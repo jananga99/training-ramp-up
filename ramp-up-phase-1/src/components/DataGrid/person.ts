@@ -1,7 +1,7 @@
-// enum Gender {
-//     MALE = 'male',
-//     FEMALE = 'female'
-// }
+enum Gender {
+    MALE = 'male',
+    FEMALE = 'female'
+}
 
 type Person =  {
     id: number | null,
@@ -14,5 +14,5 @@ type Person =  {
     tempId: number | null
 }
 
-// export {Gender}
+export {Gender}
 export type { Person }
