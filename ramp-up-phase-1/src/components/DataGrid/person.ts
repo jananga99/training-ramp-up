@@ -3,7 +3,7 @@ enum Gender {
     FEMALE = 'female'
 }
 
-type Person =  {
+interface Person   {
     id: number | null,
     name: string | null,
     gender: string | null,
@@ -11,7 +11,6 @@ type Person =  {
     mobileNo: string | null,
     birthday: string | null,
     age: number | null,
-    tempId: number | null
 }
 
 export {Gender}

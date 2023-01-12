@@ -11,7 +11,6 @@ const persons = [
         mobileNo: "0112748768",
         birthday: "Mon Sep 16 1996",
         age: 25,
-        tempId: 10
     },
     {
         id: 45,
@@ -21,7 +20,6 @@ const persons = [
         mobileNo: "0112748768",
         birthday: "Mon Sep 16 1996",
         age: 25,
-        tempId: 10
     },
     {
         id: 45,
@@ -31,7 +29,6 @@ const persons = [
         mobileNo: "0112748768",
         birthday: "Mon Sep 16 1996",
         age: 25,
-        tempId: 10
     },
     {
         id: 45,
@@ -41,7 +38,6 @@ const persons = [
         mobileNo: "0112748768",
         birthday: "Mon Sep 16 1996",
         age: 25,
-        tempId: 10
     },
     {
         id: 45,
@@ -51,7 +47,6 @@ const persons = [
         mobileNo: "0112748768",
         birthday: "Mon Sep 16 1996",
         age: 25,
-        tempId: 10
     },
     {
         id: 45,
@@ -61,7 +56,6 @@ const persons = [
         mobileNo: "0112748768",
         birthday: "Mon Sep 16 1996",
         age: 25,
-        tempId: 10
     },
     {
         id: 45,
@@ -71,7 +65,6 @@ const persons = [
         mobileNo: "0112748768",
         birthday: "Mon Sep 16 1996",
         age: 25,
-        tempId: 10
     },
 ]
 

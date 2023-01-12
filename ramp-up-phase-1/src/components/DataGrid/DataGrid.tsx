@@ -4,119 +4,57 @@ import {Gender, Person} from "./person";
 import persons from './sampleData'
 import CommandButtons from "./CommandButtons/CommandButtons";
 import {Button} from "@progress/kendo-react-buttons";
-import userValidationSchema from "./personValidatio";
+import {userValidationSchema, getDateFromBirthday} from "./personValidatio";
 import moment from 'moment';
 
-const getDateFromBirthday = (birthday:string)=>{
-    const arr = birthday.split(' ')
-    let month = ''
-    if(!["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].includes(arr[0] as never)){
-        console.log("Invalid week day")
-        return ''
-    }else if(!["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Sep", "Oct", "Nov", "Dec"].includes(arr[1] as never)){
-        console.log("Invalid Month")
-        return ''
-    }
-    switch (arr[1]) {
-        case "Jan":
-            month='1'
-            break
-        case "Feb":
-            month='2'
-            break
-        case "Mar":
-            month='3'
-            break
-        case "Apr":
-            month='4'
-            break
-        case "May":
-            month='5'
-            break
-        case "Jum":
-            month='6'
-            break
-        case "Jul":
-            month='7'
-            break
-        case "Aug":
-            month='8'
-            break
-        case "Sep":
-            month='9'
-            break
-        case "Oct":
-            month='10'
-            break
-        case "Nov":
-            month='11'
-            break
-        case "Dec":
-            month='12'
-            break
-    }
-    return arr[3]+"-"+month+"-"+arr[2]
+
+type PersonGrid = Person & {
+    isAdding: boolean,
+    isEditing: boolean
 }
 
+const initialPersonGrid: PersonGrid = {
+    id: null,
+    name: null,
+    gender: null,
+    address: null,
+    mobileNo: null,
+    birthday: null,
+    age: null,
+    isAdding: false,
+    isEditing: false
+}
 
 
 const DataGrid: FC =  ()=>{
 
-    const [data, setData] = useState<Person[]>([]);
-    const [editData, setEditData] = useState<Person>({
-        id: null,
-        name: null,
-        gender: null,
-        address: null,
-        mobileNo: null,
-        birthday: null,
-        age: null,
-        tempId: null
-    });
+    const [data, setData] = useState<PersonGrid[]>([]);
+    const [editData, setEditData] = useState<PersonGrid>({...initialPersonGrid});
     
 
     useEffect(()=>{
-        setData(persons)
+        setData(persons.map((item) => {
+            return {...item, ["isAdding"]: false, ["isEditing"]: false}
+        }))
     },[])
 
     const handleAddNewClick = () => {
-        const newRecord = {
-            id: null,
-            name: null,
-            gender: null,
-            address: null,
-            mobileNo: null,
-            birthday: null,
-            age: null,
-            tempId: -1,
-            inEdit: true
-        };
+        const newRecord = {...initialPersonGrid, ["isAdding"]: true};
         setData([newRecord, ...data]);
     }
 
     const handleDiscardChanges = () => {
-        const newData: Person[] = []
+        const newData: PersonGrid[] = []
         data.forEach((val, index)=>{
-            if(val.tempId !== -1){
+            if(!val.isAdding){
                 newData.push(val)
             }
         })
         setData(newData);
-        setEditData({
-            id: null,
-            name: null,
-            gender: null,
-            address: null,
-            mobileNo: null,
-            birthday: null,
-            age: null,
-            tempId: null
-        })
+        setEditData({...initialPersonGrid})
     }
 
     const addRecord = () => {
-        console.log("in add record")
-        console.log(editData)
         // Mon Sep 16 1996
         const getBirthdayOut = getDateFromBirthday(editData.birthday as string)
         if(getBirthdayOut.length===0){
@@ -125,7 +63,6 @@ const DataGrid: FC =  ()=>{
         }
         const birthDate = new Date(getBirthdayOut)
         const age = moment().diff(birthDate, 'years')
-        console.log(age)
         userValidationSchema.validate({
             id: editData.id,
             name: editData.name,
@@ -134,33 +71,21 @@ const DataGrid: FC =  ()=>{
             mobileNo: editData.mobileNo,
             age: age,
         }).then((validData)=>{
-            console.log("before valid")
-                console.log("valid")
                 const newData = data.map((item) =>
-                    item.tempId === -1 ? { ...item, ["tempId"]: 0, ["age"]: age } : item
+                    item.isAdding ? { ...item, ["isAdding"]: false, ["age"]: age } : item
                 );
                 setData(newData);
-                setEditData({
-                    id: null,
-                    name: null,
-                    gender: null,
-                    address: null,
-                    mobileNo: null,
-                    birthday: null,
-                    age: null,
-                    tempId: null
-                })
+                setEditData({...initialPersonGrid})
         }).catch((err)=>{
-            console.log(err.errors)
             alert(err.errors[0])
         })
     }
 
     const itemChange = (event: GridItemChangeEvent) => {
-        console.log(event)
+        // console.log(event)
         const field = event.field || "";
         const newData = data.map((item) =>
-            item.tempId === -1 ? { ...item, [field]: event.value } : item
+            item.isAdding || item.isEditing  ? { ...item, [field]: event.value } : item
         );
         setData(newData);
         const temp: keyof Person =  event.field as keyof Person;
@@ -175,8 +100,7 @@ const DataGrid: FC =  ()=>{
             onItemChange={itemChange}
             data={data.map(item=>({
             ...item,
-            command: <CommandButtons />,
-                inEdit: item.tempId === -1
+                inEdit: item.isAdding || item.isEditing
         }))}>
             <GridToolbar>
                 <div>
@@ -195,14 +119,31 @@ const DataGrid: FC =  ()=>{
             <GridColumn title="Address" field="address" editor="text" />
             <GridColumn title="Mobile No" field="mobileNo" editor="text" />
             <GridColumn title="Date of Birth" field="birthday" editor="text" />
-            <GridColumn title="Age" field="age" editor="numeric" />
+            <GridColumn title="Age" field="age" editor="numeric" cell={(props: GridCellProps) => {
+                if(props.dataItem.tempId === -1){
+                    return <td>
+                    </td>
+                }else{
+                    return <td>
+                        {props.dataItem.age}
+                    </td>
+                }
+            }}/>
             {/* eslint-disable-next-line react/prop-types */}
-            <GridColumn title="command" field="command" cell={(props) => (
-                <td>
-                    <Button onClick={addRecord} >Add</Button>
-                    <Button onClick={handleDiscardChanges}>Discard Changes</Button>
-                </td>
-            )} />
+            <GridColumn title="command" field="command" cell={(props: GridCellProps) => {
+                console.log(props.dataItem)
+                if(props.dataItem.isAdding){
+                    return <td>
+                        <Button onClick={addRecord} >Add</Button>
+                        <Button onClick={handleDiscardChanges}>Discard Changes</Button>
+                    </td>
+                }else{
+                    return <td>
+                        <Button onClick={addRecord} >Edit</Button>
+                        <Button onClick={handleDiscardChanges}>Remove</Button>
+                    </td>
+                }
+            }} />
         </Grid>
     </div>
 }
