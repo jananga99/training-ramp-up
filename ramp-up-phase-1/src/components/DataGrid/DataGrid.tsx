@@ -80,6 +80,16 @@ const DataGrid: FC =  ()=>{
         })
     }
 
+    const removeRecord = (id:number) => {
+        const newData: PersonGrid[] = []
+        data.forEach((val, index)=>{
+            if(val.id!==id){
+                newData.push(val)
+            }
+        })
+        setData(newData);
+    }
+
     const itemChange = (event: GridItemChangeEvent) => {
         // console.log(event)
         const field = event.field || "";
@@ -130,8 +140,12 @@ const DataGrid: FC =  ()=>{
             }}/>
             {/* eslint-disable-next-line react/prop-types */}
             <GridColumn title="command" field="command" cell={(props: GridCellProps) => {
-                console.log(props.dataItem)
                 if(props.dataItem.isAdding){
+                    return <td>
+                        <Button onClick={addRecord} >Add</Button>
+                        <Button onClick={handleDiscardChanges}>Discard Changes</Button>
+                    </td>
+                }else if(props.dataItem.isEditing){
                     return <td>
                         <Button onClick={addRecord} >Add</Button>
                         <Button onClick={handleDiscardChanges}>Discard Changes</Button>
@@ -139,7 +153,9 @@ const DataGrid: FC =  ()=>{
                 }else{
                     return <td>
                         <Button onClick={addRecord} >Edit</Button>
-                        <Button onClick={handleDiscardChanges}>Remove</Button>
+                        <Button onClick={()=>{
+                            removeRecord(props.dataItem.id)
+                        }}>Remove</Button>
                     </td>
                 }
             }} />
