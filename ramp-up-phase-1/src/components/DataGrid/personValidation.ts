@@ -18,8 +18,8 @@ const userValidationSchema = Yup.object().shape({
         .required("Gender is empty")
         .test(
             "is-gender",
-            "Gender must be male or female",
-            (value) => value===Gender .MALE || value===Gender.FEMALE
+            `Gender must be ${Gender.MALE} or ${Gender.FEMALE} or ${Gender.OTHER}`,
+            (value) => value===Gender .MALE || value===Gender.FEMALE || value===Gender.OTHER
         ),
     address: Yup.string()
         .required("Address is empty"),
@@ -37,6 +37,9 @@ const userValidationSchema = Yup.object().shape({
 });
 
 const getDateFromBirthday = (birthday:string)=>{
+    if(birthday === null || birthday === undefined){
+        return ''
+    }
     const arr = birthday.split(' ')
     let month = ''
     if(!["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].includes(arr[0] as never)){
