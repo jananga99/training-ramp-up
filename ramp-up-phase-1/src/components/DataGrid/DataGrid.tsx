@@ -1,5 +1,13 @@
 import {FC, useEffect, useState} from "react";
-import {Grid, GridCellProps, GridColumn, GridItemChangeEvent, GridRow, GridToolbar} from "@progress/kendo-react-grid";
+import {
+    Grid,
+    GridCell,
+    GridCellProps,
+    GridColumn,
+    GridItemChangeEvent,
+    GridRow,
+    GridToolbar
+} from "@progress/kendo-react-grid";
 import {DropDownList, DropDownListChangeEvent} from '@progress/kendo-react-dropdowns';
 import {Gender, Person} from "./person";
 import persons from './sampleData'
@@ -10,62 +18,68 @@ import moment from 'moment';
 
 type PersonGrid = Person & {
     isAdding: boolean,
-    isEditing: boolean
+    isEditing: boolean,
+    keyId: number | null
 }
 
 const initialPersonGrid: PersonGrid = {
-    id: null,
-    name: null,
-    gender: null,
-    address: null,
-    mobileNo: null,
-    birthday: null,
+    id: 0,
+    name: '',
+    gender: Gender.MALE,
+    address: '',
+    mobileNo: '',
+    birthday: '',
     age: null,
     isAdding: false,
-    isEditing: false
+    isEditing: false,
+    keyId: null
 }
 
 
 const DataGrid: FC =  ()=>{
 
-    const [data, setData] = useState<PersonGrid[]>([]);
-    const [addData, setAddData] = useState<PersonGrid>({...initialPersonGrid});
-    const [editData, setEditData] = useState<PersonGrid>({...initialPersonGrid});
-
+    const [data, setData] = useState<Map<number,PersonGrid>>(new Map());
+    const [editIds, setEditIds] = useState<number[]>([]);
+    const [prevEditData, setPrevEditData] = useState<Map<number, PersonGrid>>(new Map())
+    const [keyIdCount, setKeyIdCount] = useState<number>(0)
+    const [gridData, setGridData] = useState<PersonGrid[]>([])
 
     useEffect(()=>{
-        setData(persons.map((item) => {
-            return {...item, ["isAdding"]: false, ["isEditing"]: false}
-        }))
+        persons.forEach((item, index) => {
+            data.set(index, {...item, isAdding: false, isEditing: false, keyId: index})
+        })
+        setKeyIdCount(persons.length)
+        manualSetData()
     },[])
+    
+    const manualSetData = ()=>{
+        setData(data);
+        setGridData(Array.from(data.values()).sort((a,b)=>{
+            return (b.keyId as number) - (a.keyId as number);
+        }))
+    }
 
     const handleAddNewClick = () => {
-        const newRecord = {...initialPersonGrid, ["isAdding"]: true};
-        setData([newRecord, ...data]);
-        setAddData(newRecord)
+        const newRecord = {...initialPersonGrid, isAdding: true, keyId: keyIdCount};
+        data.set(keyIdCount, newRecord)
+        manualSetData();
+        setKeyIdCount(keyIdCount+1)
     }
 
-    const handleDiscardChanges = () => {
-        const newData: PersonGrid[] = []
-        data.forEach((val, index)=>{
-            if(!val.isAdding){
-                newData.push(val)
-            }
-        })
-        setData(newData);
-        setAddData({...initialPersonGrid})
+    const handleDiscardChanges = (keyId: number) => {
+        data.delete(keyId)
+        manualSetData();
     }
 
-    const addRecord = () => {
+    const addRecord = (keyId: number) => {
         // Mon Sep 16 1996
-        console.log(addData)
+        const addData = data.get(keyId) as PersonGrid
         const getBirthdayOut = getDateFromBirthday(addData.birthday as string)
-        if(getBirthdayOut.length===0){
-            alert("Invalid Date of birth format")
-            return
+        let age = -1;
+        if(getBirthdayOut.length!==0){
+            const birthDate = new Date(getBirthdayOut)
+            age = moment().diff(birthDate, 'years')
         }
-        const birthDate = new Date(getBirthdayOut)
-        const age = moment().diff(birthDate, 'years')
         userValidationSchema.validate({
             id: addData.id,
             name: addData.name,
@@ -73,48 +87,45 @@ const DataGrid: FC =  ()=>{
             address: addData.address,
             mobileNo: addData.mobileNo,
             age: age,
-        }).then((validData)=>{
-            const newData = data.map((item) =>
-                item.isAdding ? { ...item, ["isAdding"]: false, ["age"]: age } : item
-            );
-            setData(newData);
-            setAddData({...initialPersonGrid})
+        }).then(()=>{
+            let isDuplicate = false
+            data.forEach((val)=>{
+                if(val.keyId!==keyId && val.id===(data.get(keyId) as PersonGrid).id){
+                    alert("Duplicate Id")
+                    isDuplicate = true
+                }
+            })
+            if(!isDuplicate){
+                data.set(keyId, { ...data.get(keyId) as PersonGrid, isAdding: false, age: age })
+                manualSetData();
+            }
         }).catch((err)=>{
-            alert(err.errors[0])
+            console.log(err.errors)
+            alert(err.errors)
         })
     }
 
-    const removeRecord = (id:number) => {
-        const newData: PersonGrid[] = []
-        data.forEach((val, index)=>{
-            if(val.id!==id){
-                newData.push(val)
-            }
-        })
-        setData(newData);
+    const removeRecord = (keyId:number) => {
+        data.delete(keyId)
+        manualSetData();
     }
 
-    const handleEditClick = (id: number) =>{
-        const newData = data.map((item) =>{
-            if(id===item.id){
-                setEditData({ ...item, isEditing: true })
-                return { ...item, isEditing: true }
-            }else{
-                return item
-            }
-        });
-        setData(newData);
+    const handleEditClick = (keyId: number) =>{
+        setEditIds([...editIds, keyId])
+        prevEditData.set(keyId, data.get(keyId) as PersonGrid)
+        data.set(keyId, {...data.get(keyId) as PersonGrid, isEditing: true})
+        manualSetData();
     }
 
-    const editRecord = () => {
+    const editRecord = (keyId: number) => {
         // Mon Sep 16 1996
+        const editData = data.get(keyId) as PersonGrid
         const getBirthdayOut = getDateFromBirthday(editData.birthday as string)
-        if(getBirthdayOut.length===0){
-            alert("Invalid Date of birth format")
-            return
+        let age = -1;
+        if(getBirthdayOut.length!==0){
+            const birthDate = new Date(getBirthdayOut)
+            age = moment().diff(birthDate, 'years')
         }
-        const birthDate = new Date(getBirthdayOut)
-        const age = moment().diff(birthDate, 'years')
         userValidationSchema.validate({
             id: editData.id,
             name: editData.name,
@@ -122,59 +133,46 @@ const DataGrid: FC =  ()=>{
             address: editData.address,
             mobileNo: editData.mobileNo,
             age: age,
-        }).then((validData)=>{
-            const newData = data.map((item) =>
-                item.isEditing ? { ...item, isEditing: false, age: age } : item
-            );
-            setData(newData);
-            setEditData({...initialPersonGrid})
+        }).then(()=>{
+            let isDuplicate = false
+            data.forEach((val)=>{
+                if(val.keyId!==keyId && val.id===(data.get(keyId) as PersonGrid).id){
+                    alert("Duplicate Id")
+                    isDuplicate = true
+                }
+            })
+            if(!isDuplicate){
+                data.set(keyId, { ...data.get(keyId) as PersonGrid, isEditing: false, age: age })
+                manualSetData();
+                editIds.slice(editIds.indexOf(keyId), 1)
+                setEditIds(editIds)
+                prevEditData.delete(keyId)
+                setPrevEditData(prevEditData)
+            }
         }).catch((err)=>{
-            alert(err.errors[0])
+            alert(err.errors)
         })
     }
     
 
-    const handleCancel = () => {
-        const newData: PersonGrid[] = []
-        data.forEach((val, index)=>{
-            if(!val.isEditing){
-                newData.push(val)
-            }
-        })
-        setData(newData);
-        setAddData({...initialPersonGrid})
+    const handleCancel = (keyId:number) => {
+        data.set(keyId, prevEditData.get(keyId) as PersonGrid)
+        manualSetData()
+        editIds.slice(editIds.indexOf(keyId), 1)
+        setEditIds(editIds)
+        prevEditData.delete(keyId)
+        setPrevEditData(prevEditData)
     }
 
     const itemChange = (event: GridItemChangeEvent) => {
-
         const field = event.field || "";
-        const newData = data.map((item) =>
-            item.isAdding || item.isEditing  ? { ...item, [field]: event.value } : item
-        );
-        setData(newData);
-        const temp: keyof Person =  event.field as keyof Person;
-        if(addData.isAdding){
-            addData[temp] = event.value
-            setAddData(addData)
-        }else if(editData.isEditing){
-            editData[temp] = event.value
-            setEditData(editData)
-        }
-        console.log(addData)
+        data.set(event.dataItem.keyId, { ...data.get(event.dataItem.keyId) as PersonGrid, [field]: event.value })
+        manualSetData();
     };
 
-    const dropDownChange = (event: DropDownListChangeEvent) => {
-        const newData = data.map((item) =>
-            item.isAdding || item.isEditing  ? { ...item, gender: event.value } : item
-        );
-        setData(newData);
-        if(addData.isAdding){
-            addData.gender = event.value
-            setAddData(addData)
-        }else if(editData.isEditing){
-            editData.gender = event.value
-            setEditData(editData)
-        }
+    const dropDownChange = (event: DropDownListChangeEvent, keyId:number) => {
+        data.set(keyId, { ...data.get(keyId) as PersonGrid, gender: event.value })
+        manualSetData();
     };
 
 
@@ -184,10 +182,12 @@ const DataGrid: FC =  ()=>{
         <Grid
             editField="inEdit"
             onItemChange={itemChange}
-            data={data.map(item=>({
-                ...item,
-                inEdit: item.isAdding || item.isEditing
-            }))}>
+            data={gridData.map(item=>{
+                return ({
+                    ...item,
+                    inEdit: item.isAdding || item.isEditing
+                })
+            })}>
             <GridToolbar>
                 <div>
                     <button
@@ -199,23 +199,17 @@ const DataGrid: FC =  ()=>{
                     </button>
                 </div>
             </GridToolbar>
-            <GridColumn title="ID" field="id" editor="numeric"  />
+            <GridColumn title="ID" field="id" editor="numeric" />
             <GridColumn title="Name" field="name" editor="text" />
             <GridColumn title="Gender" field="gender"  cell={(props: GridCellProps) => {
-                if(props.dataItem.isAdding){
+                if(props.dataItem.isAdding || props.dataItem.isEditing){
                     return <td>
                         <DropDownList
                             data={[Gender.MALE, Gender.FEMALE, Gender.OTHER]}
-                            onChange={dropDownChange}
+                            onChange={(event)=>{
+                                dropDownChange(event, props.dataItem.keyId)
+                            }}
                             value={props.dataItem.gender}
-                        />
-                    </td>
-                }else if(props.dataItem.isEditing){
-                    return <td>
-                        <DropDownList
-                            data={[Gender.MALE, Gender.FEMALE, Gender.OTHER]}
-                            value={props.dataItem.gender}
-                            onChange={dropDownChange}
                         />
                     </td>
                 }else{
@@ -241,21 +235,29 @@ const DataGrid: FC =  ()=>{
             <GridColumn title="command" field="command" cell={(props: GridCellProps) => {
                 if(props.dataItem.isAdding){
                     return <td>
-                        <Button onClick={addRecord} >Add</Button>
-                        <Button onClick={handleDiscardChanges}>Discard Changes</Button>
+                        <Button onClick={()=>{
+                            addRecord(props.dataItem.keyId)
+                        }} >Add</Button>
+                        <Button onClick={()=>{
+                            handleDiscardChanges(props.dataItem.keyId)
+                        }}>Discard Changes</Button>
                     </td>
                 }else if(props.dataItem.isEditing){
                     return <td>
-                        <Button onClick={editRecord}>Update</Button>
-                        <Button onClick={handleCancel}>Cancel</Button>
+                        <Button onClick={()=>{
+                            editRecord(props.dataItem.keyId)
+                        }}>Update</Button>
+                        <Button onClick={()=>{
+                            handleCancel(props.dataItem.keyId)
+                        }}>Cancel</Button>
                     </td>
                 }else{
                     return <td>
                         <Button onClick={()=>{
-                            handleEditClick(props.dataItem.id)
+                            handleEditClick(props.dataItem.keyId)
                         }} >Edit</Button>
                         <Button onClick={()=>{
-                            removeRecord(props.dataItem.id)
+                            removeRecord(props.dataItem.keyId)
                         }}>Remove</Button>
                     </td>
                 }
