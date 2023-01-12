@@ -1,11 +1,9 @@
 import {FC, useEffect, useState} from "react";
 import {
     Grid,
-    GridCell,
     GridCellProps,
     GridColumn,
     GridItemChangeEvent,
-    GridRow,
     GridToolbar
 } from "@progress/kendo-react-grid";
 import {DropDownList, DropDownListChangeEvent} from '@progress/kendo-react-dropdowns';
@@ -14,6 +12,7 @@ import persons from './sampleData'
 import {Button} from "@progress/kendo-react-buttons";
 import {userValidationSchema, getDateFromBirthday} from "./personValidation";
 import moment from 'moment';
+import './DataGrid.scss'
 
 
 type PersonGrid = Person & {
@@ -253,7 +252,7 @@ const DataGrid: FC =  ()=>{
                     </td>
                 }else{
                     return <td>
-                        <Button onClick={()=>{
+                        <Button className="command-edit-button" onClick={()=>{
                             handleEditClick(props.dataItem.keyId)
                         }} >Edit</Button>
                         <Button onClick={()=>{
