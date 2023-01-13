@@ -10,7 +10,7 @@ interface Person   {
     gender: string | null,
     address: string | null,
     mobileNo: string | null,
-    birthday: string | null,
+    birthday: Date | null,
     age: number | null,
 }
 

@@ -10,7 +10,7 @@ import {DropDownList, DropDownListChangeEvent} from '@progress/kendo-react-dropd
 import {Gender, Person} from "./person";
 import persons from './sampleData'
 import {Button} from "@progress/kendo-react-buttons";
-import {userValidationSchema, getDateFromBirthday} from "./personValidation";
+import {userValidationSchema} from "./personValidation";
 import moment from 'moment';
 import './DataGrid.scss'
 
@@ -27,7 +27,7 @@ const initialPersonGrid: PersonGrid = {
     gender: Gender.MALE,
     address: '',
     mobileNo: '',
-    birthday: '',
+    birthday: null,
     age: null,
     isAdding: false,
     isEditing: false,
@@ -45,7 +45,7 @@ const DataGrid: FC =  ()=>{
 
     useEffect(()=>{
         persons.forEach((item, index) => {
-            data.set(index, {...item, isAdding: false, isEditing: false, keyId: index})
+            data.set(index, {...item, isAdding: false, isEditing: false, keyId: index, birthday: new Date(item.birthday)})
         })
         setKeyIdCount(persons.length)
         manualSetData()
@@ -71,13 +71,10 @@ const DataGrid: FC =  ()=>{
     }
 
     const addRecord = (keyId: number) => {
-        // Mon Sep 16 1996
         const addData = data.get(keyId) as PersonGrid
-        const getBirthdayOut = getDateFromBirthday(addData.birthday as string)
-        let age = -1;
-        if(getBirthdayOut.length!==0){
-            const birthDate = new Date(getBirthdayOut)
-            age = moment().diff(birthDate, 'years')
+        let age = -1
+        if(addData.birthday !== null){
+            age = moment().diff(addData.birthday, 'years');
         }
         userValidationSchema.validate({
             id: addData.id,
@@ -117,13 +114,10 @@ const DataGrid: FC =  ()=>{
     }
 
     const editRecord = (keyId: number) => {
-        // Mon Sep 16 1996
         const editData = data.get(keyId) as PersonGrid
-        const getBirthdayOut = getDateFromBirthday(editData.birthday as string)
-        let age = -1;
-        if(getBirthdayOut.length!==0){
-            const birthDate = new Date(getBirthdayOut)
-            age = moment().diff(birthDate, 'years')
+        let age = -1
+        if(editData.birthday !== null){
+            age = moment().diff(editData.birthday, 'years');
         }
         userValidationSchema.validate({
             id: editData.id,
@@ -219,7 +213,7 @@ const DataGrid: FC =  ()=>{
             }}/>
             <GridColumn title="Address" field="address" editor="text" />
             <GridColumn title="Mobile No" field="mobileNo" editor="text" />
-            <GridColumn title="Date of Birth" field="birthday" editor="text" />
+            <GridColumn title="Date of Birth" field="birthday" editor="date" format="{0:E MMM dd yyyy}" />
             <GridColumn title="Age" field="age" editor="numeric" cell={(props: GridCellProps) => {
                 if(props.dataItem.isAdding){
                     return <td>

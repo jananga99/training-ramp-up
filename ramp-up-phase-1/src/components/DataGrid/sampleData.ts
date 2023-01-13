@@ -9,7 +9,7 @@ const persons = [
         gender: "male",
         address: "homagama",
         mobileNo: "0112748768",
-        birthday: "Mon Sep 16 1996",
+        birthday: "11/11/1998",
         age: 25,
     },
     {
@@ -18,7 +18,7 @@ const persons = [
         gender: "male",
         address: "homagama",
         mobileNo: "0112748768",
-        birthday: "Mon Sep 16 1996",
+        birthday: "11/11/1998",
         age: 25,
     },
     {
@@ -27,7 +27,7 @@ const persons = [
         gender: "male",
         address: "homagama",
         mobileNo: "0112748768",
-        birthday: "Mon Sep 16 1996",
+        birthday: "11/11/1998",
         age: 25,
     },
     {
@@ -36,7 +36,7 @@ const persons = [
         gender: "male",
         address: "homagama",
         mobileNo: "0112748768",
-        birthday: "Mon Sep 16 1996",
+        birthday: "11/11/1998",
         age: 25,
     },
     {
@@ -45,7 +45,7 @@ const persons = [
         gender: "male",
         address: "homagama",
         mobileNo: "0112748768",
-        birthday: "Mon Sep 16 1996",
+        birthday: "11/11/1998",
         age: 25,
     },
     {
@@ -54,7 +54,7 @@ const persons = [
         gender: "male",
         address: "homagama",
         mobileNo: "0112748768",
-        birthday: "Mon Sep 16 1996",
+        birthday: "11/11/1998",
         age: 25,
     },
     {
@@ -63,7 +63,7 @@ const persons = [
         gender: "male",
         address: "homagama",
         mobileNo: "0112748768",
-        birthday: "Mon Sep 16 1996",
+        birthday: "11/11/1998",
         age: 25,
     },
 ]
