@@ -1,4 +1,6 @@
 import express, { Express, Request, Response } from 'express'
+import bodyParser from 'body-parser'
+import studentRouter from './src/routes/student.route'
 import dotenv from 'dotenv'
 
 dotenv.config()
@@ -6,8 +8,24 @@ dotenv.config()
 const app: Express = express()
 const port = process.env.PORT
 
+app.use(express.json())
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+)
+//fds
 app.get('/', (req: Request, res: Response) => {
-  res.send('Backend Server')
+  res.status(200).json({ message: 'ok' })
+})
+
+app.use('/students', studentRouter)
+
+app.use((err: any, req: Request, res: Response) => {
+  const statusCode = err.statusCode || 500
+  console.error(err.message, err.stack)
+  res.status(statusCode).json({ message: err.message })
+  return
 })
 
 app.listen(port, () => {
