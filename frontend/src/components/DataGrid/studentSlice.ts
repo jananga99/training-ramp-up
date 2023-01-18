@@ -32,6 +32,10 @@ export const studentSlice = createSlice({
     createStudentFailed(state) {
       state.createLoading -= 1;
     },
+    createReduxStudent(state, action: PayloadAction<Student>) {
+      state.value.push(action.payload);
+      console.log(state.value);
+    },
 
     updateStudent(state, action: PayloadAction<Student>) {
       state.updateLoading += 1;
@@ -41,6 +45,15 @@ export const studentSlice = createSlice({
     },
     updateStudentFailed(state) {
       state.updateLoading -= 1;
+    },
+    updateReduxStudent(state, action: PayloadAction<Student>) {
+      state.value = state.value.map((val) => {
+        if (val.dbId === action.payload.dbId) {
+          return action.payload;
+        } else {
+          return val;
+        }
+      });
     },
 
     removeStudent(state, action: PayloadAction<number>) {
@@ -52,6 +65,18 @@ export const studentSlice = createSlice({
     removeStudentFailed(state) {
       state.removeLoading -= 1;
     },
+    removeReduxStudent(state, action: PayloadAction<number>) {
+      let ind = -1;
+      state.value.forEach((val, index) => {
+        if (val.dbId === action.payload) {
+          ind = index;
+        }
+      });
+      if (ind >= 0) {
+        state.value.splice(ind, 1);
+      }
+    },
+
     getStudent(state) {
       state.getLoading += 1;
     },
@@ -69,15 +94,18 @@ export const {
   createStudentFailed,
   createStudentSuccess,
   createStudent,
+  createReduxStudent,
   updateStudentFailed,
   updateStudentSuccess,
   updateStudent,
+  updateReduxStudent,
   getStudentSuccess,
   getStudentFailed,
   getStudent,
   removeStudentFailed,
   removeStudentSuccess,
   removeStudent,
+  removeReduxStudent,
 } = studentSlice.actions;
 
 export default studentSlice.reducer;

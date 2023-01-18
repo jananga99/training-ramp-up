@@ -25,7 +25,7 @@ async function createStudent(req: Request, res: Response, next: NextFunction) {
   try {
     const student = await create(req.body.student)
     if (student) {
-      sendNotification('create', student.dbId as number)
+      sendNotification('create', student.dbId as number, student)
     }
     res.status(201).json(student)
   } catch (err: any) {
@@ -38,7 +38,7 @@ async function updateStudent(req: Request, res: Response, next: NextFunction) {
   try {
     const student = await update(parseInt(req.params.dbId), req.body.student)
     if (student) {
-      sendNotification('update', student.dbId as number)
+      sendNotification('update', student.dbId as number, student)
     }
     res.status(200).json(student)
   } catch (err: any) {
@@ -52,7 +52,7 @@ async function removeStudent(req: Request, res: Response, next: NextFunction) {
     const student = await remove(parseInt(req.params.dbId))
     if (student) {
       student.dbId = parseInt(req.params.dbId)
-      sendNotification('delete', parseInt(req.params.dbId))
+      sendNotification('delete', parseInt(req.params.dbId), student)
     }
     res.status(200).json(student)
   } catch (err: any) {
