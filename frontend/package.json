@@ -58,6 +58,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
+    "socket.io-client": "^4.5.4",
     "typescript": "^4.9.4",
     "web-vitals": "^2.1.4",
     "yup": "^0.32.11"
@@ -90,6 +91,7 @@
     ]
   },
   "devDependencies": {
+    "@types/socket.io-client": "^3.0.0",
     "@typescript-eslint/eslint-plugin": "^5.48.1",
     "@typescript-eslint/parser": "^5.48.1",
     "eslint": "^8.31.0",
