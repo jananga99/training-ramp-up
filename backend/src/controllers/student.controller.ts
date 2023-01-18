@@ -5,6 +5,7 @@ import {
   update,
   remove,
 } from '../services/student.service'
+import { sendNotification } from '../services/notification.service'
 
 async function getStudents(
   req: Request,
@@ -22,7 +23,11 @@ async function getStudents(
 
 async function createStudent(req: Request, res: Response, next: NextFunction) {
   try {
-    res.status(201).json(await create(req.body.student))
+    const student = await create(req.body.student)
+    if (student) {
+      sendNotification('create', student.dbId as number)
+    }
+    res.status(201).json(student)
   } catch (err: any) {
     console.error(`Error while creating student`, err.message)
     next(err)
@@ -31,9 +36,11 @@ async function createStudent(req: Request, res: Response, next: NextFunction) {
 
 async function updateStudent(req: Request, res: Response, next: NextFunction) {
   try {
-    res
-      .status(200)
-      .json(await update(parseInt(req.params.dbId), req.body.student))
+    const student = await update(parseInt(req.params.dbId), req.body.student)
+    if (student) {
+      sendNotification('update', student.dbId as number)
+    }
+    res.status(200).json(student)
   } catch (err: any) {
     console.error(`Error while updating student`, err.message)
     next(err)
@@ -42,7 +49,12 @@ async function updateStudent(req: Request, res: Response, next: NextFunction) {
 
 async function removeStudent(req: Request, res: Response, next: NextFunction) {
   try {
-    res.status(200).json(await remove(parseInt(req.params.dbId)))
+    const student = await remove(parseInt(req.params.dbId))
+    if (student) {
+      student.dbId = parseInt(req.params.dbId)
+      sendNotification('delete', parseInt(req.params.dbId))
+    }
+    res.status(200).json(student)
   } catch (err: any) {
     console.error(`Error while deleting student`, err.message)
     next(err)

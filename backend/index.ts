@@ -1,8 +1,17 @@
 import express, { Express, Request, Response } from 'express'
 import studentRouter from './src/routes/student.route'
+import { createServer } from 'http'
+import { Server } from 'socket.io'
+import cors from 'cors'
+import dotenv from 'dotenv'
+dotenv.config()
 
 const app: Express = express()
-const port = process.env.PORT
+app.use(cors({}))
+const httpServer = createServer(app)
+export const io = new Server(httpServer, {
+  cors: {},
+})
 
 app.use(express.json())
 app.use(
@@ -25,6 +34,6 @@ app.use((err: any, req: Request, res: Response) => {
   return
 })
 
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`)
+httpServer.listen(process.env.PORT, () => {
+  console.log(`Http server is running at http://localhost:${process.env.PORT}`)
 })
