@@ -1,9 +1,5 @@
 import express, { Express, Request, Response } from 'express'
-import bodyParser from 'body-parser'
 import studentRouter from './src/routes/student.route'
-import dotenv from 'dotenv'
-
-dotenv.config()
 
 const app: Express = express()
 const port = process.env.PORT
@@ -14,6 +10,7 @@ app.use(
     extended: true,
   })
 )
+
 //fds
 app.get('/', (req: Request, res: Response) => {
   res.status(200).json({ message: 'ok' })

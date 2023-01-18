@@ -1,19 +1,30 @@
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+
 enum Gender {
   MALE = 'male',
   FEMALE = 'female',
   OTHER = 'other',
 }
 
-type Student = {
-  dbId: string | null
-  id: number | null
-  name: string | null
-  gender: string | null
-  address: string | null
-  mobileNo: string | null
-  birthday: Date | null
-  age: number | null
+@Entity()
+class Student {
+  @PrimaryGeneratedColumn()
+  dbId: number | undefined
+  @Column('text')
+  address: string | undefined
+  @Column('int')
+  age: number | undefined
+  @Column('text')
+  birthday: Date | undefined
+  @Column('text')
+  gender: string | undefined
+  @Column('int')
+  id: number | undefined
+  @Column('text')
+  mobileNo: string | undefined
+  @Column('text')
+  name: string | undefined
 }
 
 export { Gender }
-export type { Student }
+export { Student }
