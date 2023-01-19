@@ -14,79 +14,48 @@ import moment from "moment";
 import "./DataGrid.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../utils/store";
-import { createStudent, getStudent, removeStudent, updateStudent } from "./studentSlice";
-
-type StudentGrid = Student & {
-  isAdding: boolean;
-  isEditing: boolean;
-};
-
-const initialStudentGrid: StudentGrid = {
-  id: 0,
-  dbId: undefined,
-  name: "",
-  gender: Gender.MALE,
-  address: "",
-  mobileNo: "",
-  birthday: null,
-  age: null,
-  isAdding: false,
-  isEditing: false,
-  keyId: null,
-};
+import {
+  createAddNewReduxStudent,
+  createStudent,
+  getStudent,
+  removeAddNewReduxStudent,
+  removeStudent,
+  updateReduxStudentFromDB,
+  updateReduxStudentFromGrid,
+  updateReduxStudentToEditing,
+  updateStudent,
+} from "./studentSlice";
 
 const DataGrid: FC = () => {
-  const [data, setData] = useState<Map<number, StudentGrid>>(new Map());
   const [editIds, setEditIds] = useState<number[]>([]);
-  const [prevEditData, setPrevEditData] = useState<Map<number, StudentGrid>>(new Map());
-  const [keyIdCount, setKeyIdCount] = useState<number>(0);
-  const [gridData, setGridData] = useState<StudentGrid[]>([]);
+  const [prevEditData, setPrevEditData] = useState<Map<number, Student>>(new Map());
 
   const students = useSelector((state: RootState) => state.student.value);
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(getStudent());
-    students.forEach((item, index) => {
-      data.set(index, {
-        ...item,
-        isAdding: false,
-        isEditing: false,
-        keyId: index,
-        birthday: new Date(item.birthday as unknown as string),
-      });
-    });
-    setKeyIdCount(students.length);
-    manualSetData();
   }, []);
 
-  const manualSetData = () => {
-    setData(data);
-    setGridData(
-      Array.from(data.values()).sort((a, b) => {
-        return (b.keyId as number) - (a.keyId as number);
-      })
-    );
-  };
-
   const handleAddNewClick = () => {
-    const newRecord = { ...initialStudentGrid, isAdding: true, keyId: keyIdCount };
-    data.set(keyIdCount, newRecord);
-    manualSetData();
-    setKeyIdCount(keyIdCount + 1);
+    dispatch(createAddNewReduxStudent());
   };
 
   const handleDiscardChanges = (keyId: number) => {
-    data.delete(keyId);
-    manualSetData();
+    dispatch(removeAddNewReduxStudent(keyId));
   };
 
   const addRecord = (keyId: number) => {
-    const addData = data.get(keyId) as StudentGrid;
-    let age = -1;
-    if (addData.birthday !== null) {
-      age = moment().diff(addData.birthday, "years");
+    let ind = -1;
+    students.forEach((val, index) => {
+      if (val.keyId === keyId) {
+        ind = index;
+      }
+    });
+    if (ind < 0) {
+      return;
     }
+    const addData = students[ind];
     userValidationSchema
       .validate({
         id: addData.id,
@@ -94,20 +63,19 @@ const DataGrid: FC = () => {
         gender: addData.gender,
         address: addData.address,
         mobileNo: addData.mobileNo,
-        age: age,
+        age: addData.age,
       })
       .then(() => {
         let isDuplicate = false;
-        data.forEach((val) => {
-          if (val.keyId !== keyId && val.id === (data.get(keyId) as StudentGrid).id) {
+        students.forEach((val) => {
+          if (val.keyId !== keyId && val.id === addData.id) {
             alert("Duplicate Id");
             isDuplicate = true;
           }
         });
         if (!isDuplicate) {
-          dispatch(createStudent({ ...(data.get(keyId) as Student), age: age }));
-          data.delete(keyId);
-          manualSetData();
+          dispatch(createStudent({ ...addData }));
+          dispatch(removeAddNewReduxStudent(keyId));
         }
       })
       .catch((err) => {
@@ -115,25 +83,36 @@ const DataGrid: FC = () => {
       });
   };
 
-  const removeRecord = (keyId: number) => {
-    dispatch(removeStudent((data.get(keyId) as StudentGrid).dbId as number));
-    data.delete(keyId);
-    manualSetData();
+  const removeRecord = (dbId: number) => {
+    dispatch(removeStudent(dbId));
   };
 
-  const handleEditClick = (keyId: number) => {
-    setEditIds([...editIds, keyId]);
-    prevEditData.set(keyId, data.get(keyId) as StudentGrid);
-    data.set(keyId, { ...(data.get(keyId) as StudentGrid), isEditing: true });
-    manualSetData();
-  };
-
-  const editRecord = (keyId: number) => {
-    const editData = data.get(keyId) as StudentGrid;
-    let age = -1;
-    if (editData.birthday !== null) {
-      age = moment().diff(editData.birthday, "years");
+  const handleEditClick = (dbId: number) => {
+    setEditIds([...editIds, dbId]);
+    let ind = -1;
+    students.forEach((val, index) => {
+      if (val.dbId === dbId) {
+        ind = index;
+      }
+    });
+    if (ind < 0) {
+      return;
     }
+    prevEditData.set(dbId, students[ind]);
+    dispatch(updateReduxStudentToEditing(dbId));
+  };
+
+  const editRecord = (dbId: number) => {
+    let ind = -1;
+    students.forEach((val, index) => {
+      if (val.dbId === dbId) {
+        ind = index;
+      }
+    });
+    if (ind < 0) {
+      return;
+    }
+    const editData = students[ind];
     userValidationSchema
       .validate({
         id: editData.id,
@@ -141,24 +120,22 @@ const DataGrid: FC = () => {
         gender: editData.gender,
         address: editData.address,
         mobileNo: editData.mobileNo,
-        age: age,
+        age: editData.age,
       })
       .then(() => {
         let isDuplicate = false;
-        data.forEach((val) => {
-          if (val.keyId !== keyId && val.id === (data.get(keyId) as StudentGrid).id) {
+        students.forEach((val) => {
+          if (val.dbId !== dbId && val.id === editData.id) {
             alert("Duplicate Id");
             isDuplicate = true;
           }
         });
         if (!isDuplicate) {
-          dispatch(updateStudent({ ...(data.get(keyId) as Student), age: age }));
-          editIds.slice(editIds.indexOf(keyId), 1);
+          dispatch(updateStudent({ ...editData }));
+          editIds.slice(editIds.indexOf(dbId), 1);
           setEditIds(editIds);
-          prevEditData.delete(keyId);
+          prevEditData.delete(dbId);
           setPrevEditData(prevEditData);
-          data.set(keyId, { ...(data.get(keyId) as StudentGrid), isEditing: false, age: age });
-          manualSetData();
         }
       })
       .catch((err) => {
@@ -166,41 +143,54 @@ const DataGrid: FC = () => {
       });
   };
 
-  const handleCancel = (keyId: number) => {
-    data.set(keyId, prevEditData.get(keyId) as StudentGrid);
-    manualSetData();
-    editIds.slice(editIds.indexOf(keyId), 1);
+  const handleCancel = (dbId: number) => {
+    dispatch(updateReduxStudentFromDB(prevEditData.get(dbId) as Student));
+    editIds.splice(editIds.indexOf(dbId), 1);
     setEditIds(editIds);
-    prevEditData.delete(keyId);
+    prevEditData.delete(dbId);
     setPrevEditData(prevEditData);
   };
 
   const itemChange = (event: GridItemChangeEvent) => {
     const field = event.field || "";
-    data.set(event.dataItem.keyId, {
-      ...(data.get(event.dataItem.keyId) as StudentGrid),
-      [field]: event.value,
+    let ind = -1;
+    students.forEach((val, index) => {
+      if (val.keyId === event.dataItem.keyId) {
+        ind = index;
+      }
     });
-    manualSetData();
+    if (ind < 0) {
+      return;
+    }
+    if (field === "birthday") {
+      dispatch(
+        updateReduxStudentFromGrid({
+          ...students[ind],
+          birthday: event.value,
+          age: moment().diff(event.value, "years"),
+        })
+      );
+    } else {
+      dispatch(updateReduxStudentFromGrid({ ...students[ind], [field]: event.value }));
+    }
   };
 
   const dropDownChange = (event: DropDownListChangeEvent, keyId: number) => {
-    data.set(keyId, { ...(data.get(keyId) as StudentGrid), gender: event.value });
-    manualSetData();
+    let ind = -1;
+    students.forEach((val, index) => {
+      if (val.keyId === keyId) {
+        ind = index;
+      }
+    });
+    if (ind < 0) {
+      return;
+    }
+    dispatch(updateReduxStudentFromGrid({ ...students[ind], gender: event.value }));
   };
 
   return (
     <div>
-      <Grid
-        editField="inEdit"
-        onItemChange={itemChange}
-        data={gridData.map((item) => {
-          return {
-            ...item,
-            inEdit: item.isAdding || item.isEditing,
-          };
-        })}
-      >
+      <Grid editField="inEdit" onItemChange={itemChange} data={students}>
         <GridToolbar>
           <div>
             <button
@@ -284,14 +274,14 @@ const DataGrid: FC = () => {
                 <td>
                   <Button
                     onClick={() => {
-                      editRecord(props.dataItem.keyId);
+                      editRecord(props.dataItem.dbId);
                     }}
                   >
                     Update
                   </Button>
                   <Button
                     onClick={() => {
-                      handleCancel(props.dataItem.keyId);
+                      handleCancel(props.dataItem.dbId);
                     }}
                   >
                     Cancel
@@ -304,14 +294,14 @@ const DataGrid: FC = () => {
                   <Button
                     className="command-edit-button"
                     onClick={() => {
-                      handleEditClick(props.dataItem.keyId);
+                      handleEditClick(props.dataItem.dbId);
                     }}
                   >
                     Edit
                   </Button>
                   <Button
                     onClick={() => {
-                      removeRecord(props.dataItem.keyId);
+                      removeRecord(props.dataItem.dbId);
                     }}
                   >
                     Remove

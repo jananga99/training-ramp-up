@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Student } from "./student";
+import { Gender, Student } from "./student";
 
 interface StudentState {
   createLoading: number;
@@ -33,8 +33,30 @@ export const studentSlice = createSlice({
       state.createLoading -= 1;
     },
     createReduxStudent(state, action: PayloadAction<Student>) {
-      state.value.push(action.payload);
-      console.log(state.value);
+      state.value.push({
+        ...action.payload,
+        isAdding: false,
+        isEditing: false,
+        inEdit: false,
+        keyId: state.value.length,
+        birthday: new Date(action.payload.birthday as unknown as string),
+      });
+    },
+    createAddNewReduxStudent(state) {
+      state.value.push({
+        id: 0,
+        dbId: undefined,
+        name: "",
+        gender: Gender.MALE,
+        address: "",
+        mobileNo: "",
+        birthday: null,
+        age: null,
+        isAdding: true,
+        isEditing: false,
+        keyId: state.value.length,
+        inEdit: true,
+      });
     },
 
     updateStudent(state, action: PayloadAction<Student>) {
@@ -46,10 +68,38 @@ export const studentSlice = createSlice({
     updateStudentFailed(state) {
       state.updateLoading -= 1;
     },
-    updateReduxStudent(state, action: PayloadAction<Student>) {
+    updateReduxStudentFromDB(state, action: PayloadAction<Student>) {
       state.value = state.value.map((val) => {
         if (val.dbId === action.payload.dbId) {
-          return action.payload;
+          if (val.isEditing) {
+            return { ...val, isEditing: false, isAdding: false, inEdit: false };
+          } else {
+            return {
+              ...action.payload,
+              isAdding: false,
+              isEditing: false,
+              inEdit: false,
+              birthday: new Date(action.payload.birthday as unknown as string),
+            };
+          }
+        } else {
+          return val;
+        }
+      });
+    },
+    updateReduxStudentFromGrid(state, action: PayloadAction<Student>) {
+      state.value = state.value.map((val) => {
+        if (val.keyId === action.payload.keyId) {
+          return { ...action.payload };
+        } else {
+          return val;
+        }
+      });
+    },
+    updateReduxStudentToEditing(state, action: PayloadAction<number>) {
+      state.value = state.value.map((val) => {
+        if (val.dbId === action.payload) {
+          return { ...val, isAdding: false, isEditing: true, inEdit: true };
         } else {
           return val;
         }
@@ -76,6 +126,17 @@ export const studentSlice = createSlice({
         state.value.splice(ind, 1);
       }
     },
+    removeAddNewReduxStudent(state, action: PayloadAction<number>) {
+      let ind = -1;
+      state.value.forEach((val, index) => {
+        if (val.keyId === action.payload) {
+          ind = index;
+        }
+      });
+      if (ind >= 0) {
+        state.value.splice(ind, 1);
+      }
+    },
 
     getStudent(state) {
       state.getLoading += 1;
@@ -83,6 +144,16 @@ export const studentSlice = createSlice({
     getStudentSuccess(state, action: PayloadAction<Student[]>) {
       state.getLoading -= 1;
       state.value = action.payload;
+      state.value = state.value.map((val, index) => {
+        return {
+          ...val,
+          isAdding: false,
+          isEditing: false,
+          keyId: index,
+          inEdit: false,
+          birthday: new Date(val.birthday as unknown as string),
+        };
+      });
     },
     getStudentFailed(state) {
       state.getLoading -= 1;
@@ -95,10 +166,13 @@ export const {
   createStudentSuccess,
   createStudent,
   createReduxStudent,
+  createAddNewReduxStudent,
   updateStudentFailed,
   updateStudentSuccess,
   updateStudent,
-  updateReduxStudent,
+  updateReduxStudentFromDB,
+  updateReduxStudentFromGrid,
+  updateReduxStudentToEditing,
   getStudentSuccess,
   getStudentFailed,
   getStudent,
@@ -106,6 +180,7 @@ export const {
   removeStudentSuccess,
   removeStudent,
   removeReduxStudent,
+  removeAddNewReduxStudent,
 } = studentSlice.actions;
 
 export default studentSlice.reducer;

@@ -4,7 +4,7 @@ import { io } from "socket.io-client";
 import { UserNotification } from "./notification";
 import {
   createReduxStudent,
-  updateReduxStudent,
+  updateReduxStudentFromDB,
   removeReduxStudent,
 } from "../../components/DataGrid/studentSlice";
 import { Student } from "../../components/DataGrid/student";
@@ -39,7 +39,7 @@ export default function* notificationSaga() {
           yield put(createReduxStudent(notification.data as Student));
           break;
         case "update":
-          yield put(updateReduxStudent(notification.data as Student));
+          yield put(updateReduxStudentFromDB(notification.data as Student));
           break;
         case "delete":
           yield put(removeReduxStudent(notification.data?.dbId as number));

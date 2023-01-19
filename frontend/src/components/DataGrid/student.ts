@@ -14,6 +14,9 @@ interface Student {
   mobileNo: string | null;
   birthday: Date | null;
   age: number | null;
+  isAdding: boolean;
+  isEditing: boolean;
+  inEdit: boolean;
 }
 
 export { Gender };
