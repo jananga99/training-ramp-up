@@ -26,8 +26,9 @@ export const studentSlice = createSlice({
     createStudent(state, action: PayloadAction<Student>) {
       state.createLoading += 1;
     },
-    createStudentSuccess(state) {
+    createStudentSuccess(state, action: PayloadAction<Student>) {
       state.createLoading -= 1;
+      state.value.push(action.payload);
     },
     createStudentFailed(state) {
       state.createLoading -= 1;
@@ -36,8 +37,15 @@ export const studentSlice = createSlice({
     updateStudent(state, action: PayloadAction<Student>) {
       state.updateLoading += 1;
     },
-    updateStudentSuccess(state) {
+    updateStudentSuccess(state, action: PayloadAction<Student>) {
       state.updateLoading -= 1;
+      state.value = state.value.map((val) => {
+        if (val.id === action.payload.id) {
+          return action.payload;
+        } else {
+          return val;
+        }
+      });
     },
     updateStudentFailed(state) {
       state.updateLoading -= 1;
@@ -46,8 +54,17 @@ export const studentSlice = createSlice({
     removeStudent(state, action: PayloadAction<number>) {
       state.removeLoading += 1;
     },
-    removeStudentSuccess(state) {
+    removeStudentSuccess(state, action: PayloadAction<number>) {
       state.removeLoading -= 1;
+      let ind = -1;
+      state.value.forEach((val, index) => {
+        if (val.id === action.payload) {
+          ind = index;
+        }
+      });
+      if (ind >= 0) {
+        state.value.splice(ind, 1);
+      }
     },
     removeStudentFailed(state) {
       state.removeLoading -= 1;

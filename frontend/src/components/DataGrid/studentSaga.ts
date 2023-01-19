@@ -57,8 +57,12 @@ async function getInDB(): Promise<Student[]> {
 
 function* create(action: PayloadAction<Student>) {
   try {
-    yield call(createInDB, action.payload);
-    yield put(createStudentSuccess());
+    const response: Student = yield call(createInDB, action.payload);
+    if (response) {
+      yield put(createStudentSuccess(response));
+    } else {
+      yield put(createStudentFailed());
+    }
   } catch (error) {
     yield put(createStudentFailed());
   }
@@ -66,8 +70,12 @@ function* create(action: PayloadAction<Student>) {
 
 function* update(action: PayloadAction<Student>) {
   try {
-    yield call(updateInDB, action.payload);
-    yield put(updateStudentSuccess());
+    const response: Student = yield call(updateInDB, action.payload);
+    if (response) {
+      yield put(updateStudentSuccess(response));
+    } else {
+      yield put(updateStudentFailed());
+    }
   } catch (error) {
     yield put(updateStudentFailed());
   }
@@ -75,8 +83,12 @@ function* update(action: PayloadAction<Student>) {
 
 function* remove(action: PayloadAction<number>) {
   try {
-    yield call(removeInDB, action.payload);
-    yield put(removeStudentSuccess());
+    const response: number = yield call(removeInDB, action.payload);
+    if (response) {
+      yield put(removeStudentSuccess(response));
+    } else {
+      yield put(removeStudentFailed());
+    }
   } catch (error) {
     console.log(error);
     yield put(removeStudentFailed());

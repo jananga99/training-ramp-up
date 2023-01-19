@@ -30,6 +30,7 @@ const initialStudent: Student = {
   inEdit: false,
 };
 
+// Returns the index of element of given arr which have number field = value
 const getIndex = (arr: Student[], field: keyof Student, value: number) => {
   let ind = -1;
   arr.forEach((val, index) => {
@@ -41,19 +42,31 @@ const getIndex = (arr: Student[], field: keyof Student, value: number) => {
 };
 
 const DataGrid: FC = () => {
+  // These are used to store previous edit data in cased of use to restore if updates were canceled.
   const [editIds, setEditIds] = useState<number[]>([]);
   const [prevEditData, setPrevEditData] = useState<Map<number, Student>>(new Map());
+
+  // keyId identifies all the rows in the Grid uniquely. Used specially to identify newly adding rows which does not have id yet
   const [keyIdCount, setKeyIdCount] = useState<number>(0);
 
   const students = useSelector((state: RootState) => state.student.value);
+
   const dispatch = useDispatch();
+
+  // Grid data denotes the data currently in app (without saving to redux store)
   // eslint-disable-next-line prefer-const
   let [gridData, setGridData] = useState<Student[]>([]);
 
+  // Gets data from database at the first time the component renders
   useEffect(() => {
     dispatch(getStudent());
-    gridData = students.map((item, index) => {
-      return {
+  }, []);
+
+  useEffect(() => {
+    // Grid Data item is updated from database updates only if it is not currently updating
+    students.forEach((item, index) => {
+      const ind = getIndex(gridData, "id", item.id as number);
+      const newItem = {
         ...item,
         isAdding: false,
         isEditing: false,
@@ -61,11 +74,21 @@ const DataGrid: FC = () => {
         keyId: index,
         birthday: new Date(item.birthday as unknown as string),
       };
+      if (ind < 0) {
+        gridData.unshift(newItem);
+      } else if (!gridData[ind].isEditing) {
+        gridData[ind] = newItem;
+      } else {
+        // Previous data is set to database data
+        prevEditData.set(item.id as number, newItem);
+      }
     });
-    setGridData([...gridData]);
+    setPrevEditData(prevEditData);
     setKeyIdCount(students.length);
-  }, []);
+    setGridData([...gridData]);
+  }, [students]);
 
+  // Handles clicking Add New button. Adds an empty record after assigning it a unique keyId value
   const handleAddNewClick = () => {
     const newRecord = { ...initialStudent, isAdding: true, keyId: keyIdCount, inEdit: true };
     gridData.unshift(newRecord);
@@ -73,12 +96,14 @@ const DataGrid: FC = () => {
     setGridData([...gridData]);
   };
 
+  // Handles clicking Discard changes while adding. Removes corresponding adding record from grid data
   const handleDiscardChanges = (keyId: number) => {
     const ind = getIndex(gridData, "keyId", keyId);
     gridData.splice(ind, 1);
     setGridData([...gridData]);
   };
 
+  // Handles clicking add button while adding. Validates and dispatches for creating
   const addRecord = (keyId: number) => {
     let ind = getIndex(gridData, "keyId", keyId);
     const addData = gridData[ind];
@@ -92,23 +117,20 @@ const DataGrid: FC = () => {
       })
       .then(() => {
         ind = getIndex(gridData, "keyId", keyId);
-        gridData[ind].isAdding = false;
-        gridData[ind].inEdit = false;
+        gridData.splice(ind, 1);
         dispatch(createStudent(addData));
-        // setGridData([...gridData]);
       })
       .catch((err) => {
         alert(err.errors);
       });
   };
 
+  // Handles clicking Remove Button.
   const removeRecord = (id: number) => {
-    const ind = getIndex(gridData, "id", id);
-    gridData.splice(ind, 1);
     dispatch(removeStudent(id));
-    setGridData([...gridData]);
   };
 
+  // Handles clicking Edit button. Save current data to prevEditData and make the row editable
   const handleEditClick = (id: number) => {
     setEditIds([...editIds, id]);
     const ind = getIndex(gridData, "id", id);
@@ -118,6 +140,7 @@ const DataGrid: FC = () => {
     setGridData([...gridData]);
   };
 
+  // Handles clicking update button. Removes previous data and dispatches current data to update action
   const editRecord = (id: number) => {
     let ind = getIndex(gridData, "id", id);
     const editData = gridData[ind];
@@ -132,20 +155,20 @@ const DataGrid: FC = () => {
       })
       .then(() => {
         dispatch(updateStudent(editData));
-        editIds.splice(editIds.indexOf(id), 1);
-        setEditIds(editIds);
-        prevEditData.delete(id);
-        setPrevEditData(prevEditData);
         ind = getIndex(gridData, "id", id);
         gridData[ind].isEditing = false;
-        gridData[ind].inEdit = false;
-        setGridData([...gridData]);
+        setGridData(gridData);
+        editIds.splice(editIds.indexOf(id), 1);
+        prevEditData.delete(id);
+        setPrevEditData(prevEditData);
+        setEditIds([...editIds]);
       })
       .catch((err) => {
         alert(err.errors);
       });
   };
 
+  // Handles clicking Cancel while updating. Pops previous data to row
   const handleCancel = (id: number) => {
     const ind = getIndex(gridData, "id", id);
     gridData[ind] = prevEditData.get(id) as Student;
@@ -155,6 +178,7 @@ const DataGrid: FC = () => {
     setEditIds([...editIds]);
   };
 
+  // Handles item change in Grid. Changes gridData and re renders component
   const itemChange = (event: GridItemChangeEvent) => {
     const field = event.field as keyof Student;
     const ind = getIndex(gridData, "keyId", event.dataItem.keyId);
@@ -167,6 +191,7 @@ const DataGrid: FC = () => {
     setGridData([...gridData]);
   };
 
+  // Handles gender change in Grid. Changes gridData and re renders component
   const dropDownChange = (event: DropDownListChangeEvent, keyId: number) => {
     const ind = getIndex(gridData, "keyId", keyId);
     gridData[ind].gender = event.value;
