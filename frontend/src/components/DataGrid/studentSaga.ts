@@ -13,7 +13,7 @@ import {
   removeStudentSuccess,
   removeStudent,
 } from "./studentSlice";
-import { Student } from "./student";
+import { Student } from "../../utils/student";
 import { PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 
@@ -30,7 +30,7 @@ async function createInDB(student: Student): Promise<Student> {
 
 async function updateInDB(student: Student): Promise<Student> {
   const response = await axios({
-    url: `${process.env.REACT_APP_BACKEND_SERVER_URL}students/${student.dbId}`,
+    url: `${process.env.REACT_APP_BACKEND_SERVER_URL}students/${student.id}`,
     method: "PUT",
     data: {
       student: student,
@@ -39,9 +39,9 @@ async function updateInDB(student: Student): Promise<Student> {
   return response.data;
 }
 
-async function removeInDB(dbId: number): Promise<Student> {
+async function removeInDB(id: number): Promise<Student> {
   const response = await axios({
-    url: `${process.env.REACT_APP_BACKEND_SERVER_URL}students/${dbId}`,
+    url: `${process.env.REACT_APP_BACKEND_SERVER_URL}students/${id}`,
     method: "DELETE",
   });
   return response.data;

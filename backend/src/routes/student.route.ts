@@ -15,9 +15,9 @@ router.get('/', getStudents)
 router.post('/', createStudent)
 
 /* PUT student */
-router.put('/:dbId', updateStudent)
+router.put('/:id', updateStudent)
 
 /* DELETE student */
-router.delete('/:dbId', removeStudent)
+router.delete('/:id', removeStudent)
 
 export default router

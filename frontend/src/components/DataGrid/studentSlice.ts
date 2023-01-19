@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Student } from "./student";
+import { Student } from "../../utils/student";
 
 interface StudentState {
   createLoading: number;

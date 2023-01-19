@@ -7,23 +7,17 @@ import {
   GridToolbar,
 } from "@progress/kendo-react-grid";
 import { DropDownList, DropDownListChangeEvent } from "@progress/kendo-react-dropdowns";
-import { Gender, Student } from "./student";
+import { Gender, Student } from "../../utils/student";
 import { Button } from "@progress/kendo-react-buttons";
-import { userValidationSchema } from "./personValidation";
+import { userValidationSchema } from "../../utils/personValidation";
 import moment from "moment";
 import "./DataGrid.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../utils/store";
 import { createStudent, getStudent, removeStudent, updateStudent } from "./studentSlice";
 
-type StudentGrid = Student & {
-  isAdding: boolean;
-  isEditing: boolean;
-};
-
-const initialStudentGrid: StudentGrid = {
+const initialStudent: Student = {
   id: 0,
-  dbId: undefined,
   name: "",
   gender: Gender.MALE,
   address: "",
@@ -33,107 +27,100 @@ const initialStudentGrid: StudentGrid = {
   isAdding: false,
   isEditing: false,
   keyId: null,
+  inEdit: false,
+};
+
+const getIndex = (arr: Student[], field: keyof Student, value: number) => {
+  let ind = -1;
+  arr.forEach((val, index) => {
+    if (val[field] === value) {
+      ind = index;
+    }
+  });
+  return ind;
 };
 
 const DataGrid: FC = () => {
-  const [data, setData] = useState<Map<number, StudentGrid>>(new Map());
   const [editIds, setEditIds] = useState<number[]>([]);
-  const [prevEditData, setPrevEditData] = useState<Map<number, StudentGrid>>(new Map());
+  const [prevEditData, setPrevEditData] = useState<Map<number, Student>>(new Map());
   const [keyIdCount, setKeyIdCount] = useState<number>(0);
-  const [gridData, setGridData] = useState<StudentGrid[]>([]);
 
   const students = useSelector((state: RootState) => state.student.value);
   const dispatch = useDispatch();
+  // eslint-disable-next-line prefer-const
+  let [gridData, setGridData] = useState<Student[]>([]);
 
   useEffect(() => {
     dispatch(getStudent());
-    students.forEach((item, index) => {
-      data.set(index, {
+    gridData = students.map((item, index) => {
+      return {
         ...item,
         isAdding: false,
         isEditing: false,
+        inEdit: false,
         keyId: index,
         birthday: new Date(item.birthday as unknown as string),
-      });
+      };
     });
+    setGridData([...gridData]);
     setKeyIdCount(students.length);
-    manualSetData();
   }, []);
 
-  const manualSetData = () => {
-    setData(data);
-    setGridData(
-      Array.from(data.values()).sort((a, b) => {
-        return (b.keyId as number) - (a.keyId as number);
-      })
-    );
-  };
-
   const handleAddNewClick = () => {
-    const newRecord = { ...initialStudentGrid, isAdding: true, keyId: keyIdCount };
-    data.set(keyIdCount, newRecord);
-    manualSetData();
+    const newRecord = { ...initialStudent, isAdding: true, keyId: keyIdCount, inEdit: true };
+    gridData.unshift(newRecord);
     setKeyIdCount(keyIdCount + 1);
+    setGridData([...gridData]);
   };
 
   const handleDiscardChanges = (keyId: number) => {
-    data.delete(keyId);
-    manualSetData();
+    const ind = getIndex(gridData, "keyId", keyId);
+    gridData.splice(ind, 1);
+    setGridData([...gridData]);
   };
 
   const addRecord = (keyId: number) => {
-    const addData = data.get(keyId) as StudentGrid;
-    let age = -1;
-    if (addData.birthday !== null) {
-      age = moment().diff(addData.birthday, "years");
-    }
+    let ind = getIndex(gridData, "keyId", keyId);
+    const addData = gridData[ind];
     userValidationSchema
       .validate({
-        id: addData.id,
         name: addData.name,
         gender: addData.gender,
         address: addData.address,
         mobileNo: addData.mobileNo,
-        age: age,
+        age: addData.age,
       })
       .then(() => {
-        let isDuplicate = false;
-        data.forEach((val) => {
-          if (val.keyId !== keyId && val.id === (data.get(keyId) as StudentGrid).id) {
-            alert("Duplicate Id");
-            isDuplicate = true;
-          }
-        });
-        if (!isDuplicate) {
-          dispatch(createStudent({ ...(data.get(keyId) as Student), age: age }));
-          data.delete(keyId);
-          manualSetData();
-        }
+        ind = getIndex(gridData, "keyId", keyId);
+        gridData[ind].isAdding = false;
+        gridData[ind].inEdit = false;
+        dispatch(createStudent(addData));
+        // setGridData([...gridData]);
       })
       .catch((err) => {
         alert(err.errors);
       });
   };
 
-  const removeRecord = (keyId: number) => {
-    dispatch(removeStudent((data.get(keyId) as StudentGrid).dbId as number));
-    data.delete(keyId);
-    manualSetData();
+  const removeRecord = (id: number) => {
+    const ind = getIndex(gridData, "id", id);
+    gridData.splice(ind, 1);
+    dispatch(removeStudent(id));
+    setGridData([...gridData]);
   };
 
-  const handleEditClick = (keyId: number) => {
-    setEditIds([...editIds, keyId]);
-    prevEditData.set(keyId, data.get(keyId) as StudentGrid);
-    data.set(keyId, { ...(data.get(keyId) as StudentGrid), isEditing: true });
-    manualSetData();
+  const handleEditClick = (id: number) => {
+    setEditIds([...editIds, id]);
+    const ind = getIndex(gridData, "id", id);
+    prevEditData.set(id, { ...gridData[ind] });
+    gridData[ind].isEditing = true;
+    gridData[ind].inEdit = true;
+    setGridData([...gridData]);
   };
 
-  const editRecord = (keyId: number) => {
-    const editData = data.get(keyId) as StudentGrid;
-    let age = -1;
-    if (editData.birthday !== null) {
-      age = moment().diff(editData.birthday, "years");
-    }
+  const editRecord = (id: number) => {
+    let ind = getIndex(gridData, "id", id);
+    const editData = gridData[ind];
     userValidationSchema
       .validate({
         id: editData.id,
@@ -141,66 +128,54 @@ const DataGrid: FC = () => {
         gender: editData.gender,
         address: editData.address,
         mobileNo: editData.mobileNo,
-        age: age,
+        age: editData.age,
       })
       .then(() => {
-        let isDuplicate = false;
-        data.forEach((val) => {
-          if (val.keyId !== keyId && val.id === (data.get(keyId) as StudentGrid).id) {
-            alert("Duplicate Id");
-            isDuplicate = true;
-          }
-        });
-        if (!isDuplicate) {
-          dispatch(updateStudent({ ...(data.get(keyId) as Student), age: age }));
-          editIds.slice(editIds.indexOf(keyId), 1);
-          setEditIds(editIds);
-          prevEditData.delete(keyId);
-          setPrevEditData(prevEditData);
-          data.set(keyId, { ...(data.get(keyId) as StudentGrid), isEditing: false, age: age });
-          manualSetData();
-        }
+        dispatch(updateStudent(editData));
+        editIds.splice(editIds.indexOf(id), 1);
+        setEditIds(editIds);
+        prevEditData.delete(id);
+        setPrevEditData(prevEditData);
+        ind = getIndex(gridData, "id", id);
+        gridData[ind].isEditing = false;
+        gridData[ind].inEdit = false;
+        setGridData([...gridData]);
       })
       .catch((err) => {
         alert(err.errors);
       });
   };
 
-  const handleCancel = (keyId: number) => {
-    data.set(keyId, prevEditData.get(keyId) as StudentGrid);
-    manualSetData();
-    editIds.slice(editIds.indexOf(keyId), 1);
-    setEditIds(editIds);
-    prevEditData.delete(keyId);
+  const handleCancel = (id: number) => {
+    const ind = getIndex(gridData, "id", id);
+    gridData[ind] = prevEditData.get(id) as Student;
+    editIds.splice(editIds.indexOf(id), 1);
+    prevEditData.delete(id);
     setPrevEditData(prevEditData);
+    setEditIds([...editIds]);
   };
 
   const itemChange = (event: GridItemChangeEvent) => {
-    const field = event.field || "";
-    data.set(event.dataItem.keyId, {
-      ...(data.get(event.dataItem.keyId) as StudentGrid),
-      [field]: event.value,
-    });
-    manualSetData();
+    const field = event.field as keyof Student;
+    const ind = getIndex(gridData, "keyId", event.dataItem.keyId);
+    if (field === "birthday") {
+      gridData[ind].birthday = event.value;
+      gridData[ind].age = moment().diff(event.value, "years");
+    } else {
+      gridData[ind] = { ...gridData[ind], [field]: event.value };
+    }
+    setGridData([...gridData]);
   };
 
   const dropDownChange = (event: DropDownListChangeEvent, keyId: number) => {
-    data.set(keyId, { ...(data.get(keyId) as StudentGrid), gender: event.value });
-    manualSetData();
+    const ind = getIndex(gridData, "keyId", keyId);
+    gridData[ind].gender = event.value;
+    setGridData([...gridData]);
   };
 
   return (
     <div>
-      <Grid
-        editField="inEdit"
-        onItemChange={itemChange}
-        data={gridData.map((item) => {
-          return {
-            ...item,
-            inEdit: item.isAdding || item.isEditing,
-          };
-        })}
-      >
+      <Grid editField="inEdit" onItemChange={itemChange} data={gridData}>
         <GridToolbar>
           <div>
             <button
@@ -212,7 +187,18 @@ const DataGrid: FC = () => {
             </button>
           </div>
         </GridToolbar>
-        <GridColumn title="ID" field="id" editor="numeric" />
+        <GridColumn
+          title="Id"
+          field="id"
+          editor="numeric"
+          cell={(props: GridCellProps) => {
+            if (props.dataItem.isAdding) {
+              return <td></td>;
+            } else {
+              return <td>{props.dataItem.id}</td>;
+            }
+          }}
+        />
         <GridColumn title="Name" field="name" editor="text" />
         <GridColumn
           title="Gender"
@@ -284,14 +270,14 @@ const DataGrid: FC = () => {
                 <td>
                   <Button
                     onClick={() => {
-                      editRecord(props.dataItem.keyId);
+                      editRecord(props.dataItem.id);
                     }}
                   >
                     Update
                   </Button>
                   <Button
                     onClick={() => {
-                      handleCancel(props.dataItem.keyId);
+                      handleCancel(props.dataItem.id);
                     }}
                   >
                     Cancel
@@ -304,14 +290,14 @@ const DataGrid: FC = () => {
                   <Button
                     className="command-edit-button"
                     onClick={() => {
-                      handleEditClick(props.dataItem.keyId);
+                      handleEditClick(props.dataItem.id);
                     }}
                   >
                     Edit
                   </Button>
                   <Button
                     onClick={() => {
-                      removeRecord(props.dataItem.keyId);
+                      removeRecord(props.dataItem.id);
                     }}
                   >
                     Remove

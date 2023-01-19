@@ -2,10 +2,6 @@ import { Gender } from "./student";
 import * as Yup from "yup";
 
 const userValidationSchema = Yup.object().shape({
-  id: Yup.number()
-    .required("Id is empty")
-    .positive("Id must be positive")
-    .integer("Id must be an integer"),
   name: Yup.string()
     .required("Name is empty")
     .test("is-empty", "Name cannot be empty", (value) => value !== undefined && value.length > 0),

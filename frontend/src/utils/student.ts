@@ -4,8 +4,7 @@ enum Gender {
   OTHER = "other",
 }
 
-interface Student {
-  dbId: number | undefined;
+type Student = {
   keyId: number | null;
   id: number | null;
   name: string | null;
@@ -14,7 +13,10 @@ interface Student {
   mobileNo: string | null;
   birthday: Date | null;
   age: number | null;
-}
+  isAdding: boolean;
+  isEditing: boolean;
+  inEdit: boolean;
+};
 
 export { Gender };
 export type { Student };

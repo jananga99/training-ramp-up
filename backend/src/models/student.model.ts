@@ -9,7 +9,7 @@ enum Gender {
 @Entity()
 class Student {
   @PrimaryGeneratedColumn()
-  dbId: number | undefined
+  id: number | undefined
   @Column('text')
   address: string | undefined
   @Column('int')
@@ -18,8 +18,6 @@ class Student {
   birthday: Date | undefined
   @Column('text')
   gender: string | undefined
-  @Column('int')
-  id: number | undefined
   @Column('text')
   mobileNo: string | undefined
   @Column('text')
