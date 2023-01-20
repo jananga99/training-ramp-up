@@ -83,9 +83,15 @@ const DataGrid: FC = () => {
         prevEditData.set(item.id as number, newItem);
       }
     });
+    const newGridData: Student[] = [];
+    gridData.forEach((value) => {
+      if (value.isAdding || getIndex(students, "id", value.id as number) >= 0) {
+        newGridData.push(value);
+      }
+    });
     setPrevEditData(prevEditData);
     setKeyIdCount(students.length);
-    setGridData([...gridData]);
+    setGridData(newGridData);
   }, [students]);
 
   // Handles clicking Add New button. Adds an empty record after assigning it a unique keyId value
