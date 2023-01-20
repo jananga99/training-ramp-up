@@ -6,15 +6,18 @@ import {
   GridItemChangeEvent,
   GridToolbar,
 } from "@progress/kendo-react-grid";
-import { DropDownList, DropDownListChangeEvent } from "@progress/kendo-react-dropdowns";
+import { DropDownListChangeEvent } from "@progress/kendo-react-dropdowns";
 import { Gender, Student } from "../../utils/student";
-import { Button } from "@progress/kendo-react-buttons";
 import { userValidationSchema } from "../../utils/personValidation";
 import moment from "moment";
-import "./DataGrid.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../utils/store";
 import { createStudent, getStudent, removeStudent, updateStudent } from "./studentSlice";
+import { GenderCell } from "./GenderCell/GenderCell";
+import { AgeCell } from "./AgeCell/AgeCell";
+import { CommandCell } from "./CommandCell/CommandCell";
+import { DatePickerChangeEvent } from "@progress/kendo-react-dateinputs";
+import { BirthdayCell } from "./BirthdayCell/BirthdayCell";
 
 const initialStudent: Student = {
   id: 0,
@@ -22,8 +25,8 @@ const initialStudent: Student = {
   gender: Gender.MALE,
   address: "",
   mobileNo: "",
-  birthday: null,
-  age: null,
+  birthday: new Date(),
+  age: 0,
   isAdding: false,
   isEditing: false,
   keyId: null,
@@ -188,12 +191,7 @@ const DataGrid: FC = () => {
   const itemChange = (event: GridItemChangeEvent) => {
     const field = event.field as keyof Student;
     const ind = getIndex(gridData, "keyId", event.dataItem.keyId);
-    if (field === "birthday") {
-      gridData[ind].birthday = event.value;
-      gridData[ind].age = moment().diff(event.value, "years");
-    } else {
-      gridData[ind] = { ...gridData[ind], [field]: event.value };
-    }
+    gridData[ind] = { ...gridData[ind], [field]: event.value };
     setGridData([...gridData]);
   };
 
@@ -201,6 +199,13 @@ const DataGrid: FC = () => {
   const dropDownChange = (event: DropDownListChangeEvent, keyId: number) => {
     const ind = getIndex(gridData, "keyId", keyId);
     gridData[ind].gender = event.value;
+    setGridData([...gridData]);
+  };
+
+  const dateChange = (event: DatePickerChangeEvent, keyId: number) => {
+    const ind = getIndex(gridData, "keyId", keyId);
+    gridData[ind].birthday = event.value as Date;
+    gridData[ind].age = moment().diff(event.value, "years");
     setGridData([...gridData]);
   };
 
@@ -234,109 +239,41 @@ const DataGrid: FC = () => {
         <GridColumn
           title="Gender"
           field="gender"
-          cell={(props: GridCellProps) => {
-            if (props.dataItem.isAdding || props.dataItem.isEditing) {
-              return (
-                <td>
-                  <DropDownList
-                    data={[Gender.MALE, Gender.FEMALE, Gender.OTHER]}
-                    onChange={(event) => {
-                      dropDownChange(event, props.dataItem.keyId);
-                    }}
-                    value={props.dataItem.gender}
-                  />
-                </td>
-              );
-            } else {
-              return <td>{props.dataItem.gender}</td>;
-            }
-          }}
+          cell={(props: GridCellProps) => (
+            <GenderCell dropDownChange={dropDownChange} student={props.dataItem} />
+          )}
         />
         <GridColumn title="Address" field="address" editor="text" />
         <GridColumn title="Mobile No" field="mobileNo" editor="text" />
         <GridColumn
           title="Date of Birth"
           field="birthday"
-          editor="date"
           format="{0:E MMM dd yyyy}"
+          cell={(props: GridCellProps) => (
+            <BirthdayCell student={props.dataItem} dateChange={dateChange} />
+          )}
         />
         <GridColumn
           title="Age"
           field="age"
           editor="numeric"
-          cell={(props: GridCellProps) => {
-            if (props.dataItem.isAdding) {
-              return <td></td>;
-            } else {
-              return <td>{props.dataItem.age}</td>;
-            }
-          }}
+          cell={(props: GridCellProps) => <AgeCell student={props.dataItem} />}
         />
-        {/* eslint-disable-next-line react/prop-types */}
+
         <GridColumn
           title="command"
           field="command"
-          cell={(props: GridCellProps) => {
-            if (props.dataItem.isAdding) {
-              return (
-                <td>
-                  <Button
-                    onClick={() => {
-                      addRecord(props.dataItem.keyId);
-                    }}
-                  >
-                    Add
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      handleDiscardChanges(props.dataItem.keyId);
-                    }}
-                  >
-                    Discard Changes
-                  </Button>
-                </td>
-              );
-            } else if (props.dataItem.isEditing) {
-              return (
-                <td>
-                  <Button
-                    onClick={() => {
-                      editRecord(props.dataItem.id);
-                    }}
-                  >
-                    Update
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      handleCancel(props.dataItem.id);
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                </td>
-              );
-            } else {
-              return (
-                <td>
-                  <Button
-                    className="command-edit-button"
-                    onClick={() => {
-                      handleEditClick(props.dataItem.id);
-                    }}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      removeRecord(props.dataItem.id);
-                    }}
-                  >
-                    Remove
-                  </Button>
-                </td>
-              );
-            }
-          }}
+          cell={(props: GridCellProps) => (
+            <CommandCell
+              student={props.dataItem}
+              editRecord={editRecord}
+              handleEditClick={handleEditClick}
+              handleCancel={handleCancel}
+              addRecord={addRecord}
+              handleDiscardChanges={handleDiscardChanges}
+              removeRecord={removeRecord}
+            />
+          )}
         />
       </Grid>
     </div>

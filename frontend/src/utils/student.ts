@@ -11,7 +11,7 @@ type Student = {
   gender: string | null;
   address: string | null;
   mobileNo: string | null;
-  birthday: Date | null;
+  birthday: Date;
   age: number | null;
   isAdding: boolean;
   isEditing: boolean;
