@@ -1,8 +1,10 @@
 import { FC, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { TextField, Button, Typography } from "@mui/material";
+import { TextField, Button, Typography, IconButton, InputAdornment } from "@mui/material";
 import { makeStyles } from "@mui/styles";
+import { userValidationSchema } from "../../utils/validation/validation";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const useStyles = makeStyles({
   body: {
@@ -57,7 +59,19 @@ const useStyles = makeStyles({
     alignItems: "right",
     justifyContent: "center",
   },
+  passwordTextRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  passwordText: {
+    width: "400px",
+  },
 });
+
+const getPasswordType = (visible: boolean) => {
+  return visible ? "text" : "password";
+};
 
 const SignUpPage: FC = () => {
   useEffect(() => {
@@ -66,7 +80,9 @@ const SignUpPage: FC = () => {
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
@@ -74,7 +90,22 @@ const SignUpPage: FC = () => {
 
   const handleSubmit = (): void => {
     // dispatch(set(nickname));
-    navigate("/");
+    // navigate("/");
+    userValidationSchema
+      .validate(
+        {
+          email: email,
+          password: password,
+          confirmPassword: confirmPassword,
+        },
+        { abortEarly: false }
+      )
+      .then(() => {
+        alert("Success");
+      })
+      .catch((err) => {
+        alert(err.errors[0]);
+      });
   };
 
   const handleHaveAccountClick = () => {
@@ -101,19 +132,47 @@ const SignUpPage: FC = () => {
             className={classes.inputData}
             label="Password"
             value={password}
-            type="password"
+            type={getPasswordType(showPassword)}
             onChange={(event) => setPassword(event.target.value)}
-            sx={{ borderRadius: 10, margin: 2, width: 500 }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <Visibility /> : <VisibilityOff />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
+        </div>
+        <div className={classes.passwordTextRow}>
+          <Typography className={classes.passwordText}>
+            *Password must contain at least one lower case letter, upper case letter, number, and a
+            symbol
+          </Typography>
         </div>
         <div className={classes.inputRow}>
           <TextField
             className={classes.inputData}
             label="Confirm Password"
             value={confirmPassword}
-            type="password"
+            type={getPasswordType(showConfirmPassword)}
             onChange={(event) => setConfirmPassword(event.target.value)}
-            sx={{ borderRadius: 10, margin: 2, width: 500 }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
         </div>
         <div className={classes.submitButtonRow}>
