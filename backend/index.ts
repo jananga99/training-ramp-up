@@ -1,6 +1,7 @@
 import express, { Express, Request, Response } from 'express'
 import studentRouter from './src/routes/student.route'
 import userRouter from './src/routes/user.route'
+import authRouter from './src/routes/auth.route'
 import { createServer } from 'http'
 import { Server } from 'socket.io'
 import cors from 'cors'
@@ -26,8 +27,9 @@ app.get('/', (req: Request, res: Response) => {
   res.status(200).json({ message: 'ok' })
 })
 
-app.use('/students', studentRouter)
+app.use('/auth', authRouter)
 app.use('/user', userRouter)
+app.use('/students', studentRouter)
 
 app.use((err: any, req: Request, res: Response) => {
   const statusCode = err.statusCode || 500

@@ -1,10 +1,20 @@
 import { FC, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { Typography, TextField, Button, InputAdornment, IconButton } from "@mui/material";
-import "./SignInPage.scss";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  Typography,
+  TextField,
+  Button,
+  InputAdornment,
+  IconButton,
+  CircularProgress,
+} from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { User } from "../../utils/user";
+import { signInUser } from "../SignUpPage/userSlice";
+import { RootState } from "../../utils/store";
+import jwt from "jsonwebtoken";
 
 const useStyles = makeStyles({
   body: {
@@ -67,16 +77,40 @@ const useStyles = makeStyles({
   passwordText: {
     width: "400px",
   },
+  loadingRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loadingProgress: {},
 });
 
 const getPasswordType = (visible: boolean) => {
   return visible ? "text" : "password";
 };
 
+jwt.verify(
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InFAcS5jb20iLCJpYXQiOjE2NzQzMjM1NDcsImV4cCI6MTY3NDMyNDE0N30.4rFwhi_qi2z8QUNd5EcQ48j6SLdaQD74e1cTc0HxUlY",
+  "gghj4hjdf@#^d"
+);
+
 const SignInPage: FC = () => {
+  const accessToken = useSelector((state: RootState) => state.user.accessToken);
   useEffect(() => {
     document.title = "Sign In";
+
+    testa();
   }, []);
+
+  const testa = async () => {
+    console.log(process.env.REACT_APP_ACCESS_TOKEN_SECRET);
+    console.log(accessToken);
+    // const decoded = await jwt.verify(
+    //   accessToken as string,
+    //   process.env.REACT_APP_ACCESS_TOKEN_SECRET as string
+    // );
+    // console.log(decoded);
+  };
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -86,9 +120,17 @@ const SignInPage: FC = () => {
 
   const dispatch = useDispatch();
 
+  const signInLoading = useSelector((state: RootState) => state.user.signInLoading);
+
   const handleSubmit = (): void => {
-    // dispatch(set(nickname));
-    navigate("/home");
+    const newUser: User = {
+      email: email,
+      password: password,
+    };
+    dispatch(signInUser(newUser));
+    setEmail("");
+    setPassword("");
+    setShowPassword(false);
   };
 
   const handleAddNewClick = () => {
@@ -141,6 +183,9 @@ const SignInPage: FC = () => {
           >
             Sign In
           </Button>
+        </div>
+        <div className={classes.loadingRow}>
+          {signInLoading && <CircularProgress className={classes.loadingProgress} />}
         </div>
         <div className={classes.haveAccountTextRow}>
           <Typography onClick={handleAddNewClick}> Create New Account</Typography>

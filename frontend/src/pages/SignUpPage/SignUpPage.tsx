@@ -1,10 +1,20 @@
 import { FC, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { TextField, Button, Typography, IconButton, InputAdornment } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  TextField,
+  Button,
+  Typography,
+  IconButton,
+  InputAdornment,
+  CircularProgress,
+} from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { userValidationSchema } from "../../utils/validation/validation";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { createUser } from "./userSlice";
+import { User } from "../../utils/user";
+import { RootState } from "../../utils/store";
 
 const useStyles = makeStyles({
   body: {
@@ -67,6 +77,12 @@ const useStyles = makeStyles({
   passwordText: {
     width: "400px",
   },
+  loadingRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loadingProgress: {},
 });
 
 const getPasswordType = (visible: boolean) => {
@@ -88,8 +104,9 @@ const SignUpPage: FC = () => {
 
   const dispatch = useDispatch();
 
+  const createLoading = useSelector((state: RootState) => state.user.createLoading);
+
   const handleSubmit = (): void => {
-    // dispatch(set(nickname));
     // navigate("/");
     userValidationSchema
       .validate(
@@ -101,7 +118,16 @@ const SignUpPage: FC = () => {
         { abortEarly: false }
       )
       .then(() => {
-        alert("Success");
+        const newUser: User = {
+          email: email,
+          password: password,
+        };
+        dispatch(createUser(newUser));
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
+        setShowPassword(false);
+        setShowConfirmPassword(false);
       })
       .catch((err) => {
         alert(err.errors[0]);
@@ -184,6 +210,9 @@ const SignUpPage: FC = () => {
           >
             Sign Up
           </Button>
+        </div>
+        <div className={classes.loadingRow}>
+          {createLoading && <CircularProgress className={classes.loadingProgress} />}
         </div>
         <div className={classes.haveAccountTextRow}>
           <Typography onClick={handleHaveAccountClick}> Already have an account?</Typography>
