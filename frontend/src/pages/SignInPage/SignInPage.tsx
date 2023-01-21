@@ -1,9 +1,10 @@
 import { FC, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { Typography, TextField, Button } from "@mui/material";
+import { Typography, TextField, Button, InputAdornment, IconButton } from "@mui/material";
 import "./SignInPage.scss";
 import { makeStyles } from "@mui/styles";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const useStyles = makeStyles({
   body: {
@@ -58,7 +59,19 @@ const useStyles = makeStyles({
     alignItems: "right",
     justifyContent: "center",
   },
+  passwordTextRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  passwordText: {
+    width: "400px",
+  },
 });
+
+const getPasswordType = (visible: boolean) => {
+  return visible ? "text" : "password";
+};
 
 const SignInPage: FC = () => {
   useEffect(() => {
@@ -67,6 +80,7 @@ const SignInPage: FC = () => {
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
@@ -94,7 +108,6 @@ const SignInPage: FC = () => {
             value={email}
             type="email"
             onChange={(event) => setEmail(event.target.value)}
-            sx={{ borderRadius: 10, margin: 2, width: 500 }}
           />
         </div>
         <div className={classes.inputRow}>
@@ -102,9 +115,20 @@ const SignInPage: FC = () => {
             className={classes.inputData}
             label="Password"
             value={password}
-            type="password"
+            type={getPasswordType(showPassword)}
             onChange={(event) => setPassword(event.target.value)}
-            sx={{ borderRadius: 10, margin: 2, width: 500 }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <Visibility /> : <VisibilityOff />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
         </div>
 

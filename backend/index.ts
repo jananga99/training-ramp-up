@@ -1,5 +1,6 @@
 import express, { Express, Request, Response } from 'express'
 import studentRouter from './src/routes/student.route'
+import userRouter from './src/routes/user.route'
 import { createServer } from 'http'
 import { Server } from 'socket.io'
 import cors from 'cors'
@@ -26,6 +27,7 @@ app.get('/', (req: Request, res: Response) => {
 })
 
 app.use('/students', studentRouter)
+app.use('/user', userRouter)
 
 app.use((err: any, req: Request, res: Response) => {
   const statusCode = err.statusCode || 500
