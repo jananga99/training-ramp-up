@@ -1,11 +1,13 @@
 import React from "react";
 import "./App.scss";
 import DataGridPage from "./pages/DataGridPage/DataGridPage";
+import SignInPage from "./pages/signInPage";
 
 function App() {
   return (
     <div className="App">
-      <DataGridPage />
+      {/*<DataGridPage />*/}
+      <SignInPage />
     </div>
   );
 }
