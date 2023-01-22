@@ -26,19 +26,26 @@ export const studentSlice = createSlice({
     createStudent(state, action: PayloadAction<Student>) {
       state.createLoading += 1;
     },
-    createStudentSuccess(state, action: PayloadAction<Student>) {
+    createStudentSuccess(state) {
       state.createLoading -= 1;
-      state.value.push(action.payload);
     },
     createStudentFailed(state) {
       state.createLoading -= 1;
+    },
+    createReduxStudent(state, action: PayloadAction<Student>) {
+      state.value.push(action.payload);
     },
 
     updateStudent(state, action: PayloadAction<Student>) {
       state.updateLoading += 1;
     },
-    updateStudentSuccess(state, action: PayloadAction<Student>) {
+    updateStudentSuccess(state) {
       state.updateLoading -= 1;
+    },
+    updateStudentFailed(state) {
+      state.updateLoading -= 1;
+    },
+    updateReduxStudent(state, action: PayloadAction<Student>) {
       state.value = state.value.map((val) => {
         if (val.id === action.payload.id) {
           return action.payload;
@@ -47,15 +54,16 @@ export const studentSlice = createSlice({
         }
       });
     },
-    updateStudentFailed(state) {
-      state.updateLoading -= 1;
-    },
-
     removeStudent(state, action: PayloadAction<number>) {
       state.removeLoading += 1;
     },
-    removeStudentSuccess(state, action: PayloadAction<number>) {
+    removeStudentSuccess(state) {
       state.removeLoading -= 1;
+    },
+    removeStudentFailed(state) {
+      state.removeLoading -= 1;
+    },
+    removeReduxStudent(state, action: PayloadAction<number>) {
       let ind = -1;
       state.value.forEach((val, index) => {
         if (val.id === action.payload) {
@@ -65,9 +73,6 @@ export const studentSlice = createSlice({
       if (ind >= 0) {
         state.value.splice(ind, 1);
       }
-    },
-    removeStudentFailed(state) {
-      state.removeLoading -= 1;
     },
     getStudent(state) {
       state.getLoading += 1;
@@ -86,15 +91,18 @@ export const {
   createStudentFailed,
   createStudentSuccess,
   createStudent,
+  createReduxStudent,
   updateStudentFailed,
   updateStudentSuccess,
   updateStudent,
+  updateReduxStudent,
   getStudentSuccess,
   getStudentFailed,
   getStudent,
   removeStudentFailed,
   removeStudentSuccess,
   removeStudent,
+  removeReduxStudent,
 } = studentSlice.actions;
 
 export default studentSlice.reducer;
