@@ -83,49 +83,52 @@ async function getInDB(): Promise<Student[]> {
   }
 }
 
-function* create(action: PayloadAction<Student>) {
+function* sagaHandler(action: PayloadAction<Student | number>) {
   try {
-    yield call(createInDB, action.payload);
-    yield put(createStudentSuccess());
+    switch (action.type) {
+      case createStudent.type: {
+        yield call(createInDB, action.payload as Student);
+        yield put(createStudentSuccess());
+        break;
+      }
+      case updateStudent.type: {
+        yield call(updateInDB, action.payload as Student);
+        yield put(updateStudentSuccess());
+        break;
+      }
+      case getStudent.type: {
+        const response: Student[] = yield call(getInDB);
+        yield put(getStudentSuccess(response));
+        break;
+      }
+      case removeStudent.type: {
+        yield call(removeInDB, action.payload as number);
+        yield put(removeStudentSuccess());
+        break;
+      }
+    }
   } catch (error: any) {
-    yield put(createStudentFailed());
-    alert(error.message);
-  }
-}
-
-function* update(action: PayloadAction<Student>) {
-  try {
-    yield call(updateInDB, action.payload);
-    yield put(updateStudentSuccess());
-  } catch (error: any) {
-    yield put(updateStudentFailed());
-    alert(error.message);
-  }
-}
-
-function* remove(action: PayloadAction<number>) {
-  try {
-    yield call(removeInDB, action.payload);
-    yield put(removeStudentSuccess());
-  } catch (error: any) {
-    yield put(removeStudentFailed());
-    alert(error.message);
-  }
-}
-
-function* get() {
-  try {
-    const response: Student[] = yield call(getInDB);
-    yield put(getStudentSuccess(response));
-  } catch (error: any) {
-    yield put(getStudentFailed());
+    switch (action.type) {
+      case createStudent.type:
+        yield put(createStudentFailed());
+        break;
+      case updateStudent.type:
+        yield put(updateStudentFailed());
+        break;
+      case getStudent.type:
+        yield put(getStudentFailed());
+        break;
+      case removeStudent.type:
+        yield put(removeStudentFailed());
+        break;
+    }
     alert(error.message);
   }
 }
 
 export default function* studentSaga() {
-  yield takeEvery(createStudent.type, create);
-  yield takeEvery(updateStudent.type, update);
-  yield takeEvery(removeStudent.type, remove);
-  yield takeEvery(getStudent.type, get);
+  yield takeEvery(
+    [removeStudent.type, createStudent.type, updateStudent.type, getStudent.type],
+    sagaHandler
+  );
 }
