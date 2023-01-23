@@ -1,8 +1,19 @@
 import { FC, useEffect, useState } from "react";
-
-import { TextField, Button, InputAdornment, IconButton, Box } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  Typography,
+  TextField,
+  Button,
+  InputAdornment,
+  IconButton,
+  CircularProgress,
+  Box,
+} from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-
+import { User } from "../../utils/user";
+import { signInUser } from "../SignUpPage/userSlice";
+import { RootState } from "../../utils/store";
 import jwt from "jsonwebtoken";
 
 const styles = {
@@ -78,41 +89,50 @@ const getPasswordType = (visible: boolean) => {
   return visible ? "text" : "password";
 };
 
-// jwt.verify(
-//     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InFAcS5jb20iLCJpYXQiOjE2NzQzMjM1NDcsImV4cCI6MTY3NDMyNDE0N30.4rFwhi_qi2z8QUNd5EcQ48j6SLdaQD74e1cTc0HxUlY",
-//     "gghj4hjdf@#^d"
-// );
-
 const SignInPage: FC = () => {
+  // const accessToken = useSelector((state: RootState) => state.user.accessToken);
+
   useEffect(() => {
     document.title = "Sign In";
   }, []);
+
+  const signedIn = useSelector((state: RootState) => state.user.signedIn);
+  useEffect(() => {
+    if (signedIn) {
+      navigate("/home");
+    }
+  }, [signedIn]);
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
+  const navigate = useNavigate();
+
+  const dispatch = useDispatch();
+
+  const signInLoading = useSelector((state: RootState) => state.user.signInLoading);
+
   const handleSubmit = (): void => {
+    const newUser: User = {
+      email: email,
+      password: password,
+    };
+    dispatch(signInUser(newUser));
     setEmail("");
     setPassword("");
     setShowPassword(false);
-    try {
-      const res = jwt.verify(
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InFAcS5jb20iLCJpYXQiOjE2NzQzMjM1NDcsImV4cCI6MTY3NDMyNDE0N30.4rFwhi_qi2z8QUNd5EcQ48j6SLdaQD74e1cTc0HxUlY",
-        "gghj4hjdf@#^d"
-      );
-    } catch (err: any) {
-      console.log(err.message);
-    }
+  };
+
+  const handleAddNewClick = () => {
+    navigate("/signup");
   };
 
   return (
-    <Box component="div" sx={styles.body}>
-      <Box component="div" sx={styles.signInBox}>
-        <Box component="div" sx={styles.signInTitle}>
-          Sign In
-        </Box>
-        <Box component="div" sx={styles.inputRow}>
+    <Box sx={styles.body}>
+      <Box sx={styles.signInBox}>
+        <Box sx={styles.signInTitle}>Sign In</Box>
+        <Box sx={styles.inputRow}>
           <TextField
             sx={styles.inputData}
             label="Email"
@@ -121,7 +141,7 @@ const SignInPage: FC = () => {
             onChange={(event) => setEmail(event.target.value)}
           />
         </Box>
-        <Box component="div" sx={styles.inputRow}>
+        <Box sx={styles.inputRow}>
           <TextField
             sx={styles.inputData}
             label="Password"
@@ -143,7 +163,7 @@ const SignInPage: FC = () => {
           />
         </Box>
 
-        <Box component="div" sx={styles.submitButtonRow}>
+        <Box sx={styles.submitButtonRow}>
           <Button
             sx={styles.submitButton}
             variant="contained"
@@ -152,6 +172,12 @@ const SignInPage: FC = () => {
           >
             Sign In
           </Button>
+        </Box>
+        <Box sx={styles.loadingRow}>
+          {signInLoading && <CircularProgress sx={styles.loadingProgress} />}
+        </Box>
+        <Box sx={styles.haveAccountTextRow}>
+          <Typography onClick={handleAddNewClick}> Create New Account</Typography>
         </Box>
       </Box>
     </Box>

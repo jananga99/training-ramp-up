@@ -66,6 +66,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^8.0.5",
+    "react-router-dom": "^6.7.0",
     "react-scripts": "5.0.1",
     "redux": "^4.2.0",
     "redux-persist": "^6.0.0",
@@ -106,6 +107,7 @@
     "@types/axios": "^0.14.0",
     "@types/jsonwebtoken": "^9.0.1",
     "@types/react-redux": "^7.1.25",
+    "@types/react-router-dom": "^5.3.3",
     "@types/redux-saga": "^0.10.5",
     "@types/socket.io-client": "^3.0.0",
     "@typescript-eslint/eslint-plugin": "^5.48.1",
@@ -122,6 +124,7 @@
     "sass": "^1.57.1",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
-    "url": "^0.11.0"
+    "url": "^0.11.0",
+    "yup-password": "^0.2.2"
   }
 }

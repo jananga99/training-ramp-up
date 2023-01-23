@@ -1,13 +1,11 @@
 import React from "react";
 import "./App.scss";
-import DataGridPage from "./pages/DataGridPage/DataGridPage";
-import SignInPage from "./pages/signInPage";
+import AppRouter from "./utils/routes";
 
 function App() {
   return (
     <div className="App">
-      {/*<DataGridPage />*/}
-      <SignInPage />
+      <AppRouter />
     </div>
   );
 }
