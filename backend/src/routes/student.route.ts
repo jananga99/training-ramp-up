@@ -5,11 +5,12 @@ import {
   updateStudent,
   removeStudent,
 } from '../controllers/student.controller'
+import passport from 'passport'
 
 const router = express.Router()
 
 /* GET students. */
-router.get('/', getStudents)
+router.get('/', passport.authenticate('jwt', { session: false }), getStudents)
 
 /* POST student */
 router.post('/', createStudent)

@@ -16,7 +16,7 @@ async function signIn(
       res.cookie('jwt', generateRefreshToken(req.body.email), {
         httpOnly: true,
         sameSite: 'none',
-        secure: true,
+        secure: false, //true in production (to use HTTPS)
         maxAge: 3 * 24 * 60 * 60 * 1000,
       })
       res.status(200).json({
@@ -33,4 +33,19 @@ async function signIn(
   }
 }
 
-export { signIn }
+async function refreshToken(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    res.status(200).json({
+      accessToken: generateAccessToken(req.body.email),
+    })
+  } catch (err: any) {
+    console.error(`Refresh token in expired or invalid`, err.message)
+    next(err)
+  }
+}
+
+export { signIn, refreshToken }

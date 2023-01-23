@@ -7,8 +7,12 @@ import { Server } from 'socket.io'
 import cors from 'cors'
 import dotenv from 'dotenv'
 dotenv.config()
+import './src/configs/passport.config'
+import passport from 'passport'
+import cookieParser from 'cookie-parser'
 
 const app: Express = express()
+app.use(cookieParser())
 app.use(cors({}))
 const httpServer = createServer(app)
 export const io = new Server(httpServer, {
@@ -21,6 +25,8 @@ app.use(
     extended: true,
   })
 )
+
+app.use(passport.initialize())
 
 //fds
 app.get('/', (req: Request, res: Response) => {
