@@ -14,7 +14,6 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { User } from "../../utils/user";
 import { signInUser } from "../SignUpPage/userSlice";
 import { RootState } from "../../utils/store";
-import jwt from "jsonwebtoken";
 
 const styles = {
   body: {
@@ -90,18 +89,9 @@ const getPasswordType = (visible: boolean) => {
 };
 
 const SignInPage: FC = () => {
-  // const accessToken = useSelector((state: RootState) => state.user.accessToken);
-
   useEffect(() => {
     document.title = "Sign In";
   }, []);
-
-  const signedIn = useSelector((state: RootState) => state.user.signedIn);
-  useEffect(() => {
-    if (signedIn) {
-      navigate("/home");
-    }
-  }, [signedIn]);
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");

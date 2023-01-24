@@ -2,9 +2,9 @@ import { call, cancelled, put, take } from "redux-saga/effects";
 import { EventChannel, eventChannel } from "redux-saga";
 import { io } from "socket.io-client";
 import {
-  createStudentSuccess,
-  updateStudentSuccess,
-  removeStudentSuccess,
+  createReduxStudent,
+  updateReduxStudent,
+  removeReduxStudent,
 } from "../components/DataGrid/studentSlice";
 import { Student } from "./student";
 
@@ -42,13 +42,13 @@ export default function* notificationSaga() {
       const notification: UserNotification = yield take(chan);
       switch (notification.type) {
         case "create":
-          yield put(createStudentSuccess(notification.data as Student));
+          yield put(createReduxStudent(notification.data as Student));
           break;
         case "update":
-          yield put(updateStudentSuccess(notification.data as Student));
+          yield put(updateReduxStudent(notification.data as Student));
           break;
         case "delete":
-          yield put(removeStudentSuccess(notification.data?.id as number));
+          yield put(removeReduxStudent(notification.data?.id as number));
           break;
       }
     }

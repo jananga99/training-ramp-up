@@ -31,6 +31,7 @@ async function createAsync(user: User): Promise<User> {
 
 async function signInAsync(user: User): Promise<User> {
   const response = await axios({
+    withCredentials: true,
     url: `${process.env.REACT_APP_BACKEND_SERVER_URL}auth/`,
     method: "POST",
     data: {
@@ -38,12 +39,26 @@ async function signInAsync(user: User): Promise<User> {
       password: user.password,
     },
   });
+  console.log(response.data);
   if (response.status === 200 && response.data.accessToken) {
+    console.log(response.data.accessToken);
     return response.data.accessToken;
   } else if (response.data.message) {
     throw new Error(response.data.message);
   } else {
     throw new Error("Unknown error occurred");
+  }
+}
+
+export async function refreshAsync() {
+  try {
+    return await axios({
+      withCredentials: true,
+      url: `${process.env.REACT_APP_BACKEND_SERVER_URL}auth/refresh`,
+      method: "POST",
+    });
+  } catch (error: any) {
+    return error.response;
   }
 }
 

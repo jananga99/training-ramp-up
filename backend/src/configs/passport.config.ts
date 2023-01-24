@@ -9,6 +9,7 @@ const opts = {
 }
 
 passport.use(
+  'jwt',
   new Strategy(opts, async function (jwt_payload, done) {
     const user = await getOne(jwt_payload.sub)
     if (user) {

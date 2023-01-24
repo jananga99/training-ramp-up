@@ -13,15 +13,17 @@ async function signIn(
   try {
     const result = await validateSignIn(req.body.email, req.body.password)
     if (result) {
-      res.cookie('jwt', generateRefreshToken(req.body.email), {
-        httpOnly: true,
-        sameSite: 'none',
-        secure: false, //true in production (to use HTTPS)
-        maxAge: 3 * 24 * 60 * 60 * 1000,
-      })
-      res.status(200).json({
-        accessToken: generateAccessToken(req.body.email),
-      })
+      res
+        .cookie('jwt', generateRefreshToken(req.body.email), {
+          httpOnly: true,
+          sameSite: 'none',
+          secure: false, //true in production (to use HTTPS)
+          maxAge: 3 * 24 * 60 * 60 * 1000,
+        })
+        .status(200)
+        .json({
+          accessToken: generateAccessToken(req.body.email),
+        })
     } else {
       res
         .status(401)
@@ -39,11 +41,12 @@ async function refreshToken(
   next: NextFunction
 ): Promise<void> {
   try {
+    console.log('Access token is refreshed by backend')
     res.status(200).json({
       accessToken: generateAccessToken(req.body.email),
     })
   } catch (err: any) {
-    console.error(`Refresh token in expired or invalid`, err.message)
+    console.error(`Access token generation failed`, err.message)
     next(err)
   }
 }

@@ -12,11 +12,20 @@ import passport from 'passport'
 import cookieParser from 'cookie-parser'
 
 const app: Express = express()
+app.use(
+  cors({
+    origin: ['http://localhost:3000'],
+    credentials: true,
+  })
+)
 app.use(cookieParser())
-app.use(cors({}))
+
 const httpServer = createServer(app)
 export const io = new Server(httpServer, {
-  cors: {},
+  cors: {
+    origin: ['http://localhost:3000'],
+    credentials: true,
+  },
 })
 
 app.use(express.json())
@@ -45,5 +54,5 @@ app.use((err: any, req: Request, res: Response) => {
 })
 
 httpServer.listen(process.env.PORT, () => {
-  console.log(`Http server is running at http://localhost:${process.env.PORT}`)
+  console.log(`Https server is running at http://localhost:${process.env.PORT}`)
 })

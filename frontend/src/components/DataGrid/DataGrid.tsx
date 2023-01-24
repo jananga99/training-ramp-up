@@ -8,7 +8,7 @@ import {
 } from "@progress/kendo-react-grid";
 import { DropDownListChangeEvent } from "@progress/kendo-react-dropdowns";
 import { Gender, Student } from "../../utils/student";
-import { userValidationSchema } from "../../utils/personValidation";
+import { studentValidationSchema } from "../../utils/validation/validation";
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../utils/store";
@@ -116,7 +116,7 @@ const DataGrid: FC = () => {
   const addRecord = (keyId: number) => {
     let ind = getIndex(gridData, "keyId", keyId);
     const addData = gridData[ind];
-    userValidationSchema
+    studentValidationSchema
       .validate({
         name: addData.name,
         gender: addData.gender,
@@ -153,7 +153,7 @@ const DataGrid: FC = () => {
   const editRecord = (id: number) => {
     let ind = getIndex(gridData, "id", id);
     const editData = gridData[ind];
-    userValidationSchema
+    studentValidationSchema
       .validate({
         id: editData.id,
         name: editData.name,
