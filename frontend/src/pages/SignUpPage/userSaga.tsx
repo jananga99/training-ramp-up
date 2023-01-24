@@ -1,4 +1,5 @@
 import { call, put, takeEvery } from "redux-saga/effects";
+import { AxiosResponse } from "axios";
 import {
   createUserFailed,
   createUserSuccess,
@@ -11,42 +12,34 @@ import { User } from "../../utils/user";
 import { PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 
-async function createAsync(user: User): Promise<User> {
-  const response = await axios({
-    url: `${process.env.REACT_APP_BACKEND_SERVER_URL}user/`,
-    method: "POST",
-    data: {
-      email: user.email,
-      password: user.password,
-    },
-  });
-  if (response.status === 201) {
-    return response.data;
-  } else if (response.data.message) {
-    throw new Error(response.data.message);
-  } else {
-    throw new Error("Unknown error occurred");
+async function createAsync(user: User): Promise<AxiosResponse> {
+  try {
+    return await axios({
+      url: `${process.env.REACT_APP_BACKEND_SERVER_URL}user/`,
+      method: "POST",
+      data: {
+        email: user.email,
+        password: user.password,
+      },
+    });
+  } catch (error: any) {
+    return error.response;
   }
 }
 
-async function signInAsync(user: User): Promise<User> {
-  const response = await axios({
-    withCredentials: true,
-    url: `${process.env.REACT_APP_BACKEND_SERVER_URL}auth/`,
-    method: "POST",
-    data: {
-      email: user.email,
-      password: user.password,
-    },
-  });
-  console.log(response.data);
-  if (response.status === 200 && response.data.accessToken) {
-    console.log(response.data.accessToken);
-    return response.data.accessToken;
-  } else if (response.data.message) {
-    throw new Error(response.data.message);
-  } else {
-    throw new Error("Unknown error occurred");
+async function signInAsync(user: User): Promise<AxiosResponse> {
+  try {
+    return await axios({
+      withCredentials: true,
+      url: `${process.env.REACT_APP_BACKEND_SERVER_URL}auth/`,
+      method: "POST",
+      data: {
+        email: user.email,
+        password: user.password,
+      },
+    });
+  } catch (error: any) {
+    return error.response;
   }
 }
 
@@ -63,32 +56,31 @@ export async function refreshAsync() {
 }
 
 function* handleSaga(action: PayloadAction<User>) {
-  try {
-    switch (action.type) {
-      case createUser.type: {
-        const response: User = yield call(createAsync, action.payload);
-        alert(`User - ${response.email} is registered successfully`);
+  switch (action.type) {
+    case createUser.type: {
+      const response: AxiosResponse = yield call(createAsync, action.payload);
+      if (response.status === 201) {
+        alert(`User - ${response.data.email} is registered successfully`);
         yield put(createUserSuccess());
-        break;
+      } else {
+        alert(`User - ${response.data.email} registration failed. Try again.`);
+        yield put(createUserFailed());
       }
-      case signInUser.type: {
-        const response: string = yield call(signInAsync, action.payload);
-        yield put(signInUserSuccess(response));
-        break;
-      }
+      break;
     }
-  } catch (error: any) {
-    switch (action.type) {
-      case createUser.type: {
-        alert(error.message);
-        yield put(createUserFailed(error.message));
-        break;
+    case signInUser.type: {
+      const response: AxiosResponse = yield call(signInAsync, action.payload);
+      if (response.status === 200 && response.data.accessToken) {
+        yield put(signInUserSuccess(response.data.accessToken));
+      } else {
+        if (response.data.success) {
+          alert("Invalid Email or Password");
+        } else {
+          alert("Sign in failed. Try again");
+        }
+        yield put(signInUserFailed());
       }
-      case signInUser.type: {
-        alert(error.message);
-        yield put(signInUserFailed(error.message));
-        break;
-      }
+      break;
     }
   }
 }

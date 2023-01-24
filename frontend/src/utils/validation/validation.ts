@@ -28,12 +28,6 @@ const studentValidationSchema = yup.object().shape({
     .positive("Age must be positive")
     .integer("Age must be an integer")
     .min(18, "Student needs to be 18 years or older"),
-  email: yup.string().required("Email is empty").email("Enter a valid email"),
-  password: yup.string().required("Password is empty").password(),
-  confirmPassword: yup
-    .string()
-    .required("Confirm password is empty")
-    .oneOf([yup.ref("password"), null], "Password and Confirm password does not match"),
 });
 
 const userValidationSchema = yup.object().shape({

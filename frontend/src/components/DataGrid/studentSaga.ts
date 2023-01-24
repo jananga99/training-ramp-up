@@ -19,61 +19,58 @@ import axios, { AxiosResponse } from "axios";
 import { signInUserFailed, signInUserSuccess } from "../../pages/SignUpPage/userSlice";
 import { refreshAsync } from "../../pages/SignUpPage/userSaga";
 
-async function createInDB(student: Student, accessToken: string): Promise<Student> {
-  const response = await axios({
-    url: `${process.env.REACT_APP_BACKEND_SERVER_URL}students/`,
-    method: "POST",
-    data: {
-      student: student,
-    },
-  });
-  console.log(response.status);
-  if (response.status === 201) {
-    return response.data;
-  }
-  if (response.data.message) {
-    throw new Error(response.data.message);
-  } else {
-    throw new Error("An unknown error occurred.");
-  }
-}
-
-async function updateInDB(student: Student, accessToken: string): Promise<Student> {
-  const response = await axios({
-    url: `${process.env.REACT_APP_BACKEND_SERVER_URL}students/${student.id}`,
-    method: "PUT",
-    data: {
-      student: student,
-    },
-  });
-  if (response.status === 200) {
-    return response.data;
-  }
-  if (response.data.message) {
-    throw new Error(response.data.message);
-  } else {
-    throw new Error("An unknown error occurred.");
+async function createInDB(student: Student, accessToken: string): Promise<AxiosResponse> {
+  try {
+    return await axios({
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      url: `${process.env.REACT_APP_BACKEND_SERVER_URL}students/`,
+      method: "POST",
+      data: {
+        student: student,
+      },
+    });
+  } catch (error: any) {
+    return error.response;
   }
 }
 
-async function removeInDB(id: number, accessToken: string): Promise<boolean> {
-  const response = await axios({
-    url: `${process.env.REACT_APP_BACKEND_SERVER_URL}students/${id}`,
-    method: "DELETE",
-  });
-  if (response.status === 204) {
-    return true;
+async function updateInDB(student: Student, accessToken: string): Promise<AxiosResponse> {
+  try {
+    return await axios({
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      url: `${process.env.REACT_APP_BACKEND_SERVER_URL}students/${student.id}`,
+      method: "PUT",
+      data: {
+        student: student,
+      },
+    });
+  } catch (error: any) {
+    return error.response;
   }
-  if (response.data.message) {
-    throw new Error(response.data.message);
-  } else {
-    throw new Error("An unknown error occurred.");
+}
+
+async function removeInDB(id: number, accessToken: string): Promise<AxiosResponse> {
+  try {
+    return await axios({
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      url: `${process.env.REACT_APP_BACKEND_SERVER_URL}students/${id}`,
+      method: "DELETE",
+    });
+  } catch (error: any) {
+    return error.response;
   }
 }
 
 async function getInDB(accessToken: string): Promise<AxiosResponse> {
-  console.log("get in db");
-  console.log(accessToken);
   try {
     return await axios({
       withCredentials: true,
@@ -88,67 +85,74 @@ async function getInDB(accessToken: string): Promise<AxiosResponse> {
   }
 }
 
+function* refresh() {
+  const response: AxiosResponse = yield call(refreshAsync);
+  if (response.status === 200) {
+    yield put(signInUserSuccess(response.data.accessToken));
+  } else {
+    yield put(signInUserFailed());
+    alert("You need to be signed in.");
+  }
+}
+
 function* sagaHandler(action: PayloadAction<Student | number>) {
   const accessToken: string = yield select((state) => state.user.accessToken);
-
   switch (action.type) {
     case createStudent.type: {
-      yield call(createInDB, action.payload as Student, accessToken);
-      yield put(createStudentSuccess());
+      const response: AxiosResponse = yield call(
+        createInDB,
+        action.payload as Student,
+        accessToken
+      );
+      if (response.status === 201) {
+        yield put(createStudentSuccess(response.data));
+      } else if (response.status === 401) {
+        yield refresh();
+      } else {
+        alert("Student create failed");
+        yield put(createStudentFailed());
+      }
       break;
     }
     case updateStudent.type: {
-      yield call(updateInDB, action.payload as Student, accessToken);
-      yield put(updateStudentSuccess());
+      const response: AxiosResponse = yield call(
+        updateInDB,
+        action.payload as Student,
+        accessToken
+      );
+      if (response.status === 200) {
+        yield put(updateStudentSuccess(response.data));
+      } else if (response.status === 401) {
+        yield refresh();
+      } else {
+        alert("Student update failed");
+        yield put(updateStudentFailed());
+      }
       break;
     }
     case getStudent.type: {
-      console.log(typeof accessToken);
       const response: AxiosResponse = yield call(getInDB, accessToken);
       if (response.status === 200) {
         yield put(getStudentSuccess(response.data));
       } else if (response.status === 401) {
-        const response: AxiosResponse = yield call(refreshAsync);
-        if (response.status === 200) {
-          yield put(signInUserSuccess(response.data.accessToken));
-        } else {
-          yield put(signInUserFailed());
-        }
+        yield refresh();
+      } else {
+        yield put(getStudentFailed());
       }
       break;
     }
     case removeStudent.type: {
-      yield call(removeInDB, action.payload as number, accessToken);
-      yield put(removeStudentSuccess());
+      const response: AxiosResponse = yield call(removeInDB, action.payload as number, accessToken);
+      if (response.status === 204) {
+        yield put(removeStudentSuccess(response.data));
+      } else if (response.status === 401) {
+        yield refresh();
+      } else {
+        alert("Student remove failed");
+        yield put(removeStudentFailed());
+      }
       break;
     }
-
-    //   console.log(error);
-    //   console.log(error.response.status);
-    //   if (error.response.status === 401) {
-    //     try {
-    //       const token: string = yield call(refreshAsync);
-    //       yield put(signInUserSuccess(token));
-    //       console.log(token);
-    //     } catch (err) {
-    //       yield put(signInUserFailed());
-    //     }
-    //   } else {
-    //     switch (action.type) {
-    //       case createStudent.type:
-    //         yield put(createStudentFailed());
-    //         break;
-    //       case updateStudent.type:
-    //         yield put(updateStudentFailed());
-    //         break;
-    //       case getStudent.type:
-    //         yield put(getStudentFailed());
-    //         break;
-    //       case removeStudent.type:
-    //         yield put(removeStudentFailed());
-    //         break;
-    //     }
-    //     alert(error.message);
   }
 }
 

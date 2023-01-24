@@ -27,7 +27,7 @@ async function signIn(
     } else {
       res
         .status(401)
-        .json({ success: false, message: 'Invalid email or password' })
+        .json({ success: true, message: 'Invalid email or password' })
     }
   } catch (err: any) {
     console.error(`Error while signing in the user`, err.message)

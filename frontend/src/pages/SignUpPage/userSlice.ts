@@ -36,7 +36,6 @@ export const userSlice = createSlice({
     signInUserSuccess(state, action: PayloadAction<string>) {
       state.signInLoading = false;
       state.accessToken = action.payload;
-      console.log(state.accessToken);
       state.signedIn = true;
     },
     signInUserFailed(state) {
