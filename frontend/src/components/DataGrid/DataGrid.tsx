@@ -117,20 +117,23 @@ const DataGrid: FC = () => {
     let ind = getIndex(gridData, "keyId", keyId);
     const addData = gridData[ind];
     userValidationSchema
-      .validate({
-        name: addData.name,
-        gender: addData.gender,
-        address: addData.address,
-        mobileNo: addData.mobileNo,
-        age: addData.age,
-      })
+      .validate(
+        {
+          name: addData.name,
+          gender: addData.gender,
+          address: addData.address,
+          mobileNo: addData.mobileNo,
+          age: addData.age,
+        },
+        { abortEarly: false }
+      )
       .then(() => {
         ind = getIndex(gridData, "keyId", keyId);
         gridData.splice(ind, 1);
         dispatch(createStudent(addData));
       })
       .catch((err) => {
-        alert(err.errors);
+        alert(err.errors[0]);
       });
   };
 
@@ -154,14 +157,17 @@ const DataGrid: FC = () => {
     let ind = getIndex(gridData, "id", id);
     const editData = gridData[ind];
     userValidationSchema
-      .validate({
-        id: editData.id,
-        name: editData.name,
-        gender: editData.gender,
-        address: editData.address,
-        mobileNo: editData.mobileNo,
-        age: editData.age,
-      })
+      .validate(
+        {
+          id: editData.id,
+          name: editData.name,
+          gender: editData.gender,
+          address: editData.address,
+          mobileNo: editData.mobileNo,
+          age: editData.age,
+        },
+        { abortEarly: false }
+      )
       .then(() => {
         dispatch(updateStudent(editData));
         ind = getIndex(gridData, "id", id);
@@ -173,7 +179,7 @@ const DataGrid: FC = () => {
         setEditIds([...editIds]);
       })
       .catch((err) => {
-        alert(err.errors);
+        alert(err.errors[0]);
       });
   };
 

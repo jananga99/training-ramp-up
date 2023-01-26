@@ -23,8 +23,8 @@ const userValidationSchema = Yup.object().shape({
     .required("Mobile No is empty")
     .test(
       "is-telephone-number",
-      "MobileNo must be a ten number",
-      (value) => typeof value === "string" && /^\d+$/.test(value as string) && value.length === 10
+      "MobileNo must be a nine number prefixed by country code or 0 (e.g. 0123456789 or +94123456789",
+      (value) => typeof value === "string" && /^(\+\d{2}|0)\d{9}$/.test(value as string)
     ),
   age: Yup.number()
     .test("is-valid-format", "Invalid birthday format", (value) => value !== -1)

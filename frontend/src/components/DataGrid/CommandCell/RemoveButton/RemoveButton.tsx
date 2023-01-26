@@ -10,6 +10,7 @@ export const RemoveButton: FC<RemoveButtonProps> = ({ removeRecord, id }: Remove
   return (
     <Button
       onClick={() => {
+        confirm(`Confirm deleting student with id ${id} `);
         removeRecord(id);
       }}
     >
