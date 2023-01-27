@@ -1,4 +1,4 @@
-import { call, put, takeEvery } from "redux-saga/effects";
+import { call, put, takeEvery, select } from "redux-saga/effects";
 import {
   createStudentFailed,
   createStudentSuccess,
@@ -15,114 +15,199 @@ import {
 } from "./studentSlice";
 import { Student } from "../../utils/student";
 import { PayloadAction } from "@reduxjs/toolkit";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
+import { signInUserFailed, signInUserSuccess } from "../../pages/SignInPage/authSlice";
+import { refreshAsync } from "../../pages/SignInPage/authSaga";
 
-async function createInDB(student: Student): Promise<Student> {
-  const response = await axios({
-    url: `${process.env.REACT_APP_BACKEND_SERVER_URL}students/`,
-    method: "POST",
-    data: {
-      student: student,
-    },
-  });
-  if (response.status === 201) {
-    return response.data;
-  }
-  if (response.data.message) {
-    throw new Error(response.data.message);
-  } else {
-    throw new Error("An unknown error occurred.");
+async function createInDB(student: Student, accessToken: string): Promise<AxiosResponse> {
+  try {
+    return await axios({
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      url: `${process.env.REACT_APP_BACKEND_SERVER_URL}students/`,
+      method: "POST",
+      data: {
+        student: student,
+      },
+    });
+  } catch (error: any) {
+    return error.response;
   }
 }
 
-async function updateInDB(student: Student): Promise<Student> {
-  const response = await axios({
-    url: `${process.env.REACT_APP_BACKEND_SERVER_URL}students/${student.id}`,
-    method: "PUT",
-    data: {
-      student: student,
-    },
-  });
+async function updateInDB(student: Student, accessToken: string): Promise<AxiosResponse> {
+  try {
+    return await axios({
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      url: `${process.env.REACT_APP_BACKEND_SERVER_URL}students/${student.id}`,
+      method: "PUT",
+      data: {
+        student: student,
+      },
+    });
+  } catch (error: any) {
+    return error.response;
+  }
+}
+
+async function removeInDB(id: number, accessToken: string): Promise<AxiosResponse> {
+  try {
+    return await axios({
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      url: `${process.env.REACT_APP_BACKEND_SERVER_URL}students/${id}`,
+      method: "DELETE",
+    });
+  } catch (error: any) {
+    return error.response;
+  }
+}
+
+async function getInDB(accessToken: string): Promise<AxiosResponse> {
+  try {
+    return await axios({
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      url: `${process.env.REACT_APP_BACKEND_SERVER_URL}students/`,
+      method: "GET",
+    });
+  } catch (error: any) {
+    return error.response;
+  }
+}
+
+function* refresh() {
+  const response: AxiosResponse = yield call(refreshAsync);
   if (response.status === 200) {
-    return response.data;
-  }
-  if (response.data.message) {
-    throw new Error(response.data.message);
-  } else {
-    throw new Error("An unknown error occurred.");
-  }
-}
-
-async function removeInDB(id: number): Promise<boolean> {
-  const response = await axios({
-    url: `${process.env.REACT_APP_BACKEND_SERVER_URL}students/${id}`,
-    method: "DELETE",
-  });
-  if (response.status === 204) {
+    yield put(signInUserSuccess(response.data.accessToken));
     return true;
-  }
-  if (response.data.message) {
-    throw new Error(response.data.message);
   } else {
-    throw new Error("An unknown error occurred.");
-  }
-}
-
-async function getInDB(): Promise<Student[]> {
-  const response = await axios({
-    url: `${process.env.REACT_APP_BACKEND_SERVER_URL}students/`,
-    method: "GET",
-  });
-  if (response.status === 200) {
-    return response.data;
-  }
-  if (response.data.message) {
-    throw new Error(response.data.message);
-  } else {
-    throw new Error("An unknown error occurred.");
+    yield put(signInUserFailed());
+    alert("You need to be signed in.");
+    return false;
   }
 }
 
 function* sagaHandler(action: PayloadAction<Student | number>) {
-  try {
-    switch (action.type) {
-      case createStudent.type: {
-        yield call(createInDB, action.payload as Student);
-        yield put(createStudentSuccess());
-        break;
-      }
-      case updateStudent.type: {
-        yield call(updateInDB, action.payload as Student);
-        yield put(updateStudentSuccess());
-        break;
-      }
-      case getStudent.type: {
-        const response: Student[] = yield call(getInDB);
-        yield put(getStudentSuccess(response));
-        break;
-      }
-      case removeStudent.type: {
-        yield call(removeInDB, action.payload as number);
-        yield put(removeStudentSuccess());
-        break;
-      }
-    }
-  } catch (error: any) {
-    switch (action.type) {
-      case createStudent.type:
+  const accessToken: string = yield select((state) => state.auth.accessToken);
+  switch (action.type) {
+    case createStudent.type: {
+      const response: AxiosResponse = yield call(
+        createInDB,
+        action.payload as Student,
+        accessToken
+      );
+      if (response.status === 201) {
+        yield put(createStudentSuccess(response.data));
+      } else if (response.status === 401) {
+        const success: boolean = yield refresh();
+        if (success) {
+          const accessToken: string = yield select((state) => state.auth.accessToken);
+          const response: AxiosResponse = yield call(
+            createInDB,
+            action.payload as Student,
+            accessToken
+          );
+          if (response.status === 201) {
+            yield put(createStudentSuccess(response.data));
+          } else {
+            alert("Student create failed");
+            yield put(createStudentFailed());
+          }
+        }
+      } else {
+        alert("Student create failed");
         yield put(createStudentFailed());
-        break;
-      case updateStudent.type:
-        yield put(updateStudentFailed());
-        break;
-      case getStudent.type:
-        yield put(getStudentFailed());
-        break;
-      case removeStudent.type:
-        yield put(removeStudentFailed());
-        break;
+      }
+      break;
     }
-    alert(error.message);
+    case updateStudent.type: {
+      const response: AxiosResponse = yield call(
+        updateInDB,
+        action.payload as Student,
+        accessToken
+      );
+      if (response.status === 200) {
+        yield put(updateStudentSuccess(response.data));
+      } else if (response.status === 401) {
+        const success: boolean = yield refresh();
+        if (success) {
+          const accessToken: string = yield select((state) => state.auth.accessToken);
+          const response: AxiosResponse = yield call(
+            updateInDB,
+            action.payload as Student,
+            accessToken
+          );
+          if (response.status === 200) {
+            yield put(updateStudentSuccess(response.data));
+          } else {
+            alert("Student update failed");
+            yield put(updateStudentFailed());
+          }
+        }
+      } else {
+        alert("Student update failed");
+        yield put(updateStudentFailed());
+      }
+      break;
+    }
+    case getStudent.type: {
+      const response: AxiosResponse = yield call(getInDB, accessToken);
+      if (response.status === 200) {
+        yield put(getStudentSuccess(response.data));
+      } else if (response.status === 401) {
+        const success: boolean = yield refresh();
+        if (success) {
+          const accessToken: string = yield select((state) => state.auth.accessToken);
+          const response: AxiosResponse = yield call(getInDB, accessToken);
+          if (response.status === 200) {
+            yield put(getStudentSuccess(response.data));
+          } else {
+            alert("Student loading failed");
+            yield put(getStudentFailed());
+          }
+        }
+      } else {
+        yield put(getStudentFailed());
+        alert("Getting students failed");
+      }
+      break;
+    }
+    case removeStudent.type: {
+      const response: AxiosResponse = yield call(removeInDB, action.payload as number, accessToken);
+      if (response.status === 204) {
+        yield put(removeStudentSuccess(response.data));
+      } else if (response.status === 401) {
+        const success: boolean = yield refresh();
+        if (success) {
+          const accessToken: string = yield select((state) => state.auth.accessToken);
+          const response: AxiosResponse = yield call(
+            removeInDB,
+            action.payload as number,
+            accessToken
+          );
+          if (response.status === 204) {
+            yield put(removeStudentSuccess(response.data));
+          } else {
+            alert("Student remove failed");
+            yield put(removeStudentFailed());
+          }
+        }
+      } else {
+        alert("Student remove failed");
+        yield put(removeStudentFailed());
+      }
+      break;
+    }
   }
 }
 

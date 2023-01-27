@@ -68,6 +68,7 @@ async function refreshToken(
   next: NextFunction
 ): Promise<void> {
   try {
+    console.log('Access token was refreshed.')
     res.status(200).json({
       accessToken: generateAccessToken(req.body.email),
     })

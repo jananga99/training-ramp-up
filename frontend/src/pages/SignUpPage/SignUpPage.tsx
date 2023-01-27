@@ -50,12 +50,14 @@ const SignUpPage: FC = () => {
           firstName: firstName,
           lastName: lastName,
         };
-        dispatch(createUser(newUser));
+        setFirstName("");
+        setLastName("");
         setEmail("");
         setPassword("");
         setConfirmPassword("");
         setShowPassword(false);
         setShowConfirmPassword(false);
+        dispatch(createUser(newUser));
       })
       .catch((err) => {
         alert(err.errors[0]);

@@ -11,7 +11,12 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 const app: Express = express()
-app.use(cors({}))
+app.use(
+  cors({
+    origin: process.env.FRONTEND_CLIENT_URL,
+    credentials: true,
+  })
+)
 const httpServer = createServer(app)
 export const io = new Server(httpServer, {
   cors: {},
