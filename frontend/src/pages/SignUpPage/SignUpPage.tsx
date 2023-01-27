@@ -1,20 +1,15 @@
 import { FC, FormEvent, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { RootState } from "../../utils/store";
-import { studentValidationSchema, userValidationSchema } from "../../utils/validation";
-import { DetailedUser, User } from "../../utils/user";
-import { TextBox } from "@progress/kendo-react-inputs";
+import { userValidationSchema } from "../../utils/validation";
+import { DetailedUser } from "../../utils/user";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 library.add(fas);
-import { Button } from "@progress/kendo-react-buttons";
 import "./SignUpPage.scss";
-
-const getPasswordType = (visible: boolean) => {
-  return visible ? "text" : "password";
-};
+import { createUser } from "../SignInPage/authSlice";
+import { RootState } from "../../utils/store";
 
 const SignUpPage: FC = () => {
   useEffect(() => {
@@ -31,11 +26,9 @@ const SignUpPage: FC = () => {
 
   const navigate = useNavigate();
 
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
-  // const createLoading = useSelector((state: RootState) => state.user.createLoading);
-
-  const createLoading = false;
+  const createLoading = useSelector((state: RootState) => state.auth.createLoading);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
@@ -57,8 +50,7 @@ const SignUpPage: FC = () => {
           firstName: firstName,
           lastName: lastName,
         };
-        console.log(newUser);
-        // dispatch(createUser(newUser));
+        dispatch(createUser(newUser));
         setEmail("");
         setPassword("");
         setConfirmPassword("");

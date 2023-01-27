@@ -2,19 +2,13 @@ import { FC, FormEvent, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "../../utils/store";
-import { studentValidationSchema, userValidationSchema } from "../../utils/validation";
 import { User } from "../../utils/user";
-import { TextBox } from "@progress/kendo-react-inputs";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 library.add(fas);
-import { Button } from "@progress/kendo-react-buttons";
 import "..//SignUpPage/SignUpPage.scss";
-
-const getPasswordType = (visible: boolean) => {
-  return visible ? "text" : "password";
-};
+import { signInUser } from "./authSlice";
 
 const SignInPage: FC = () => {
   useEffect(() => {
@@ -27,11 +21,9 @@ const SignInPage: FC = () => {
 
   const navigate = useNavigate();
 
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
-  // const createLoading = useSelector((state: RootState) => state.user.createLoading);
-
-  const createLoading = false;
+  const signInLoading = useSelector((state: RootState) => state.auth.signInLoading);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
@@ -40,8 +32,7 @@ const SignInPage: FC = () => {
       email: email,
       password: password,
     };
-    console.log(newUser);
-    // dispatch(createUser(newUser));
+    dispatch(signInUser(newUser));
     setEmail("");
     setPassword("");
 
