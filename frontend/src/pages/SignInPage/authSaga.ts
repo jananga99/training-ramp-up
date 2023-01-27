@@ -12,7 +12,7 @@ import { DetailedUser, User } from "../../utils/user";
 import { PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 
-async function createAsync(user: DetailedUser): Promise<AxiosResponse> {
+async function signUpAsync(user: DetailedUser): Promise<AxiosResponse> {
   try {
     return await axios({
       url: `${process.env.REACT_APP_BACKEND_SERVER_URL}auth/`,
@@ -33,7 +33,7 @@ async function signInAsync(user: User): Promise<AxiosResponse> {
   try {
     return await axios({
       withCredentials: true,
-      url: `${process.env.REACT_APP_BACKEND_SERVER_URL}auth/`,
+      url: `${process.env.REACT_APP_BACKEND_SERVER_URL}auth/signUp`,
       method: "POST",
       data: {
         email: user.email,
@@ -48,7 +48,7 @@ async function signInAsync(user: User): Promise<AxiosResponse> {
 function* handleSaga(action: PayloadAction<DetailedUser>) {
   switch (action.type) {
     case createUser.type: {
-      const response: AxiosResponse = yield call(createAsync, action.payload);
+      const response: AxiosResponse = yield call(signUpAsync, action.payload);
       if (response.status === 201) {
         alert(`User - ${response.data.email} is registered successfully`);
         yield put(createUserSuccess());

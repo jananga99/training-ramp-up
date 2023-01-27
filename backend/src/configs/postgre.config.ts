@@ -1,6 +1,7 @@
 import { createConnection, DataSource } from 'typeorm'
 import { Student } from '../models/student.model'
 import dotenv from 'dotenv'
+import { User } from '../models/user.model'
 dotenv.config()
 
 export const AppDataSource = new DataSource({
@@ -12,7 +13,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_DATABASE,
   synchronize: true,
   logging: false,
-  entities: [Student],
+  entities: [Student, User],
   subscribers: [],
   migrations: [],
 })
