@@ -1,11 +1,11 @@
 import React from "react";
 import "./App.scss";
-import DataGridPage from "./pages/DataGridPage/DataGridPage";
+import AppRouter from "./utils/routing/AppRouter";
 
 function App() {
   return (
     <div className="App">
-      <DataGridPage />
+      <AppRouter />
     </div>
   );
 }

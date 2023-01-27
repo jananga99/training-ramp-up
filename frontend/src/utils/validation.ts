@@ -1,10 +1,10 @@
 import { Gender } from "./student";
 import * as Yup from "yup";
+import yupPassword from "yup-password";
+yupPassword(Yup);
 
-const userValidationSchema = Yup.object().shape({
-  name: Yup.string()
-    .required("Name is empty")
-    .test("is-empty", "Name cannot be empty", (value) => value !== undefined && value.length > 0),
+const studentValidationSchema = Yup.object().shape({
+  name: Yup.string().required("Name is empty"),
   gender: Yup.string()
     .required("Gender is empty")
     .test(
@@ -12,13 +12,7 @@ const userValidationSchema = Yup.object().shape({
       `Gender must be ${Gender.MALE} or ${Gender.FEMALE} or ${Gender.OTHER}`,
       (value) => value === Gender.MALE || value === Gender.FEMALE || value === Gender.OTHER
     ),
-  address: Yup.string()
-    .required("Address is empty")
-    .test(
-      "is-empty",
-      "Address cannot be empty",
-      (value) => value !== undefined && value.length > 0
-    ),
+  address: Yup.string().required("Address is empty"),
   mobileNo: Yup.string()
     .required("Mobile No is empty")
     .test(
@@ -33,4 +27,15 @@ const userValidationSchema = Yup.object().shape({
     .min(18, "Student needs to be 18 years or older"),
 });
 
-export { userValidationSchema };
+const userValidationSchema = Yup.object().shape({
+  firstName: Yup.string().required("First Name is empty"),
+  lastName: Yup.string().required("Last Name is empty"),
+  email: Yup.string().required("Email is empty").email("Enter a valid email"),
+  // password: Yup.string().required("Password is empty").password(),
+  password: Yup.string().required("Password is empty"),
+  confirmPassword: Yup.string()
+    .required("Confirm password is empty")
+    .oneOf([Yup.ref("password"), null], "Password and Confirm password does not match"),
+});
+
+export { studentValidationSchema, userValidationSchema };
