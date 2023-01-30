@@ -8,6 +8,7 @@ import './src/configs/passport.config'
 import passport from 'passport'
 import cookieParser from 'cookie-parser'
 import dotenv from 'dotenv'
+import { AppDataSource } from './src/configs/postgre.config'
 dotenv.config()
 
 const app: Express = express()
@@ -34,6 +35,10 @@ app.use(passport.initialize())
 app.get('/', (req: Request, res: Response) => {
   res.status(200).json({ message: 'ok' })
 })
+
+AppDataSource.initialize()
+  .then(() => {})
+  .catch(error => console.log(error))
 
 app.use('/students', studentRouter)
 app.use('/auth', authRouter)
