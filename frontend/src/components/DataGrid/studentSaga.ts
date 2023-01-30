@@ -92,8 +92,53 @@ function* refresh() {
     return true;
   } else {
     yield put(signInUserFailed());
-    alert("You need to be signed in.");
     return false;
+  }
+}
+type asyncFunctionType = typeof createInDB | typeof updateInDB | typeof removeInDB | typeof getInDB;
+type successFunctionType =
+  | typeof createStudentSuccess
+  | typeof updateStudentSuccess
+  | typeof getStudentSuccess
+  | typeof removeStudentSuccess;
+type failedFunctionType =
+  | typeof createStudentFailed
+  | typeof removeStudentFailed
+  | typeof updateStudentFailed
+  | typeof getStudentFailed;
+function* asyncResponseHandler(
+  asyncFunction: asyncFunctionType,
+  requestData: any,
+  accessToken: string,
+  successFunction: successFunctionType,
+  failedFunction: failedFunctionType
+) {
+  let response: AxiosResponse;
+  if (requestData) {
+    response = yield call(asyncFunction, requestData, accessToken);
+  } else {
+    response = yield call(asyncFunction, accessToken);
+  }
+  console.log(response.status);
+  if (response.status >= 200 && response.status < 300) {
+    yield put(successFunction(response.data));
+  } else if (response.status === 401) {
+    const success: boolean = yield refresh();
+    if (success) {
+      const accessToken: string = yield select((state) => state.auth.accessToken);
+      if (requestData) {
+        response = yield call(asyncFunction, requestData, accessToken);
+      } else {
+        response = yield call(asyncFunction, accessToken);
+      }
+      if (response.status >= 200 && response.status < 300) {
+        yield put(successFunction(response.data));
+      } else {
+        yield put(failedFunction(response.data));
+      }
+    }
+  } else {
+    yield put(failedFunction(response.data));
   }
 }
 
@@ -101,111 +146,37 @@ function* sagaHandler(action: PayloadAction<Student | number>) {
   const accessToken: string = yield select((state) => state.auth.accessToken);
   switch (action.type) {
     case createStudent.type: {
-      const response: AxiosResponse = yield call(
+      yield asyncResponseHandler(
         createInDB,
         action.payload as Student,
-        accessToken
+        accessToken,
+        createStudentSuccess,
+        createStudentFailed
       );
-      if (response.status === 201) {
-        yield put(createStudentSuccess(response.data));
-      } else if (response.status === 401) {
-        const success: boolean = yield refresh();
-        if (success) {
-          const accessToken: string = yield select((state) => state.auth.accessToken);
-          const response: AxiosResponse = yield call(
-            createInDB,
-            action.payload as Student,
-            accessToken
-          );
-          if (response.status === 201) {
-            yield put(createStudentSuccess(response.data));
-          } else {
-            alert("Student create failed");
-            yield put(createStudentFailed());
-          }
-        }
-      } else {
-        alert("Student create failed");
-        yield put(createStudentFailed());
-      }
       break;
     }
     case updateStudent.type: {
-      const response: AxiosResponse = yield call(
+      yield asyncResponseHandler(
         updateInDB,
         action.payload as Student,
-        accessToken
+        accessToken,
+        updateStudentSuccess,
+        updateStudentFailed
       );
-      if (response.status === 200) {
-        yield put(updateStudentSuccess(response.data));
-      } else if (response.status === 401) {
-        const success: boolean = yield refresh();
-        if (success) {
-          const accessToken: string = yield select((state) => state.auth.accessToken);
-          const response: AxiosResponse = yield call(
-            updateInDB,
-            action.payload as Student,
-            accessToken
-          );
-          if (response.status === 200) {
-            yield put(updateStudentSuccess(response.data));
-          } else {
-            alert("Student update failed");
-            yield put(updateStudentFailed());
-          }
-        }
-      } else {
-        alert("Student update failed");
-        yield put(updateStudentFailed());
-      }
-      break;
-    }
-    case getStudent.type: {
-      const response: AxiosResponse = yield call(getInDB, accessToken);
-      if (response.status === 200) {
-        yield put(getStudentSuccess(response.data));
-      } else if (response.status === 401) {
-        const success: boolean = yield refresh();
-        if (success) {
-          const accessToken: string = yield select((state) => state.auth.accessToken);
-          const response: AxiosResponse = yield call(getInDB, accessToken);
-          if (response.status === 200) {
-            yield put(getStudentSuccess(response.data));
-          } else {
-            alert("Student loading failed");
-            yield put(getStudentFailed());
-          }
-        }
-      } else {
-        yield put(getStudentFailed());
-        alert("Getting students failed");
-      }
       break;
     }
     case removeStudent.type: {
-      const response: AxiosResponse = yield call(removeInDB, action.payload as number, accessToken);
-      if (response.status === 204) {
-        yield put(removeStudentSuccess(response.data));
-      } else if (response.status === 401) {
-        const success: boolean = yield refresh();
-        if (success) {
-          const accessToken: string = yield select((state) => state.auth.accessToken);
-          const response: AxiosResponse = yield call(
-            removeInDB,
-            action.payload as number,
-            accessToken
-          );
-          if (response.status === 204) {
-            yield put(removeStudentSuccess(response.data));
-          } else {
-            alert("Student remove failed");
-            yield put(removeStudentFailed());
-          }
-        }
-      } else {
-        alert("Student remove failed");
-        yield put(removeStudentFailed());
-      }
+      yield asyncResponseHandler(
+        removeInDB,
+        action.payload as number,
+        accessToken,
+        removeStudentSuccess,
+        removeStudentFailed
+      );
+      break;
+    }
+    case getStudent.type: {
+      yield asyncResponseHandler(getInDB, null, accessToken, getStudentSuccess, getStudentFailed);
       break;
     }
   }

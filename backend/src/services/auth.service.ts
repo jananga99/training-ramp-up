@@ -42,7 +42,7 @@ function generateAccessToken(email: string): string {
     },
     process.env.ACCESS_TOKEN_SECRET as string,
     {
-      expiresIn: '10m',
+      expiresIn: '1h',
     }
   )
 }

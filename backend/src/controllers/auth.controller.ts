@@ -33,8 +33,8 @@ async function signIn(
       res
         .cookie('jwt', generateRefreshToken(req.body.email), {
           httpOnly: true,
-          sameSite: 'none',
-          secure: false,
+          sameSite: 'strict',
+          secure: true,
           maxAge: 3 * 24 * 60 * 60 * 1000,
         })
         .status(200)

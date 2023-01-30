@@ -31,8 +31,7 @@ const userValidationSchema = Yup.object().shape({
   firstName: Yup.string().required("First Name is empty"),
   lastName: Yup.string().required("Last Name is empty"),
   email: Yup.string().required("Email is empty").email("Enter a valid email"),
-  // password: Yup.string().required("Password is empty").password(),
-  password: Yup.string().required("Password is empty"),
+  password: Yup.string().required("Password is empty").password(),
   confirmPassword: Yup.string()
     .required("Confirm password is empty")
     .oneOf([Yup.ref("password"), null], "Password and Confirm password does not match"),

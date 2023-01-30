@@ -119,6 +119,10 @@ const SignUpPage: FC = () => {
                 onClick={() => setShowPassword(!showPassword)}
               />
             </div>
+            <div className="password-description">
+              *Password must be more than 8 characters with at least one lowercase letter, uppercase
+              letter, number and symbol.
+            </div>
           </div>
           <div className="input-group">
             <label htmlFor="confirmPassword">Confirm Password</label>
