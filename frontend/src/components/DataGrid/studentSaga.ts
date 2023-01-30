@@ -119,7 +119,6 @@ function* asyncResponseHandler(
   } else {
     response = yield call(asyncFunction, accessToken);
   }
-  console.log(response.status);
   if (response.status >= 200 && response.status < 300) {
     yield put(successFunction(response.data));
   } else if (response.status === 401) {
@@ -135,10 +134,12 @@ function* asyncResponseHandler(
         yield put(successFunction(response.data));
       } else {
         yield put(failedFunction(response.data));
+        alert("An error occurred.");
       }
     }
   } else {
     yield put(failedFunction(response.data));
+    alert("An error occurred.");
   }
 }
 

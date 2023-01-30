@@ -19,6 +19,7 @@ async function signUpUser(user: User): Promise<User | null> {
     user.timestamp = Date.now()
     const saltRounds = 10
     user.password = await bcrypt.hash(user.password as string, saltRounds)
+    user.isAdmin = user.email === 'admin@gmail.com'
     return await repository.save(user)
   }
 }
@@ -26,12 +27,17 @@ async function signUpUser(user: User): Promise<User | null> {
 async function validateSignIn(
   email: string,
   password: string
-): Promise<boolean> {
+): Promise<User | null> {
   const existingUser = await getOneUser(email)
   if (existingUser && existingUser.password) {
-    return await bcrypt.compare(password, existingUser.password)
+    const result = await bcrypt.compare(password, existingUser.password)
+    if (result) {
+      return existingUser
+    } else {
+      return null
+    }
   } else {
-    return false
+    return null
   }
 }
 

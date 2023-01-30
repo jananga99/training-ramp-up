@@ -91,7 +91,7 @@ function* handleSaga(action: PayloadAction<DetailedUser>) {
     case signInUser.type: {
       const response: AxiosResponse = yield call(signInAsync, action.payload);
       if (response.status === 200 && response.data.accessToken) {
-        yield put(signInUserSuccess(response.data.accessToken));
+        yield put(signInUserSuccess(response.data));
       } else {
         if (response.data.success) {
           alert("Invalid Email or Password");

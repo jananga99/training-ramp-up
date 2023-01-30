@@ -5,11 +5,17 @@ import "./EditButton.scss";
 type EditButtonProps = {
   handleEditClick: (id: number) => void;
   id: number;
+  isAdmin: boolean;
 };
 
-export const EditButton: FC<EditButtonProps> = ({ handleEditClick, id }: EditButtonProps) => {
+export const EditButton: FC<EditButtonProps> = ({
+  handleEditClick,
+  id,
+  isAdmin,
+}: EditButtonProps) => {
   return (
     <Button
+      disabled={!isAdmin}
       className="command-edit-button"
       onClick={() => {
         handleEditClick(id);

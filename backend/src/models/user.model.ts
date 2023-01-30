@@ -4,6 +4,8 @@ import { Column, Entity, PrimaryColumn } from 'typeorm'
 export class User {
   @PrimaryColumn('text')
   email: string | undefined
+  @Column('boolean')
+  isAdmin: boolean | undefined
   @Column('text')
   password: string | undefined
   @Column('text')

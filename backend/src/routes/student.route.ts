@@ -15,21 +15,21 @@ router.get('/', passport.authenticate('jwt', { session: false }), getStudents)
 /* POST student */
 router.post(
   '/',
-  passport.authenticate('jwt', { session: false }),
+  passport.authenticate('jwt-admin', { session: false }),
   createStudent
 )
 
 /* PUT student */
 router.put(
   '/:id',
-  passport.authenticate('jwt', { session: false }),
+  passport.authenticate('jwt-admin', { session: false }),
   updateStudent
 )
 
 /* DELETE student */
 router.delete(
   '/:id',
-  passport.authenticate('jwt', { session: false }),
+  passport.authenticate('jwt-admin', { session: false }),
   removeStudent
 )
 

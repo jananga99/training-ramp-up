@@ -15,6 +15,7 @@ type CommandCellProps = {
   handleDiscardChanges: (id: number) => void;
   handleCancel: (id: number) => void;
   handleEditClick: (id: number) => void;
+  isAdmin: boolean;
 };
 
 export const CommandCell: FC<CommandCellProps> = ({
@@ -25,29 +26,31 @@ export const CommandCell: FC<CommandCellProps> = ({
   handleCancel,
   handleEditClick,
   removeRecord,
+  isAdmin,
 }: CommandCellProps) => {
   if (student.isAdding) {
     return (
       <td>
-        <AddButton addRecord={addRecord} id={student.keyId as number} />
+        <AddButton addRecord={addRecord} id={student.keyId as number} isAdmin={isAdmin} />
         <DiscardChangesButton
           handleDiscardChanges={handleDiscardChanges}
           id={student.keyId as number}
+          isAdmin={isAdmin}
         />
       </td>
     );
   } else if (student.isEditing) {
     return (
       <td>
-        <UpdateButton editRecord={editRecord} id={student.id as number} />
-        <CancelButton handleCancel={handleCancel} id={student.id as number} />
+        <UpdateButton editRecord={editRecord} id={student.id as number} isAdmin={isAdmin} />
+        <CancelButton handleCancel={handleCancel} id={student.id as number} isAdmin={isAdmin} />
       </td>
     );
   } else {
     return (
       <td>
-        <EditButton handleEditClick={handleEditClick} id={student.id as number} />
-        <RemoveButton removeRecord={removeRecord} id={student.id as number} />
+        <EditButton handleEditClick={handleEditClick} id={student.id as number} isAdmin={isAdmin} />
+        <RemoveButton removeRecord={removeRecord} id={student.id as number} isAdmin={isAdmin} />
       </td>
     );
   }

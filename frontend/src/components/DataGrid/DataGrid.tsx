@@ -56,6 +56,7 @@ const DataGrid: FC = () => {
   const [keyIdCount, setKeyIdCount] = useState<number>(0);
 
   const students = useSelector((state: RootState) => state.student.value);
+  const isAdmin = useSelector((state: RootState) => state.auth.isAdmin);
 
   const dispatch = useDispatch();
 
@@ -295,6 +296,7 @@ const DataGrid: FC = () => {
               addRecord={addRecord}
               handleDiscardChanges={handleDiscardChanges}
               removeRecord={removeRecord}
+              isAdmin={isAdmin}
             />
           )}
         />

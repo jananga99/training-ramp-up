@@ -11,8 +11,20 @@ const opts = {
 passport.use(
   'jwt',
   new Strategy(opts, async function (jwt_payload, done) {
-    const user = await getOneUser(jwt_payload.sub)
+    const user = await getOneUser(jwt_payload.email)
     if (user) {
+      return done(null, user)
+    } else {
+      return done(null, false)
+    }
+  })
+)
+
+passport.use(
+  'jwt-admin',
+  new Strategy(opts, async function (jwt_payload, done) {
+    const user = await getOneUser(jwt_payload.email)
+    if (user && user.isAdmin) {
       return done(null, user)
     } else {
       return done(null, false)
@@ -36,7 +48,7 @@ const refreshStrategy = new Strategy(refreshOpts, async function (
   jwt_payload,
   done
 ) {
-  const user = await getOneUser(jwt_payload.sub)
+  const user = await getOneUser(jwt_payload.email)
   if (user) {
     return done(null, user)
   } else {

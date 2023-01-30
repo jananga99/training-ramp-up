@@ -7,6 +7,7 @@ interface AuthState {
   signOutLoading: boolean;
   accessToken: string | null;
   signedIn: boolean;
+  isAdmin: boolean;
 }
 
 const initialState: AuthState = {
@@ -15,6 +16,12 @@ const initialState: AuthState = {
   signOutLoading: false,
   accessToken: null,
   signedIn: false,
+  isAdmin: false,
+};
+
+type signInSuccessDataType = {
+  accessToken: string;
+  isAdmin: boolean;
 };
 
 export const authSlice = createSlice({
@@ -33,14 +40,16 @@ export const authSlice = createSlice({
     signInUser(state, action: PayloadAction<User>) {
       state.signInLoading = true;
     },
-    signInUserSuccess(state, action: PayloadAction<string>) {
+    signInUserSuccess(state, action: PayloadAction<signInSuccessDataType>) {
       state.signInLoading = false;
-      state.accessToken = action.payload;
+      state.accessToken = action.payload.accessToken;
+      state.isAdmin = action.payload.isAdmin;
       state.signedIn = true;
     },
     signInUserFailed(state) {
       state.signInLoading = false;
       state.signedIn = false;
+      state.isAdmin = false;
     },
     signOutUser(state) {
       state.signOutLoading = true;
@@ -49,6 +58,7 @@ export const authSlice = createSlice({
       state.signOutLoading = false;
       state.accessToken = null;
       state.signedIn = false;
+      state.isAdmin = false;
     },
     signOutUserFailed(state) {
       state.signOutLoading = false;

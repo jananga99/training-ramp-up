@@ -5,6 +5,7 @@ import {
   validateSignIn,
   signUpUser,
 } from '../services/auth.service'
+import { User } from '../models/user.model'
 
 async function signUp(req: Request, res: Response, next: NextFunction) {
   try {
@@ -40,6 +41,7 @@ async function signIn(
         .status(200)
         .json({
           accessToken: generateAccessToken(req.body.email),
+          isAdmin: result.isAdmin,
         })
     } else {
       res
@@ -70,7 +72,7 @@ async function refreshToken(
   try {
     console.log('Access token was refreshed.')
     res.status(200).json({
-      accessToken: generateAccessToken(req.body.email),
+      accessToken: generateAccessToken((req.user as User).email as string),
     })
   } catch (err: any) {
     console.error(`Access token generation failed`, err.message)
