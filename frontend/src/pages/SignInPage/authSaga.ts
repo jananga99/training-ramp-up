@@ -7,6 +7,9 @@ import {
   signInUserSuccess,
   signInUserFailed,
   signInUser,
+  signOutUser,
+  signOutUserSuccess,
+  signOutUserFailed,
 } from "./authSlice";
 import { DetailedUser, User } from "../../utils/user";
 import { PayloadAction } from "@reduxjs/toolkit";
@@ -39,6 +42,18 @@ async function signInAsync(user: User): Promise<AxiosResponse> {
         email: user.email,
         password: user.password,
       },
+    });
+  } catch (error: any) {
+    return error.response;
+  }
+}
+
+async function signOutAsync(): Promise<AxiosResponse> {
+  try {
+    return await axios({
+      withCredentials: true,
+      url: `${process.env.REACT_APP_BACKEND_SERVER_URL}auth/signOut`,
+      method: "POST",
     });
   } catch (error: any) {
     return error.response;
@@ -87,9 +102,19 @@ function* handleSaga(action: PayloadAction<DetailedUser>) {
       }
       break;
     }
+    case signOutUser.type: {
+      const response: AxiosResponse = yield call(signOutAsync);
+      if (response.status === 200) {
+        yield put(signOutUserSuccess());
+        alert("User signed out.");
+      } else {
+        yield put(signOutUserFailed());
+        alert("User sign out failed");
+      }
+    }
   }
 }
 
 export default function* authSaga() {
-  yield takeEvery([createUser.type, signInUser.type], handleSaga);
+  yield takeEvery([createUser.type, signInUser.type, signOutUser.type], handleSaga);
 }

@@ -18,6 +18,9 @@ import { AgeCell } from "./AgeCell/AgeCell";
 import { CommandCell } from "./CommandCell/CommandCell";
 import { DatePickerChangeEvent } from "@progress/kendo-react-dateinputs";
 import { BirthdayCell } from "./BirthdayCell/BirthdayCell";
+import { signOutUser } from "../../pages/SignInPage/authSlice";
+import { Button } from "@progress/kendo-react-buttons";
+import { red } from "@mui/material/colors";
 
 const initialStudent: Student = {
   id: 0,
@@ -96,6 +99,11 @@ const DataGrid: FC = () => {
     setKeyIdCount(students.length);
     setGridData(newGridData);
   }, [students]);
+
+  // Signs out the current user
+  const handleSignOut = () => {
+    dispatch(signOutUser());
+  };
 
   // Handles clicking Add New button. Adds an empty record after assigning it a unique keyId value
   const handleAddNewClick = () => {
@@ -217,6 +225,15 @@ const DataGrid: FC = () => {
 
   return (
     <div>
+      <div style={{ textAlign: "right" }}>
+        <Button
+          className="logout-button"
+          onClick={handleSignOut}
+          style={{ padding: "5px", margin: "10px", backgroundColor: "red", color: "white" }}
+        >
+          Sign Out
+        </Button>
+      </div>
       <Grid editField="inEdit" onItemChange={itemChange} data={gridData}>
         <GridToolbar>
           <div>
