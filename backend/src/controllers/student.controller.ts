@@ -16,7 +16,6 @@ async function getStudents(
     const students = await getMultiple()
     res.status(200).json(students)
   } catch (err: any) {
-    console.error(`Error while getting students`, err.message)
     next(err)
   }
 }
@@ -31,7 +30,6 @@ async function createStudent(req: Request, res: Response, next: NextFunction) {
       next(new Error('Error while creating student'))
     }
   } catch (err: any) {
-    console.error(`Error while creating student`, err.message)
     next(err)
   }
 }
@@ -43,10 +41,9 @@ async function updateStudent(req: Request, res: Response, next: NextFunction) {
       sendNotification('update', student.id as number, student)
       res.status(200).json(student)
     } else {
-      next(new Error('Error while updating student'))
+      next(new Error('There is no existing student for this id'))
     }
   } catch (err: any) {
-    console.error(`Error while updating student`, err.message)
     next(err)
   }
 }
@@ -59,10 +56,9 @@ async function removeStudent(req: Request, res: Response, next: NextFunction) {
       sendNotification('delete', parseInt(req.params.id), student)
       res.status(204).json()
     } else {
-      next(new Error('Error while removing student'))
+      next(new Error('There is no existing student for this id'))
     }
   } catch (err: any) {
-    console.error(`Error while deleting student`, err.message)
     next(err)
   }
 }
