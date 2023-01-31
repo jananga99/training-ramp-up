@@ -1,4 +1,3 @@
-import { describe } from 'node:test'
 import { AppDataSource } from '../../../src/configs/postgre.config'
 import { User } from '../../../src/models/user.model'
 import {
@@ -10,6 +9,17 @@ import {
 } from '../../../src/services/auth.service'
 import bcrypt from 'bcrypt'
 import jwt, { JwtPayload } from 'jsonwebtoken'
+
+jest.mock('../../../src/configs/postgre.config', () => ({
+  AppDataSource: {
+    getRepository: jest.fn().mockReturnValue({
+      findOneBy: jest.fn(),
+      find: jest.fn(),
+      save: jest.fn(),
+      remove: jest.fn(),
+    }),
+  },
+}))
 
 const newUser: User = {
   email: 'john@gmail.com',
@@ -36,11 +46,11 @@ const sampleUser: User = {
   timestamp: Date.now(),
 }
 
-afterEach(() => {
-  jest.restoreAllMocks()
-})
-
 describe('Gets the user to given email', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
   test('Gets the user', async () => {
     jest
       .spyOn(AppDataSource.getRepository(User), 'findOneBy')
@@ -66,6 +76,10 @@ describe('Gets the user to given email', () => {
 })
 
 describe('Signing Up User', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
   test('Sign up the new non admin user', async () => {
     const createdUser = { ...newUser, isAdmin: false, timestamp: Date.now() }
     jest
@@ -107,7 +121,6 @@ describe('Signing Up User', () => {
     await expect(signUpUser(newUser)).rejects.toThrowError('findOneBy error')
   })
   test('Sign up fails due to error relating to save', async () => {
-    const createdUser = { ...newUser, isAdmin: false, timestamp: Date.now() }
     jest
       .spyOn(AppDataSource.getRepository(User), 'findOneBy')
       .mockResolvedValue(null)

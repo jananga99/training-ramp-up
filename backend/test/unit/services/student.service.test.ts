@@ -55,11 +55,21 @@ const removeStudent = {
   name: 'Jack',
 }
 
-afterEach(() => {
-  jest.restoreAllMocks()
-})
+jest.mock('../../../src/configs/postgre.config', () => ({
+  AppDataSource: {
+    getRepository: jest.fn().mockReturnValue({
+      findOneBy: jest.fn(),
+      find: jest.fn(),
+      save: jest.fn(),
+      remove: jest.fn(),
+    }),
+  },
+}))
 
 describe('Student Getting', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
   test('get all the students', async () => {
     jest
       .spyOn(AppDataSource.getRepository(Student), 'find')
@@ -79,6 +89,9 @@ describe('Student Getting', () => {
 })
 
 describe('Student Creating', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
   test('creates the student', async () => {
     const createdStudent = { ...newStudent, id: 3 }
     jest
@@ -96,6 +109,9 @@ describe('Student Creating', () => {
 })
 
 describe('Student Updating', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
   test('updates the student', async () => {
     jest
       .spyOn(AppDataSource.getRepository(Student), 'findOneBy')
@@ -127,6 +143,9 @@ describe('Student Updating', () => {
 })
 
 describe('Student Removing', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
   test('removes the student', async () => {
     jest
       .spyOn(AppDataSource.getRepository(Student), 'findOneBy')

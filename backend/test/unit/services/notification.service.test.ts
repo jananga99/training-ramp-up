@@ -2,11 +2,16 @@ import { Gender, Student } from '../../../src/models/student.model'
 import { io } from '../../../index'
 import { sendNotification } from '../../../src/services/notification.service'
 
-afterEach(() => {
-  jest.restoreAllMocks()
-})
+jest.mock('../../../index', () => ({
+  io: {
+    emit: jest.fn().mockReturnValue(true),
+  },
+}))
 
 describe('Notifications', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
   test('notification sends', async () => {
     const type = 'update'
     const id = 2
@@ -42,6 +47,7 @@ describe('Notifications', () => {
       name: 'Jack',
     }
     const spy = jest.spyOn(io, 'emit')
+    spy.mockReset()
     sendNotification(type, id, student)
     expect(spy).not.toHaveBeenCalled()
   })
