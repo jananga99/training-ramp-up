@@ -1,12 +1,17 @@
 import { Gender, Student } from '../../../src/models/student.model'
-import { io } from '../../../index'
 import { sendNotification } from '../../../src/services/notification.service'
-
-afterEach(() => {
-  jest.restoreAllMocks()
-})
+import { io } from '../../../index'
+jest.mock('../../../index', () => ({
+  io: {
+    emit: jest.fn((a, b, c, d) => true),
+  },
+}))
 
 describe('Notifications', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
   test('notification sends', async () => {
     const type = 'update'
     const id = 2
@@ -19,7 +24,7 @@ describe('Notifications', () => {
       mobileNo: '0123456789',
       name: 'Jack',
     }
-    const spy = jest.spyOn(io, 'emit')
+    const spy = jest.spyOn(io, 'emit').mockImplementation(() => true)
     sendNotification(type, id, student)
     expect(spy).toHaveBeenCalledWith(
       'notification',
@@ -42,6 +47,7 @@ describe('Notifications', () => {
       name: 'Jack',
     }
     const spy = jest.spyOn(io, 'emit')
+    spy.mockReset()
     sendNotification(type, id, student)
     expect(spy).not.toHaveBeenCalled()
   })

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --coverage",
+    "test": "jest --coverage --detectOpenHandles",
     "start": "concurrently \"npx tsc --watch\" \"nodemon dist/index.js\"",
     "lint": "eslint --ignore-path .eslintignore --ext .js,.ts .",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\""

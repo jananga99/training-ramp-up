@@ -1,4 +1,3 @@
-import { describe } from 'node:test'
 import { AppDataSource } from '../../../src/configs/postgre.config'
 import { User } from '../../../src/models/user.model'
 import {
