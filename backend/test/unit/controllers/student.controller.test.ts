@@ -134,8 +134,8 @@ describe('create the student', () => {
     expect(spy).toHaveBeenCalledTimes(1)
     spy.mockRestore()
   })
-  test('creates student fails due to save error', async () => {
-    const err = new Error('error in save')
+  test('creates student fails due to create error', async () => {
+    const err = new Error('error in create')
     const spy = jest.spyOn(studentService, 'create').mockRejectedValue(err)
     const req = {
       body: {

@@ -18,7 +18,6 @@ async function signUp(req: Request, res: Response, next: NextFunction) {
       res.status(200).json({ message: 'Duplicated email.' })
     }
   } catch (err: any) {
-    console.error(`Error while creating user`, err.message)
     next(err)
   }
 }
@@ -49,7 +48,6 @@ async function signIn(
         .json({ success: true, message: 'Invalid email or password' })
     }
   } catch (err: any) {
-    console.error(`Error while signing in the user`, err.message)
     next(err)
   }
 }
@@ -59,7 +57,6 @@ async function signOut(req: Request, res: Response, next: NextFunction) {
     res.clearCookie('jwt')
     res.status(200).json({ success: true })
   } catch (err) {
-    console.log('Error in clearing the cookie')
     next(err)
   }
 }
@@ -70,12 +67,10 @@ async function refreshToken(
   next: NextFunction
 ): Promise<void> {
   try {
-    console.log('Access token was refreshed.')
     res.status(200).json({
       accessToken: generateAccessToken((req.user as User).email as string),
     })
   } catch (err: any) {
-    console.error(`Access token generation failed`, err.message)
     next(err)
   }
 }

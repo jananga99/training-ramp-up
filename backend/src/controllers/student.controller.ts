@@ -23,12 +23,8 @@ async function getStudents(
 async function createStudent(req: Request, res: Response, next: NextFunction) {
   try {
     const student = await create(req.body.student)
-    if (student) {
-      sendNotification('create', student.id as number, student)
-      res.status(201).json(student)
-    } else {
-      next(new Error('Error while creating student'))
-    }
+    sendNotification('create', student.id as number, student)
+    res.status(201).json(student)
   } catch (err: any) {
     next(err)
   }
