@@ -12,13 +12,18 @@ import { studentValidationSchema } from "../../utils/validation";
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../utils/store";
-import { createStudent, getStudent, removeStudent, updateStudent } from "./studentSlice";
+import {
+  createStudent,
+  getStudent,
+  removeStudent,
+  updateStudent,
+} from "../../pages/DataGridPage/slice";
 import { GenderCell } from "./GenderCell/GenderCell";
 import { AgeCell } from "./AgeCell/AgeCell";
 import { CommandCell } from "./CommandCell/CommandCell";
 import { DatePickerChangeEvent } from "@progress/kendo-react-dateinputs";
 import { BirthdayCell } from "./BirthdayCell/BirthdayCell";
-import { signOutUser } from "../../pages/SignInPage/authSlice";
+import { signOutUser } from "../../pages/SignInPage/slice";
 import { Button } from "@progress/kendo-react-buttons";
 import { red } from "@mui/material/colors";
 

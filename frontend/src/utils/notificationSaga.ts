@@ -5,7 +5,7 @@ import {
   createReduxStudent,
   updateReduxStudent,
   removeReduxStudent,
-} from "../components/DataGrid/studentSlice";
+} from "../pages/DataGridPage/slice";
 import { Student } from "./student";
 
 type UserNotification = {

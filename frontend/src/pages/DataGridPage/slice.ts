@@ -19,7 +19,7 @@ const initialState: StudentState = {
   value: [],
 };
 
-export const studentSlice = createSlice({
+export const slice = createSlice({
   name: "student",
   initialState,
   reducers: {
@@ -103,6 +103,6 @@ export const {
   removeStudentSuccess,
   removeStudent,
   removeReduxStudent,
-} = studentSlice.actions;
+} = slice.actions;
 
-export default studentSlice.reducer;
+export default slice.reducer;

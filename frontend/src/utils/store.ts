@@ -8,6 +8,7 @@ import rootSaga from "./rootSaga";
 const persistConfig = {
   key: "root",
   storage,
+  blacklist: ["student"],
 };
 
 const sagaMiddleware = createSagaMiddleware();

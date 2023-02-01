@@ -24,7 +24,7 @@ type signInSuccessDataType = {
   isAdmin: boolean;
 };
 
-export const authSlice = createSlice({
+export const slice = createSlice({
   name: "auth",
   initialState,
   reducers: {
@@ -76,6 +76,6 @@ export const {
   signOutUserFailed,
   signOutUserSuccess,
   signOutUser,
-} = authSlice.actions;
+} = slice.actions;
 
-export default authSlice.reducer;
+export default slice.reducer;

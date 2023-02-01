@@ -8,7 +8,7 @@ import { fas } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 library.add(fas);
 import "./SignUpPage.scss";
-import { createUser } from "../SignInPage/authSlice";
+import { createUser } from "../SignInPage/slice";
 import { RootState } from "../../utils/store";
 
 const SignUpPage: FC = () => {
