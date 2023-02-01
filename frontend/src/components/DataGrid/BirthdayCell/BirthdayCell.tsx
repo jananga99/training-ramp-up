@@ -1,6 +1,7 @@
 import { FC } from "react";
 import { Student } from "../../../utils/student";
 import { DatePicker, DatePickerChangeEvent } from "@progress/kendo-react-dateinputs";
+import { getBeforeDate } from "../../../utils/helpers";
 
 type BirthdayCellProps = {
   student: Student;
@@ -13,7 +14,7 @@ export const BirthdayCell: FC<BirthdayCellProps> = ({ student, dateChange }: Bir
       <td>
         <DatePicker
           value={student.birthday}
-          max={new Date()}
+          max={getBeforeDate(18)}
           onChange={(event) => {
             dateChange(event, student.keyId as number);
           }}

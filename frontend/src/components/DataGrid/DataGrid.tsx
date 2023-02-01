@@ -25,7 +25,7 @@ import { DatePickerChangeEvent } from "@progress/kendo-react-dateinputs";
 import { BirthdayCell } from "./BirthdayCell/BirthdayCell";
 import { signOutUser } from "../../pages/SignInPage/slice";
 import { Button } from "@progress/kendo-react-buttons";
-import { red } from "@mui/material/colors";
+import { getBeforeDate } from "../../utils/helpers";
 
 const initialStudent: Student = {
   id: 0,
@@ -33,7 +33,7 @@ const initialStudent: Student = {
   gender: Gender.MALE,
   address: "",
   mobileNo: "",
-  birthday: new Date(),
+  birthday: getBeforeDate(18),
   age: 0,
   isAdding: false,
   isEditing: false,
