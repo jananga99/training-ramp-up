@@ -13,25 +13,18 @@ type NewStudent = {
   age: number;
 };
 
-type Student = {
+interface Student {
   id: number;
-  name: string;
-  gender: string;
-  address: string;
-  mobileNo: string;
-  birthday: Date;
-  age: number;
-};
+  name?: string;
+  gender?: string;
+  address?: string;
+  mobileNo?: string;
+  birthday?: Date;
+  age?: number;
+}
 
-type GridStudent = {
+type GridStudent = Student & {
   keyId: number | null;
-  id: number | null;
-  name: string | null;
-  gender: string | null;
-  address: string | null;
-  mobileNo: string | null;
-  birthday: Date;
-  age: number | null;
   isAdding: boolean;
   isEditing: boolean;
   inEdit: boolean;

@@ -9,6 +9,7 @@ import passport from 'passport'
 import { validateBody, validateParams } from '../middlewares/validate'
 import {
   idValidationSchema,
+  requiredStudentValidationSchema,
   studentValidationSchema,
 } from '../utils/validation'
 
@@ -21,12 +22,13 @@ router.get('/', passport.authenticate('jwt', { session: false }), getStudents)
 router.post(
   '/',
   passport.authenticate('jwt-admin', { session: false }),
+  validateBody(requiredStudentValidationSchema),
   validateBody(studentValidationSchema),
   createStudent
 )
 
 /* PUT student */
-router.put(
+router.patch(
   '/:id',
   passport.authenticate('jwt-admin', { session: false }),
   validateParams(idValidationSchema),

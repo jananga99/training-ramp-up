@@ -37,7 +37,7 @@ async function createAsync(student: NewStudent, accessToken: string): Promise<Ax
 async function updateAsync(student: Student, accessToken: string): Promise<AxiosResponse> {
   try {
     axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
-    return await axiosInstance.put(`/${student.id}`, student);
+    return await axiosInstance.patch(`/${student.id}`, student);
   } catch (error: any) {
     return error.response;
   }

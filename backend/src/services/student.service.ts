@@ -4,7 +4,7 @@ import { AppDataSource } from '../configs/postgre.config'
 const repository = AppDataSource.getRepository(Student)
 
 async function getMultiple(): Promise<Student[]> {
-  return await repository.find()
+  return await repository.find({ order: { id: 'ASC' } })
 }
 
 async function getOne(id: number): Promise<Student | null> {

@@ -9,36 +9,47 @@ export function getAge(birthday: Date) {
 }
 
 const studentValidationSchema = Yup.object().shape({
-  name: Yup.string().required('Name is empty'),
-  gender: Yup.string()
-    .required('Gender is empty')
-    .test(
-      'is-gender',
-      `Gender must be ${Gender.MALE} or ${Gender.FEMALE} or ${Gender.OTHER}`,
-      value => value === Gender.MALE || value === Gender.FEMALE || value === Gender.OTHER
-    ),
-  address: Yup.string().required('Address is empty'),
-  mobileNo: Yup.string()
-    .required('Mobile No is empty')
-    .test(
-      'is-telephone-number',
-      'MobileNo must be a nine number prefixed by country code or 0 (e.g. 0123456789 or +94123456789',
-      value => typeof value === 'string' && /^(\+\d{2}|0)\d{9}$/.test(value as string)
-    ),
-  birthday: Yup.date()
-    .required('Birthday is empty')
-    .max(
-      new Date(new Date().setFullYear(new Date().getFullYear() - 18)),
-      'Must be at least 18 years old'
-    ),
+  name: Yup.string(),
+  gender: Yup.string().test(
+    'is-gender',
+    `Gender must be ${Gender.MALE} or ${Gender.FEMALE} or ${Gender.OTHER}`,
+    value =>
+      value === undefined ||
+      value === Gender.MALE ||
+      value === Gender.FEMALE ||
+      value === Gender.OTHER
+  ),
+  address: Yup.string(),
+  mobileNo: Yup.string().test(
+    'is-telephone-number',
+    'MobileNo must be a nine number prefixed by country code or 0 (e.g. 0123456789 or +94123456789',
+    value =>
+      value === undefined ||
+      (typeof value === 'string' && /^(\+\d{2}|0)\d{9}$/.test(value as string))
+  ),
+  birthday: Yup.date().max(
+    new Date(new Date().setFullYear(new Date().getFullYear() - 18)),
+    'Must be at least 18 years old'
+  ),
   age: Yup.number()
-    .required('Age is empty')
     .positive('Age must be positive')
     .integer('Age must be an integer')
     .min(18, 'Student needs to be 18 years or older')
     .test('is match with age', 'Age must be compatible with the birthday', function (value) {
-      return value === getAge(this.parent.birthday)
+      return (
+        (value === undefined && this.parent.birthday === undefined) ||
+        value === getAge(this.parent.birthday)
+      )
     }),
+})
+
+const requiredStudentValidationSchema = Yup.object().shape({
+  name: Yup.string().required('Name is empty'),
+  gender: Yup.string().required('Gender is empty'),
+  address: Yup.string().required('Address is empty'),
+  mobileNo: Yup.string().required('Mobile No is empty'),
+  birthday: Yup.date().required('Birthday is empty'),
+  age: Yup.number().required('Age is empty'),
 })
 
 const idValidationSchema = Yup.object().shape({
@@ -65,4 +76,5 @@ export {
   userValidationSchema,
   signInUserValidationSchema,
   idValidationSchema,
+  requiredStudentValidationSchema,
 }

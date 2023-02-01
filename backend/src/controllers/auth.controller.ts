@@ -22,21 +22,15 @@ async function signUp(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-async function signIn(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+async function signIn(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const result = await validateSignIn(req.body.email, req.body.password)
     if (result) {
       res
         .cookie('jwt', generateRefreshToken(req.body.email), {
           httpOnly: true,
-          // sameSite: 'strict',
-          // secure: true,
-          sameSite: 'none',
-          secure: false,
+          sameSite: 'strict',
+          secure: true,
           maxAge: 3 * 24 * 60 * 60 * 1000,
         })
         .status(200)
@@ -45,9 +39,7 @@ async function signIn(
           isAdmin: result.isAdmin,
         })
     } else {
-      res
-        .status(401)
-        .json({ success: true, message: 'Invalid email or password' })
+      res.status(401).json({ success: true, message: 'Invalid email or password' })
     }
   } catch (err: any) {
     next(err)
@@ -63,11 +55,7 @@ async function signOut(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-async function refreshToken(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+async function refreshToken(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     res.status(200).json({
       accessToken: generateAccessToken((req.user as User).email as string),

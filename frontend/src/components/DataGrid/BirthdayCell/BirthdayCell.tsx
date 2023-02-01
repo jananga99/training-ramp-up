@@ -22,6 +22,6 @@ export const BirthdayCell: FC<BirthdayCellProps> = ({ student, dateChange }: Bir
       </td>
     );
   } else {
-    return <td>{student.birthday.toDateString()}</td>;
+    return <td>{(student.birthday as Date).toDateString()}</td>;
   }
 };

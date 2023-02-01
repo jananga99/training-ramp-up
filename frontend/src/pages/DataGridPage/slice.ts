@@ -48,10 +48,21 @@ export const slice = createSlice({
     updateReduxStudent(state, action: PayloadAction<Student>) {
       state.value = state.value.map((val) => {
         if (val.id === action.payload.id) {
-          return action.payload;
-        } else {
-          return val;
+          if (action.payload.name) {
+            val.name = action.payload.name;
+          }
+          if (action.payload.gender) {
+            val.gender = action.payload.gender;
+          }
+          if (action.payload.mobileNo) {
+            val.mobileNo = action.payload.mobileNo;
+          }
+          if (action.payload.birthday) {
+            val.birthday = action.payload.birthday;
+            val.age = action.payload.age;
+          }
         }
+        return val;
       });
     },
     removeStudent(state, action: PayloadAction<number>) {

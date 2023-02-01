@@ -9,7 +9,6 @@ import {
 import { DropDownListChangeEvent } from "@progress/kendo-react-dropdowns";
 import { Gender, GridStudent, NewStudent, Student } from "../../utils/student";
 import { studentValidationSchema } from "../../utils/validation";
-import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../utils/store";
 import {
@@ -60,6 +59,27 @@ const getIndexStudent = (arr: Student[], field: keyof Student, value: number) =>
     }
   });
   return ind;
+};
+
+const getUpdatingStudent = (updatingStudent: GridStudent, prevStudent: GridStudent): Student => {
+  const updatedStudent: Student = { id: updatingStudent.id as number };
+  if (updatingStudent.name !== prevStudent.name) {
+    updatedStudent.name = updatingStudent.name as string;
+  }
+  if (updatingStudent.address !== prevStudent.address) {
+    updatedStudent.address = updatingStudent.address as string;
+  }
+  if (updatingStudent.gender !== prevStudent.gender) {
+    updatedStudent.gender = updatingStudent.gender as string;
+  }
+  if (updatingStudent.mobileNo !== prevStudent.mobileNo) {
+    updatedStudent.mobileNo = updatingStudent.mobileNo as string;
+  }
+  if (updatingStudent.birthday !== prevStudent.birthday) {
+    updatedStudent.birthday = updatingStudent.birthday as Date;
+    updatedStudent.age = updatingStudent.age as number;
+  }
+  return updatedStudent;
 };
 
 const DataGrid: FC = () => {
@@ -139,16 +159,16 @@ const DataGrid: FC = () => {
   // Handles clicking add button while adding. Validates and dispatches for creating
   const addRecord = (keyId: number) => {
     let ind = getIndexGridStudent(gridData, "keyId", keyId);
-    const studentData: NewStudent = {
-      name: gridData[ind].name as string,
-      gender: gridData[ind].gender as string,
-      address: gridData[ind].address as string,
-      mobileNo: gridData[ind].mobileNo as string,
-      birthday: gridData[ind].birthday,
-      age: gridData[ind].age as number,
-    };
-    const isValid = validateStudent(studentData);
+    const isValid = validateStudent(gridData[ind]);
     if (isValid) {
+      const studentData: NewStudent = {
+        name: gridData[ind].name as string,
+        gender: gridData[ind].gender as string,
+        address: gridData[ind].address as string,
+        mobileNo: gridData[ind].mobileNo as string,
+        birthday: gridData[ind].birthday as Date,
+        age: gridData[ind].age as number,
+      };
       ind = getIndexGridStudent(gridData, "keyId", keyId);
       gridData.splice(ind, 1);
       dispatch(createStudent(studentData));
@@ -170,7 +190,7 @@ const DataGrid: FC = () => {
     setGridData([...gridData]);
   };
 
-  const validateStudent = (studentData: Student | NewStudent) => {
+  const validateStudent = (studentData: GridStudent) => {
     try {
       studentValidationSchema.validateSync(studentData, { abortEarly: false });
       return true;
@@ -183,17 +203,12 @@ const DataGrid: FC = () => {
   // Handles clicking update button. Removes previous data and dispatches current data to update action
   const editRecord = (id: number) => {
     let ind = getIndexGridStudent(gridData, "id", id);
-    const studentData: Student = {
-      id: gridData[ind].id as number,
-      name: gridData[ind].name as string,
-      gender: gridData[ind].gender as string,
-      address: gridData[ind].address as string,
-      mobileNo: gridData[ind].mobileNo as string,
-      birthday: gridData[ind].birthday,
-      age: gridData[ind].age as number,
-    };
-    const isValid = validateStudent(studentData);
+    const isValid = validateStudent(gridData[ind]);
     if (isValid) {
+      const studentData: Student = getUpdatingStudent(
+        gridData[ind],
+        prevEditData.get(gridData[ind].id as number) as GridStudent
+      );
       dispatch(updateStudent(studentData));
       ind = getIndexGridStudent(gridData, "id", id);
       gridData[ind].isEditing = false;
