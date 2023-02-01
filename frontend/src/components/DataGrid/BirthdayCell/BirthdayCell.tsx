@@ -1,10 +1,10 @@
 import { FC } from "react";
-import { Student } from "../../../utils/student";
+import { GridStudent } from "../../../utils/student";
 import { DatePicker, DatePickerChangeEvent } from "@progress/kendo-react-dateinputs";
 import { getBeforeDate } from "../../../utils/helpers";
 
 type BirthdayCellProps = {
-  student: Student;
+  student: GridStudent;
   dateChange: (event: DatePickerChangeEvent, id: number) => void;
 };
 

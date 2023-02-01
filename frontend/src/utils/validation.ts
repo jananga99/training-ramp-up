@@ -1,6 +1,7 @@
 import { Gender } from "./student";
 import * as Yup from "yup";
 import yupPassword from "yup-password";
+import { getAge } from "./helpers";
 yupPassword(Yup);
 
 const studentValidationSchema = Yup.object().shape({
@@ -20,11 +21,20 @@ const studentValidationSchema = Yup.object().shape({
       "MobileNo must be a nine number prefixed by country code or 0 (e.g. 0123456789 or +94123456789",
       (value) => typeof value === "string" && /^(\+\d{2}|0)\d{9}$/.test(value as string)
     ),
+  birthday: Yup.date()
+    .required("Birthday is empty")
+    .max(
+      new Date(new Date().setFullYear(new Date().getFullYear() - 18)),
+      "Must be at least 18 years old"
+    ),
   age: Yup.number()
     .test("is-valid-format", "Invalid birthday format", (value) => value !== -1)
     .positive("Age must be positive")
     .integer("Age must be an integer")
-    .min(18, "Student needs to be 18 years or older"),
+    .min(18, "Student needs to be 18 years or older")
+    .test("is match with age", "Age must be compatible with the birthday", function (value) {
+      return value === getAge(this.parent.birthday);
+    }),
 });
 
 const userValidationSchema = Yup.object().shape({

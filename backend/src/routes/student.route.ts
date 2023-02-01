@@ -6,6 +6,11 @@ import {
   removeStudent,
 } from '../controllers/student.controller'
 import passport from 'passport'
+import { validateBody, validateParams } from '../middlewares/validate'
+import {
+  idValidationSchema,
+  studentValidationSchema,
+} from '../utils/validation'
 
 const router = express.Router()
 
@@ -16,6 +21,7 @@ router.get('/', passport.authenticate('jwt', { session: false }), getStudents)
 router.post(
   '/',
   passport.authenticate('jwt-admin', { session: false }),
+  validateBody(studentValidationSchema),
   createStudent
 )
 
@@ -23,6 +29,8 @@ router.post(
 router.put(
   '/:id',
   passport.authenticate('jwt-admin', { session: false }),
+  validateParams(idValidationSchema),
+  validateBody(studentValidationSchema),
   updateStudent
 )
 
@@ -30,6 +38,7 @@ router.put(
 router.delete(
   '/:id',
   passport.authenticate('jwt-admin', { session: false }),
+  validateParams(idValidationSchema),
   removeStudent
 )
 

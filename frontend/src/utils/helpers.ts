@@ -1,3 +1,5 @@
+import moment from "moment/moment";
+
 export function getBeforeDate(year: number) {
   const currentDate = new Date();
   const yearsAgo = new Date(
@@ -6,4 +8,8 @@ export function getBeforeDate(year: number) {
     currentDate.getDate()
   );
   return yearsAgo;
+}
+
+export function getAge(birthday: Date) {
+  return moment().diff(birthday, "years");
 }

@@ -22,7 +22,7 @@ async function getStudents(
 
 async function createStudent(req: Request, res: Response, next: NextFunction) {
   try {
-    const student = await create(req.body.student)
+    const student = await create(req.body)
     sendNotification('create', student.id as number, student)
     res.status(201).json(student)
   } catch (err: any) {
@@ -32,7 +32,7 @@ async function createStudent(req: Request, res: Response, next: NextFunction) {
 
 async function updateStudent(req: Request, res: Response, next: NextFunction) {
   try {
-    const student = await update(parseInt(req.params.id), req.body.student)
+    const student = await update(parseInt(req.params.id), req.body)
     if (student) {
       sendNotification('update', student.id as number, student)
       res.status(200).json(student)

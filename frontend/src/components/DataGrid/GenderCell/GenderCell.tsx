@@ -1,10 +1,10 @@
 import { FC } from "react";
 import { DropDownList, DropDownListChangeEvent } from "@progress/kendo-react-dropdowns";
-import { Gender, Student } from "../../../utils/student";
+import { Gender, GridStudent } from "../../../utils/student";
 
 type GenderCellProps = {
   dropDownChange: (event: DropDownListChangeEvent, id: number) => void;
-  student: Student;
+  student: GridStudent;
 };
 
 export const GenderCell: FC<GenderCellProps> = ({ dropDownChange, student }: GenderCellProps) => {

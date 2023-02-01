@@ -13,7 +13,7 @@ import {
   removeStudentSuccess,
   removeStudent,
 } from "./slice";
-import { Student } from "../../utils/student";
+import { NewStudent, Student } from "../../utils/student";
 import { PayloadAction } from "@reduxjs/toolkit";
 import axios, { AxiosResponse } from "axios";
 import { signInUserFailed, signInUserSuccess } from "../SignInPage/slice";
@@ -25,10 +25,10 @@ const axiosInstance = axios.create({
   withCredentials: true,
 });
 
-async function createAsync(student: Student, accessToken: string): Promise<AxiosResponse> {
+async function createAsync(student: NewStudent, accessToken: string): Promise<AxiosResponse> {
   try {
     axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
-    return await axiosInstance.post("/", { student: student });
+    return await axiosInstance.post("/", student);
   } catch (error: any) {
     return error.response;
   }
@@ -37,7 +37,7 @@ async function createAsync(student: Student, accessToken: string): Promise<Axios
 async function updateAsync(student: Student, accessToken: string): Promise<AxiosResponse> {
   try {
     axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
-    return await axiosInstance.put(`/${student.id}`, { student: student });
+    return await axiosInstance.put(`/${student.id}`, student);
   } catch (error: any) {
     return error.response;
   }
@@ -123,16 +123,16 @@ function* asyncResponseHandler(
   }
 }
 
-function* getStudentHandler(action: PayloadAction<Student>) {
+function* getStudentHandler() {
   const accessToken: string = yield select((state) => state.auth.accessToken);
   yield asyncResponseHandler(getAsync, null, accessToken, getStudentSuccess, getStudentFailed);
 }
 
-function* createStudentHandler(action: PayloadAction<Student>) {
+function* createStudentHandler(action: PayloadAction<NewStudent>) {
   const accessToken: string = yield select((state) => state.auth.accessToken);
   yield asyncResponseHandler(
     createAsync,
-    action.payload as Student,
+    action.payload as NewStudent,
     accessToken,
     createStudentSuccess,
     createStudentFailed

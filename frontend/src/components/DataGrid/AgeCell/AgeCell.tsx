@@ -1,8 +1,8 @@
 import { FC } from "react";
-import { Student } from "../../../utils/student";
+import { GridStudent } from "../../../utils/student";
 
 type AgeCellProps = {
-  student: Student;
+  student: GridStudent;
 };
 
 export const AgeCell: FC<AgeCellProps> = ({ student }: AgeCellProps) => {

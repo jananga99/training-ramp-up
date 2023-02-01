@@ -5,10 +5,10 @@ import { UpdateButton } from "./UpdateButton/UpdateButton";
 import { CancelButton } from "./CancelButton/CancelButton";
 import { EditButton } from "./EditButton/EditButton";
 import { RemoveButton } from "./RemoveButton/RemoveButton";
-import { Student } from "../../../utils/student";
+import { GridStudent } from "../../../utils/student";
 
 type CommandCellProps = {
-  student: Student;
+  student: GridStudent;
   addRecord: (id: number) => void;
   removeRecord: (id: number) => void;
   editRecord: (id: number) => void;

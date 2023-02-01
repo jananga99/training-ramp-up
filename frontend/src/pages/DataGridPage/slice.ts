@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Student } from "../../utils/student";
+import { NewStudent, Student } from "../../utils/student";
 
 interface StudentState {
   createLoading: number;
@@ -23,7 +23,7 @@ export const slice = createSlice({
   name: "student",
   initialState,
   reducers: {
-    createStudent(state, action: PayloadAction<Student>) {
+    createStudent(state, action: PayloadAction<NewStudent>) {
       state.createLoading += 1;
     },
     createStudentSuccess(state) {

@@ -7,7 +7,7 @@ import {
   GridToolbar,
 } from "@progress/kendo-react-grid";
 import { DropDownListChangeEvent } from "@progress/kendo-react-dropdowns";
-import { Gender, Student } from "../../utils/student";
+import { Gender, GridStudent, NewStudent, Student } from "../../utils/student";
 import { studentValidationSchema } from "../../utils/validation";
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
@@ -25,9 +25,9 @@ import { DatePickerChangeEvent } from "@progress/kendo-react-dateinputs";
 import { BirthdayCell } from "./BirthdayCell/BirthdayCell";
 import { signOutUser } from "../../pages/SignInPage/slice";
 import { Button } from "@progress/kendo-react-buttons";
-import { getBeforeDate } from "../../utils/helpers";
+import { getAge, getBeforeDate } from "../../utils/helpers";
 
-const initialStudent: Student = {
+const initialStudent: GridStudent = {
   id: 0,
   name: "",
   gender: Gender.MALE,
@@ -42,7 +42,17 @@ const initialStudent: Student = {
 };
 
 // Returns the index of element of given arr which have number field = value
-const getIndex = (arr: Student[], field: keyof Student, value: number) => {
+const getIndexGridStudent = (arr: GridStudent[], field: keyof GridStudent, value: number) => {
+  let ind = -1;
+  arr.forEach((val, index) => {
+    if (val[field] === value) {
+      ind = index;
+    }
+  });
+  return ind;
+};
+
+const getIndexStudent = (arr: Student[], field: keyof Student, value: number) => {
   let ind = -1;
   arr.forEach((val, index) => {
     if (val[field] === value) {
@@ -55,19 +65,19 @@ const getIndex = (arr: Student[], field: keyof Student, value: number) => {
 const DataGrid: FC = () => {
   // These are used to store previous edit data in cased of use to restore if updates were canceled.
   const [editIds, setEditIds] = useState<number[]>([]);
-  const [prevEditData, setPrevEditData] = useState<Map<number, Student>>(new Map());
+  const [prevEditData, setPrevEditData] = useState<Map<number, GridStudent>>(new Map());
 
   // keyId identifies all the rows in the Grid uniquely. Used specially to identify newly adding rows which does not have id yet
   const [keyIdCount, setKeyIdCount] = useState<number>(0);
 
-  const students = useSelector((state: RootState) => state.student.value);
-  const isAdmin = useSelector((state: RootState) => state.auth.isAdmin);
+  const students: Student[] = useSelector((state: RootState) => state.student.value);
+  const isAdmin: boolean = useSelector((state: RootState) => state.auth.isAdmin);
 
   const dispatch = useDispatch();
 
   // Grid data denotes the data currently in app (without saving to redux store)
   // eslint-disable-next-line prefer-const
-  let [gridData, setGridData] = useState<Student[]>([]);
+  let [gridData, setGridData] = useState<GridStudent[]>([]);
 
   // Gets data from database at the first time the component renders
   useEffect(() => {
@@ -77,7 +87,7 @@ const DataGrid: FC = () => {
   useEffect(() => {
     // Grid Data item is updated from database updates only if it is not currently updating
     students.forEach((item, index) => {
-      const ind = getIndex(gridData, "id", item.id as number);
+      const ind = getIndexGridStudent(gridData, "id", item.id as number);
       const newItem = {
         ...item,
         isAdding: false,
@@ -95,9 +105,9 @@ const DataGrid: FC = () => {
         prevEditData.set(item.id as number, newItem);
       }
     });
-    const newGridData: Student[] = [];
+    const newGridData: GridStudent[] = [];
     gridData.forEach((value) => {
-      if (value.isAdding || getIndex(students, "id", value.id as number) >= 0) {
+      if (value.isAdding || getIndexStudent(students, "id", value.id as number) >= 0) {
         newGridData.push(value);
       }
     });
@@ -121,34 +131,28 @@ const DataGrid: FC = () => {
 
   // Handles clicking Discard changes while adding. Removes corresponding adding record from grid data
   const handleDiscardChanges = (keyId: number) => {
-    const ind = getIndex(gridData, "keyId", keyId);
+    const ind = getIndexGridStudent(gridData, "keyId", keyId);
     gridData.splice(ind, 1);
     setGridData([...gridData]);
   };
 
   // Handles clicking add button while adding. Validates and dispatches for creating
   const addRecord = (keyId: number) => {
-    let ind = getIndex(gridData, "keyId", keyId);
-    const addData = gridData[ind];
-    studentValidationSchema
-      .validate(
-        {
-          name: addData.name,
-          gender: addData.gender,
-          address: addData.address,
-          mobileNo: addData.mobileNo,
-          age: addData.age,
-        },
-        { abortEarly: false }
-      )
-      .then(() => {
-        ind = getIndex(gridData, "keyId", keyId);
-        gridData.splice(ind, 1);
-        dispatch(createStudent(addData));
-      })
-      .catch((err) => {
-        alert(err.errors[0]);
-      });
+    let ind = getIndexGridStudent(gridData, "keyId", keyId);
+    const studentData: NewStudent = {
+      name: gridData[ind].name as string,
+      gender: gridData[ind].gender as string,
+      address: gridData[ind].address as string,
+      mobileNo: gridData[ind].mobileNo as string,
+      birthday: gridData[ind].birthday,
+      age: gridData[ind].age as number,
+    };
+    const isValid = validateStudent(studentData);
+    if (isValid) {
+      ind = getIndexGridStudent(gridData, "keyId", keyId);
+      gridData.splice(ind, 1);
+      dispatch(createStudent(studentData));
+    }
   };
 
   // Handles clicking Remove Button.
@@ -159,48 +163,52 @@ const DataGrid: FC = () => {
   // Handles clicking Edit button. Save current data to prevEditData and make the row editable
   const handleEditClick = (id: number) => {
     setEditIds([...editIds, id]);
-    const ind = getIndex(gridData, "id", id);
+    const ind = getIndexGridStudent(gridData, "id", id);
     prevEditData.set(id, { ...gridData[ind] });
     gridData[ind].isEditing = true;
     gridData[ind].inEdit = true;
     setGridData([...gridData]);
   };
 
+  const validateStudent = (studentData: Student | NewStudent) => {
+    try {
+      studentValidationSchema.validateSync(studentData, { abortEarly: false });
+      return true;
+    } catch (err: any) {
+      alert(err.errors[0]);
+      return false;
+    }
+  };
+
   // Handles clicking update button. Removes previous data and dispatches current data to update action
   const editRecord = (id: number) => {
-    let ind = getIndex(gridData, "id", id);
-    const editData = gridData[ind];
-    studentValidationSchema
-      .validate(
-        {
-          id: editData.id,
-          name: editData.name,
-          gender: editData.gender,
-          address: editData.address,
-          mobileNo: editData.mobileNo,
-          age: editData.age,
-        },
-        { abortEarly: false }
-      )
-      .then(() => {
-        dispatch(updateStudent(editData));
-        ind = getIndex(gridData, "id", id);
-        gridData[ind].isEditing = false;
-        setGridData(gridData);
-        editIds.splice(editIds.indexOf(id), 1);
-        prevEditData.delete(id);
-        setPrevEditData(prevEditData);
-        setEditIds([...editIds]);
-      })
-      .catch((err) => {
-        alert(err.errors[0]);
-      });
+    let ind = getIndexGridStudent(gridData, "id", id);
+    const studentData: Student = {
+      id: gridData[ind].id as number,
+      name: gridData[ind].name as string,
+      gender: gridData[ind].gender as string,
+      address: gridData[ind].address as string,
+      mobileNo: gridData[ind].mobileNo as string,
+      birthday: gridData[ind].birthday,
+      age: gridData[ind].age as number,
+    };
+    const isValid = validateStudent(studentData);
+    if (isValid) {
+      dispatch(updateStudent(studentData));
+      ind = getIndexGridStudent(gridData, "id", id);
+      gridData[ind].isEditing = false;
+      setGridData(gridData);
+      editIds.splice(editIds.indexOf(id), 1);
+      prevEditData.delete(id);
+      setPrevEditData(prevEditData);
+      setEditIds([...editIds]);
+    }
   };
 
   // Handles clicking Cancel while updating. Pops previous data to row
   const handleCancel = (id: number) => {
-    const ind = getIndex(gridData, "id", id);
-    gridData[ind] = prevEditData.get(id) as Student;
+    const ind = getIndexGridStudent(gridData, "id", id);
+    gridData[ind] = prevEditData.get(id) as GridStudent;
     editIds.splice(editIds.indexOf(id), 1);
     prevEditData.delete(id);
     setPrevEditData(prevEditData);
@@ -209,23 +217,23 @@ const DataGrid: FC = () => {
 
   // Handles item change in Grid. Changes gridData and re renders component
   const itemChange = (event: GridItemChangeEvent) => {
-    const field = event.field as keyof Student;
-    const ind = getIndex(gridData, "keyId", event.dataItem.keyId);
+    const field = event.field as keyof GridStudent;
+    const ind = getIndexGridStudent(gridData, "keyId", event.dataItem.keyId);
     gridData[ind] = { ...gridData[ind], [field]: event.value };
     setGridData([...gridData]);
   };
 
   // Handles gender change in Grid. Changes gridData and re renders component
   const dropDownChange = (event: DropDownListChangeEvent, keyId: number) => {
-    const ind = getIndex(gridData, "keyId", keyId);
+    const ind = getIndexGridStudent(gridData, "keyId", keyId);
     gridData[ind].gender = event.value;
     setGridData([...gridData]);
   };
 
   const dateChange = (event: DatePickerChangeEvent, keyId: number) => {
-    const ind = getIndex(gridData, "keyId", keyId);
+    const ind = getIndexGridStudent(gridData, "keyId", keyId);
     gridData[ind].birthday = event.value as Date;
-    gridData[ind].age = moment().diff(event.value, "years");
+    gridData[ind].age = getAge(event.value as Date);
     setGridData([...gridData]);
   };
 

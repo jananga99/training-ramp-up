@@ -6,10 +6,15 @@ import {
   signOut,
 } from '../controllers/auth.controller'
 import passport from 'passport'
+import { validateBody } from '../middlewares/validate'
+import {
+  signInUserValidationSchema,
+  userValidationSchema,
+} from '../utils/validation'
 
 const router = express.Router()
-router.post('/signUp', signUp)
-router.post('/', signIn)
+router.post('/signUp', validateBody(userValidationSchema), signUp)
+router.post('/', validateBody(signInUserValidationSchema), signIn)
 router.post('/signOut', signOut)
 router.post(
   '/refresh',
