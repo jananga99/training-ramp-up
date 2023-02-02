@@ -24,10 +24,7 @@ async function signUpUser(user: User): Promise<User | null> {
   }
 }
 
-async function validateSignIn(
-  email: string,
-  password: string
-): Promise<User | null> {
+async function validateSignIn(email: string, password: string): Promise<User | null> {
   const existingUser = await getOneUser(email)
   if (existingUser && existingUser.password) {
     const result = await bcrypt.compare(password, existingUser.password)
@@ -48,7 +45,7 @@ function generateAccessToken(email: string): string {
     },
     process.env.ACCESS_TOKEN_SECRET as string,
     {
-      expiresIn: '1h',
+      expiresIn: '10m',
     }
   )
 }
@@ -65,10 +62,4 @@ function generateRefreshToken(email: string): string {
   )
 }
 
-export {
-  validateSignIn,
-  generateAccessToken,
-  generateRefreshToken,
-  signUpUser,
-  getOneUser,
-}
+export { validateSignIn, generateAccessToken, generateRefreshToken, signUpUser, getOneUser }

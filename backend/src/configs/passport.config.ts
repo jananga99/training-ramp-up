@@ -3,8 +3,16 @@ import passport from 'passport'
 import { getOneUser } from '../services/auth.service'
 import { Request } from 'express'
 
+const cookieExtractorAccess = function (req: Request) {
+  let token = null
+  if (req && req.cookies) {
+    token = req.cookies['jwt-access']
+  }
+  return token
+}
+
 const opts = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  jwtFromRequest: cookieExtractorAccess,
   secretOrKey: process.env.ACCESS_TOKEN_SECRET,
 }
 
@@ -32,22 +40,19 @@ passport.use(
   })
 )
 
-const cookieExtractor = function (req: Request) {
+const cookieExtractorRefresh = function (req: Request) {
   let token = null
   if (req && req.cookies) {
-    token = req.cookies['jwt']
+    token = req.cookies['jwt-refresh']
   }
   return token
 }
 
 const refreshOpts = {
-  jwtFromRequest: cookieExtractor,
+  jwtFromRequest: cookieExtractorRefresh,
   secretOrKey: process.env.REFRESH_TOKEN_SECRET,
 }
-const refreshStrategy = new Strategy(refreshOpts, async function (
-  jwt_payload,
-  done
-) {
+const refreshStrategy = new Strategy(refreshOpts, async function (jwt_payload, done) {
   const user = await getOneUser(jwt_payload.email)
   if (user) {
     return done(null, user)

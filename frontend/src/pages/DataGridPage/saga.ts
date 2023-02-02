@@ -1,4 +1,4 @@
-import { call, put, takeEvery, select } from "redux-saga/effects";
+import { call, put, takeEvery } from "redux-saga/effects";
 import {
   createStudentFailed,
   createStudentSuccess,
@@ -15,150 +15,92 @@ import {
 } from "./slice";
 import { NewStudent, Student } from "../../utils/student";
 import { PayloadAction } from "@reduxjs/toolkit";
-import axios, { AxiosResponse } from "axios";
-import { signInUserFailed, signInUserSuccess } from "../SignInPage/slice";
-import { refreshAsync } from "../SignInPage/saga";
+import { AxiosResponse } from "axios";
+import { signInUserFailed } from "../SignInPage/slice";
+import { axiosInstance } from "../../utils/axiosInstance";
 
-const axiosInstance = axios.create({
-  baseURL: `${process.env.REACT_APP_BACKEND_SERVER_URL}students`,
-  timeout: 5000,
-  withCredentials: true,
-});
-
-async function createAsync(student: NewStudent, accessToken: string): Promise<AxiosResponse> {
-  try {
-    axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
-    return await axiosInstance.post("/", student);
-  } catch (error: any) {
-    return error.response;
-  }
+async function createAsync(student: NewStudent): Promise<AxiosResponse> {
+  return await axiosInstance.post("students/", student);
 }
 
-async function updateAsync(student: Student, accessToken: string): Promise<AxiosResponse> {
-  try {
-    axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
-    return await axiosInstance.patch(`/${student.id}`, student);
-  } catch (error: any) {
-    return error.response;
-  }
+async function updateAsync(student: Student): Promise<AxiosResponse> {
+  return await axiosInstance.patch(`students/${student.id}`, student);
 }
 
-async function removeAsync(id: number, accessToken: string): Promise<AxiosResponse> {
-  try {
-    axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
-    return await axiosInstance.delete(`/${id}`);
-  } catch (error: any) {
-    return error.response;
-  }
+async function removeAsync(id: number): Promise<AxiosResponse> {
+  return await axiosInstance.delete(`students/${id}`);
 }
 
-async function getAsync(accessToken: string): Promise<AxiosResponse> {
-  try {
-    axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
-    return await axiosInstance.get("/");
-  } catch (error: any) {
-    return error.response;
-  }
-}
-
-function* refresh() {
-  const response: AxiosResponse = yield call(refreshAsync);
-  if (response.status === 200) {
-    yield put(signInUserSuccess(response.data.accessToken));
-    return true;
-  } else {
-    yield put(signInUserFailed());
-    return false;
-  }
-}
-type asyncFunctionType =
-  | typeof createAsync
-  | typeof updateAsync
-  | typeof removeAsync
-  | typeof getAsync;
-type successFunctionType =
-  | typeof createStudentSuccess
-  | typeof updateStudentSuccess
-  | typeof getStudentSuccess
-  | typeof removeStudentSuccess;
-type failedFunctionType =
-  | typeof createStudentFailed
-  | typeof removeStudentFailed
-  | typeof updateStudentFailed
-  | typeof getStudentFailed;
-function* asyncResponseHandler(
-  asyncFunction: asyncFunctionType,
-  requestData: any,
-  accessToken: string,
-  successFunction: successFunctionType,
-  failedFunction: failedFunctionType
-) {
-  let response: AxiosResponse;
-  if (requestData) {
-    response = yield call(asyncFunction, requestData, accessToken);
-  } else {
-    response = yield call(asyncFunction, accessToken);
-  }
-  if (response.status >= 200 && response.status < 300) {
-    yield put(successFunction(response.data));
-  } else if (response.status === 401) {
-    const success: boolean = yield refresh();
-    if (success) {
-      const accessToken: string = yield select((state) => state.auth.accessToken);
-      if (requestData) {
-        response = yield call(asyncFunction, requestData, accessToken);
-      } else {
-        response = yield call(asyncFunction, accessToken);
-      }
-      if (response.status >= 200 && response.status < 300) {
-        yield put(successFunction(response.data));
-      } else {
-        yield put(failedFunction(response.data));
-        alert("An error occurred.");
-      }
-    }
-  } else {
-    yield put(failedFunction(response.data));
-    alert("An error occurred.");
-  }
+async function getAsync(): Promise<AxiosResponse> {
+  return await axiosInstance.get("students/");
 }
 
 function* getStudentHandler() {
-  const accessToken: string = yield select((state) => state.auth.accessToken);
-  yield asyncResponseHandler(getAsync, null, accessToken, getStudentSuccess, getStudentFailed);
+  try {
+    const response: AxiosResponse = yield call(getAsync);
+    if (response.status === 200) {
+      yield put(getStudentSuccess(response.data));
+    } else {
+      yield put(getStudentFailed());
+      alert("Loading student data failed");
+    }
+  } catch (err: any) {
+    if (err.response.status === 401) {
+      yield put(getStudentFailed());
+      yield put(signInUserFailed());
+    }
+  }
 }
 
 function* createStudentHandler(action: PayloadAction<NewStudent>) {
-  const accessToken: string = yield select((state) => state.auth.accessToken);
-  yield asyncResponseHandler(
-    createAsync,
-    action.payload as NewStudent,
-    accessToken,
-    createStudentSuccess,
-    createStudentFailed
-  );
+  try {
+    const response: AxiosResponse = yield call(createAsync, action.payload as NewStudent);
+    if (response.status === 201) {
+      yield put(createStudentSuccess(response.data));
+    } else {
+      yield put(createStudentFailed());
+      alert("Creating the student is failed");
+    }
+  } catch (err: any) {
+    if (err.response.status === 401) {
+      yield put(createStudentFailed());
+      yield put(signInUserFailed());
+    }
+  }
 }
 
 function* updateStudentHandler(action: PayloadAction<Student>) {
-  const accessToken: string = yield select((state) => state.auth.accessToken);
-  yield asyncResponseHandler(
-    updateAsync,
-    action.payload as Student,
-    accessToken,
-    updateStudentSuccess,
-    updateStudentFailed
-  );
+  try {
+    const response: AxiosResponse = yield call(updateAsync, action.payload as Student);
+    if (response.status === 200) {
+      yield put(updateStudentSuccess(response.data));
+    } else {
+      yield put(updateStudentFailed());
+      alert("Updating the student is failed");
+    }
+  } catch (err: any) {
+    if (err.response.status === 401) {
+      yield put(updateStudentFailed());
+      yield put(signInUserFailed());
+    }
+  }
 }
 
 function* removeStudentHandler(action: PayloadAction<number>) {
-  const accessToken: string = yield select((state) => state.auth.accessToken);
-  yield asyncResponseHandler(
-    removeAsync,
-    action.payload as number,
-    accessToken,
-    removeStudentSuccess,
-    removeStudentFailed
-  );
+  try {
+    const response: AxiosResponse = yield call(removeAsync, action.payload as number);
+    if (response.status === 204) {
+      yield put(removeStudentSuccess(response.data));
+    } else {
+      yield put(removeStudentFailed());
+      alert("Removing the student is failed");
+    }
+  } catch (err: any) {
+    if (err.response.status === 401) {
+      yield put(removeStudentFailed());
+      yield put(signInUserFailed());
+    }
+  }
 }
 
 export default function* studentSaga() {

@@ -1,16 +1,8 @@
 import { NextFunction, Request, Response } from 'express'
 import { User } from '../../../src/models/user.model'
-import {
-  refreshToken,
-  signIn,
-  signOut,
-  signUp,
-} from '../../../src/controllers/auth.controller'
+import { refreshToken, signIn, signOut, signUp } from '../../../src/controllers/auth.controller'
 import * as authService from '../../../src/services/auth.service'
-import {
-  generateAccessToken,
-  validateSignIn,
-} from '../../../src/services/auth.service'
+import { generateAccessToken, validateSignIn } from '../../../src/services/auth.service'
 
 const newUser: User = {
   email: 'john@gmail.com',
@@ -69,9 +61,7 @@ describe('signs up a new user', () => {
       isAdmin: false,
       timestamp: Date.now(),
     }
-    const spy = jest
-      .spyOn(authService, 'signUpUser')
-      .mockResolvedValue(createdUser)
+    const spy = jest.spyOn(authService, 'signUpUser').mockResolvedValue(createdUser)
     const req = getRequest()
     const res = getResponse()
     const next = getNext()
@@ -89,9 +79,7 @@ describe('signs up a new user', () => {
       isAdmin: true,
       timestamp: Date.now(),
     }
-    const spy = jest
-      .spyOn(authService, 'signUpUser')
-      .mockResolvedValue(createdUser)
+    const spy = jest.spyOn(authService, 'signUpUser').mockResolvedValue(createdUser)
     const req = getRequest()
     const res = getResponse()
     const next = getNext()
@@ -149,9 +137,7 @@ describe('signs in a user', () => {
     } as unknown as Response)
   const getNext = () => jest.fn() as NextFunction
   test('signs in the user', async () => {
-    const spy = jest
-      .spyOn(authService, 'validateSignIn')
-      .mockResolvedValue(sampleUser)
+    const spy = jest.spyOn(authService, 'validateSignIn').mockResolvedValue(sampleUser)
     const spyAccessToken = jest
       .spyOn(authService, 'generateAccessToken')
       .mockReturnValue(sampleAccessToken)
@@ -165,20 +151,17 @@ describe('signs in a user', () => {
     expect(res.status).toHaveBeenCalledTimes(1)
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith({
-      accessToken: sampleAccessToken,
       isAdmin: false,
     })
     expect(res.json).toHaveBeenCalledTimes(1)
-    expect(res.cookie).toHaveBeenCalledTimes(1)
+    expect(res.cookie).toHaveBeenCalledTimes(2)
     spy.mockRestore()
     spyAccessToken.mockRestore()
     spyRefreshToken.mockRestore()
   })
 
   test('sign in fails due to invalid email or password', async () => {
-    const spy = jest
-      .spyOn(authService, 'validateSignIn')
-      .mockResolvedValue(null)
+    const spy = jest.spyOn(authService, 'validateSignIn').mockResolvedValue(null)
     const req = getRequest()
     const res = getResponse()
     const next = getNext()
@@ -231,7 +214,7 @@ describe('signs out a user', () => {
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith({ success: true })
     expect(res.json).toHaveBeenCalledTimes(1)
-    expect(res.clearCookie).toHaveBeenCalledTimes(1)
+    expect(res.clearCookie).toHaveBeenCalledTimes(2)
   })
   test('sign out fails due to error', async () => {
     const err = new Error('error in clearCookie')
@@ -265,29 +248,21 @@ describe('refreshes user', () => {
     } as unknown as Response)
   const getNext = () => jest.fn() as NextFunction
   test('refreshes the user', async () => {
-    const spy = jest
-      .spyOn(authService, 'generateAccessToken')
-      .mockReturnValue(sampleAccessToken)
+    const spy = jest.spyOn(authService, 'generateAccessToken').mockReturnValue(sampleAccessToken)
     const req = getRequest()
     const res = getResponse()
     const next = getNext()
     await refreshToken(req, res, next)
-    expect(res.status).toHaveBeenCalledTimes(1)
-    expect(res.status).toHaveBeenCalledWith(200)
-    expect(res.json).toHaveBeenCalledWith({
-      accessToken: sampleAccessToken,
-    })
-    expect(res.json).toHaveBeenCalledTimes(1)
+    expect(res.status).not.toHaveBeenCalled()
+    expect(res.json).not.toHaveBeenCalled()
     spy.mockRestore()
   })
 
   test('refresh fails due to error', async () => {
     const err = new Error('error in generateAccessToken')
-    const spy = jest
-      .spyOn(authService, 'generateAccessToken')
-      .mockImplementation(() => {
-        throw err
-      })
+    const spy = jest.spyOn(authService, 'generateAccessToken').mockImplementation(() => {
+      throw err
+    })
     const req = getRequest()
     const res = getResponse()
     const next = getNext()

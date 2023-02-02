@@ -13,75 +13,56 @@ import {
 } from "./slice";
 import { DetailedUser, User } from "../../utils/user";
 import { PayloadAction } from "@reduxjs/toolkit";
-import axios from "axios";
-
-const axiosInstance = axios.create({
-  baseURL: `${process.env.REACT_APP_BACKEND_SERVER_URL}auth`,
-  timeout: 5000,
-  withCredentials: true,
-});
+import { axiosInstance } from "../../utils/axiosInstance";
 
 async function signUpAsync(user: DetailedUser): Promise<AxiosResponse> {
-  try {
-    return await axiosInstance.post("/signUp", {
-      email: user.email,
-      password: user.password,
-      firstName: user.firstName,
-      lastName: user.lastName,
-    });
-  } catch (error: any) {
-    return error.response;
-  }
+  return await axiosInstance.post("auth/signUp", {
+    email: user.email,
+    password: user.password,
+    firstName: user.firstName,
+    lastName: user.lastName,
+  });
 }
 
 async function signInAsync(user: User): Promise<AxiosResponse> {
-  try {
-    return await axiosInstance.post("/", {
-      email: user.email,
-      password: user.password,
-    });
-  } catch (error: any) {
-    return error.response;
-  }
+  return await axiosInstance.post("auth/", {
+    email: user.email,
+    password: user.password,
+  });
 }
 
 async function signOutAsync(): Promise<AxiosResponse> {
-  try {
-    return await axiosInstance.post("/signOut");
-  } catch (error: any) {
-    return error.response;
-  }
-}
-
-export async function refreshAsync() {
-  try {
-    return await axiosInstance.post("/refresh");
-  } catch (error: any) {
-    return error.response;
-  }
+  return await axiosInstance.post("auth/signOut");
 }
 
 function* signUpHandler(action: PayloadAction<DetailedUser>) {
-  const response: AxiosResponse = yield call(signUpAsync, action.payload);
-  if (response.status === 201) {
-    alert(`User - ${response.data.email} is registered successfully`);
-    yield put(createUserSuccess());
-  } else if (response.status === 200) {
-    alert(`This email is already registered`);
-    yield put(createUserFailed());
-  } else {
-    alert(`User - ${response.data.email} registration failed. Try again.`);
+  try {
+    const response: AxiosResponse = yield call(signUpAsync, action.payload);
+    if (response.status === 201) {
+      alert(`User - ${response.data.email} is registered successfully`);
+      yield put(createUserSuccess());
+    } else if (response.status === 200) {
+      alert(`This email is already registered`);
+      yield put(createUserFailed());
+    }
+  } catch (err) {
+    alert(`User registration failed. Try again.`);
     yield put(createUserFailed());
   }
 }
 
 function* signInHandler(action: PayloadAction<DetailedUser>) {
-  const response: AxiosResponse = yield call(signInAsync, action.payload);
-  if (response.status === 200 && response.data.accessToken) {
-    yield put(signInUserSuccess(response.data));
-  } else {
-    if (response.data.success) {
+  try {
+    const response: AxiosResponse = yield call(signInAsync, action.payload);
+    if (response.status === 200) {
+      yield put(signInUserSuccess(response.data));
+    } else {
       alert("Invalid Email or Password");
+      yield put(signInUserFailed());
+    }
+  } catch (err: any) {
+    if (err.response.status === 401) {
+      alert("Invalid email or password");
     } else {
       alert("Sign in failed. Try again");
     }
@@ -90,11 +71,11 @@ function* signInHandler(action: PayloadAction<DetailedUser>) {
 }
 
 function* signOutHandler() {
-  const response: AxiosResponse = yield call(signOutAsync);
-  if (response.status === 200) {
+  try {
+    yield call(signOutAsync);
     yield put(signOutUserSuccess());
     alert("User signed out.");
-  } else {
+  } catch (err) {
     yield put(signOutUserFailed());
     alert("User sign out failed");
   }

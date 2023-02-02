@@ -1,4 +1,4 @@
-import express, { Express, Request, Response } from 'express'
+import express, { Express, NextFunction, Request, Response } from 'express'
 import studentRouter from './src/routes/student.route'
 import authRouter from './src/routes/auth.route'
 import { createServer } from 'http'
@@ -42,6 +42,11 @@ AppDataSource.initialize()
 
 app.use('/students', studentRouter)
 app.use('/auth', authRouter)
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  console.error(`An unknown request - ${req.url}`)
+  res.status(404).json({ message: `An unknown request - ${req.url}` })
+})
 
 app.use((err: any, req: Request, res: Response) => {
   const statusCode = err.statusCode || 500

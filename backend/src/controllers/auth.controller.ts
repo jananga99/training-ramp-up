@@ -27,15 +27,20 @@ async function signIn(req: Request, res: Response, next: NextFunction): Promise<
     const result = await validateSignIn(req.body.email, req.body.password)
     if (result) {
       res
-        .cookie('jwt', generateRefreshToken(req.body.email), {
+        .cookie('jwt-access', generateAccessToken(req.body.email), {
           httpOnly: true,
           sameSite: 'strict',
           secure: true,
-          maxAge: 3 * 24 * 60 * 60 * 1000,
+          maxAge: 10 * 60 * 1000,
+        })
+        .cookie('jwt-refresh', generateRefreshToken(req.body.email), {
+          httpOnly: true,
+          sameSite: 'strict',
+          secure: true,
+          maxAge: 2 * 24 * 60 * 60 * 1000,
         })
         .status(200)
         .json({
-          accessToken: generateAccessToken(req.body.email),
           isAdmin: result.isAdmin,
         })
     } else {
@@ -48,7 +53,8 @@ async function signIn(req: Request, res: Response, next: NextFunction): Promise<
 
 async function signOut(req: Request, res: Response, next: NextFunction) {
   try {
-    res.clearCookie('jwt')
+    res.clearCookie('jwt-access')
+    res.clearCookie('jwt-refresh')
     res.status(200).json({ success: true })
   } catch (err) {
     next(err)
@@ -57,9 +63,17 @@ async function signOut(req: Request, res: Response, next: NextFunction) {
 
 async function refreshToken(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    res.status(200).json({
-      accessToken: generateAccessToken((req.user as User).email as string),
-    })
+    res
+      .cookie('jwt-access', generateAccessToken((req.user as User).email as string), {
+        httpOnly: true,
+        sameSite: 'strict',
+        secure: true,
+        maxAge: 60 * 10 * 1000,
+      })
+      .status(200)
+      .json({
+        isAdmin: (req.user as User).isAdmin,
+      })
   } catch (err: any) {
     next(err)
   }
