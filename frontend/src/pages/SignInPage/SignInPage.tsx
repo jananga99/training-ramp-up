@@ -9,6 +9,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 library.add(fas);
 import "..//SignUpPage/SignUpPage.scss";
 import { signInUser } from "./slice";
+import { ClipLoader } from "react-spinners";
+import { signInUserValidationSchema } from "../../utils/validation";
 
 const SignInPage: FC = () => {
   useEffect(() => {
@@ -27,16 +29,18 @@ const SignInPage: FC = () => {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
-
     const newUser: User = {
       email: email,
       password: password,
     };
-    dispatch(signInUser(newUser));
-    setEmail("");
-    setPassword("");
-
-    setShowPassword(false);
+    try {
+      signInUserValidationSchema.validateSync(newUser, { abortEarly: false });
+      dispatch(signInUser(newUser));
+      setPassword("");
+      setShowPassword(false);
+    } catch (err: any) {
+      alert(err.errors[0]);
+    }
   };
 
   const handleDontHaveAccountClick = () => {
@@ -77,6 +81,7 @@ const SignInPage: FC = () => {
           </div>
           <button type="submit">Sign In</button>
         </form>
+        <ClipLoader loading={signInLoading} color="blue" />
         <div className="sign-up-text" onClick={handleDontHaveAccountClick}>
           Don&apos;t have an account yet
         </div>

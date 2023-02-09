@@ -46,5 +46,9 @@ const userValidationSchema = Yup.object().shape({
     .required("Confirm password is empty")
     .oneOf([Yup.ref("password"), null], "Password and Confirm password does not match"),
 });
+const signInUserValidationSchema = Yup.object().shape({
+  email: Yup.string().required("Email is empty"),
+  password: Yup.string().required("Password is empty"),
+});
 
-export { studentValidationSchema, userValidationSchema };
+export { studentValidationSchema, userValidationSchema, signInUserValidationSchema };

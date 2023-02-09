@@ -8,8 +8,9 @@ import { fas } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 library.add(fas);
 import "./SignUpPage.scss";
-import { createUser } from "../SignInPage/slice";
+import { createUser, resetCreateSuccess } from "../SignInPage/slice";
 import { RootState } from "../../utils/store";
+import { ClipLoader } from "react-spinners";
 
 const SignUpPage: FC = () => {
   useEffect(() => {
@@ -29,11 +30,22 @@ const SignUpPage: FC = () => {
   const dispatch = useDispatch();
 
   const createLoading = useSelector((state: RootState) => state.auth.createLoading);
+  const createSuccess = useSelector((state: RootState) => state.auth.createSuccess);
+
+  useEffect(() => {
+    if (createSuccess) {
+      setFirstName("");
+      setLastName("");
+      setEmail("");
+      dispatch(resetCreateSuccess());
+      redirectToSignIn();
+    }
+  }, [createLoading]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
-    userValidationSchema
-      .validate(
+    try {
+      userValidationSchema.validateSync(
         {
           firstName: firstName,
           lastName: lastName,
@@ -42,29 +54,25 @@ const SignUpPage: FC = () => {
           confirmPassword: confirmPassword,
         },
         { abortEarly: false }
-      )
-      .then(() => {
-        const newUser: DetailedUser = {
-          email: email,
-          password: password,
-          firstName: firstName,
-          lastName: lastName,
-        };
-        setFirstName("");
-        setLastName("");
-        setEmail("");
-        setPassword("");
-        setConfirmPassword("");
-        setShowPassword(false);
-        setShowConfirmPassword(false);
-        dispatch(createUser(newUser));
-      })
-      .catch((err) => {
-        alert(err.errors[0]);
-      });
+      );
+
+      const newUser: DetailedUser = {
+        email: email,
+        password: password,
+        firstName: firstName,
+        lastName: lastName,
+      };
+      setPassword("");
+      setConfirmPassword("");
+      setShowPassword(false);
+      setShowConfirmPassword(false);
+      dispatch(createUser(newUser));
+    } catch (err: any) {
+      alert(err.errors[0]);
+    }
   };
 
-  const handleHaveAccountClick = () => {
+  const redirectToSignIn = () => {
     navigate("/");
   };
 
@@ -143,7 +151,8 @@ const SignUpPage: FC = () => {
           </div>
           <button type="submit">Sign In</button>
         </form>
-        <div className="sign-up-text" onClick={handleHaveAccountClick}>
+        <ClipLoader loading={createLoading} color="blue" />
+        <div className="sign-up-text" onClick={redirectToSignIn}>
           Already have an account?
         </div>
       </div>

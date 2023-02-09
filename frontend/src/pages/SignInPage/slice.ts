@@ -3,6 +3,7 @@ import { DetailedUser, User } from "../../utils/user";
 
 interface AuthState {
   createLoading: boolean;
+  createSuccess: boolean;
   signInLoading: boolean;
   signOutLoading: boolean;
   signedIn: boolean;
@@ -11,6 +12,7 @@ interface AuthState {
 
 const initialState: AuthState = {
   createLoading: false,
+  createSuccess: false,
   signInLoading: false,
   signOutLoading: false,
   signedIn: false,
@@ -30,9 +32,14 @@ export const slice = createSlice({
     },
     createUserSuccess(state) {
       state.createLoading = false;
+      state.createSuccess = true;
     },
     createUserFailed(state) {
       state.createLoading = false;
+      state.createSuccess = false;
+    },
+    resetCreateSuccess(state) {
+      state.createSuccess = false;
     },
     signInUser(state, action: PayloadAction<User>) {
       state.signInLoading = true;
@@ -65,6 +72,7 @@ export const {
   createUserFailed,
   createUserSuccess,
   createUser,
+  resetCreateSuccess,
   signInUserSuccess,
   signInUserFailed,
   signInUser,

@@ -72,11 +72,8 @@
   display: flex;
   align-items: flex-end;
   margin-left: 300px;
-}
-
-.sign-up-text a {
   color: blue;
-  text-decoration: none;
-  margin-left: 5px;
+  text-decoration: underline;
+  cursor: pointer;
 }
 

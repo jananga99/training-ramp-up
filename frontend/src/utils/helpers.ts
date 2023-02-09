@@ -2,12 +2,7 @@ import moment from "moment/moment";
 
 export function getBeforeDate(year: number) {
   const currentDate = new Date();
-  const yearsAgo = new Date(
-    currentDate.getFullYear() - 18,
-    currentDate.getMonth(),
-    currentDate.getDate()
-  );
-  return yearsAgo;
+  return new Date(currentDate.getFullYear() - year, currentDate.getMonth(), currentDate.getDate());
 }
 
 export function getAge(birthday: Date) {
