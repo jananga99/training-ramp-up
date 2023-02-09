@@ -13,7 +13,6 @@ async function signUp(req: Request, res: Response, next: NextFunction) {
     if (user) {
       delete user?.password
       res.status(201).json(user)
-      new Error()
     } else {
       res.status(200).json({ message: 'Duplicated email.' })
     }

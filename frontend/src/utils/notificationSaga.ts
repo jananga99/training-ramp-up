@@ -1,4 +1,4 @@
-import { call, cancelled, put, take } from "redux-saga/effects";
+import { call, cancelled, put, take, select } from "redux-saga/effects";
 import { EventChannel, eventChannel } from "redux-saga";
 import { io } from "socket.io-client";
 import {
@@ -27,7 +27,6 @@ function handleNotifications() {
         message: message,
         data: student,
       });
-      alert(message);
     });
     return () => {
       socket.close();
@@ -40,16 +39,20 @@ export default function* notificationSaga() {
   try {
     while (true) {
       const notification: UserNotification = yield take(chan);
-      switch (notification.type) {
-        case "create":
-          yield put(createReduxStudent(notification.data as Student));
-          break;
-        case "update":
-          yield put(updateReduxStudent(notification.data as Student));
-          break;
-        case "delete":
-          yield put(removeReduxStudent(notification.data?.id as number));
-          break;
+      const signedIn: boolean = yield select((state) => state.auth.signedIn);
+      if (signedIn) {
+        alert(notification.message);
+        switch (notification.type) {
+          case "create":
+            yield put(createReduxStudent(notification.data as Student));
+            break;
+          case "update":
+            yield put(updateReduxStudent(notification.data as Student));
+            break;
+          case "delete":
+            yield put(removeReduxStudent(notification.data?.id as number));
+            break;
+        }
       }
     }
   } finally {

@@ -45,8 +45,8 @@ function* getStudentHandler() {
       alert("Loading student data failed");
     }
   } catch (err: any) {
+    yield put(getStudentFailed());
     if (err.response.status === 401) {
-      yield put(getStudentFailed());
       yield put(signInUserFailed());
     }
   }
@@ -62,8 +62,8 @@ function* createStudentHandler(action: PayloadAction<NewStudent>) {
       alert("Creating the student is failed");
     }
   } catch (err: any) {
+    yield put(createStudentFailed());
     if (err.response.status === 401) {
-      yield put(createStudentFailed());
       yield put(signInUserFailed());
     }
   }
@@ -79,8 +79,8 @@ function* updateStudentHandler(action: PayloadAction<Student>) {
       alert("Updating the student is failed");
     }
   } catch (err: any) {
+    yield put(updateStudentFailed());
     if (err.response.status === 401) {
-      yield put(updateStudentFailed());
       yield put(signInUserFailed());
     }
   }
@@ -96,8 +96,8 @@ function* removeStudentHandler(action: PayloadAction<number>) {
       alert("Removing the student is failed");
     }
   } catch (err: any) {
+    yield put(removeStudentFailed());
     if (err.response.status === 401) {
-      yield put(removeStudentFailed());
       yield put(signInUserFailed());
     }
   }

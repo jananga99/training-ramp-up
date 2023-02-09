@@ -13,16 +13,15 @@ axiosInstance.interceptors.response.use(
   async (err) => {
     const originalConfig = err.config;
     const urlType = originalConfig.url.split("/")[0];
-    if (urlType !== "auth" && err.response) {
-      if (err.response.status === 401 && !originalConfig._retry) {
-        originalConfig._retry = true;
-        try {
-          await axiosInstance.post("auth/refresh");
-          return axiosInstance(originalConfig);
-        } catch (error) {
-          return Promise.reject(error);
-        }
-      }
+    if (
+      urlType !== "auth" &&
+      err.response &&
+      err.response.status === 401 &&
+      !originalConfig._retry
+    ) {
+      originalConfig._retry = true;
+      await axiosInstance.post("auth/refresh");
+      return axiosInstance(originalConfig);
     }
     return Promise.reject(err);
   }
