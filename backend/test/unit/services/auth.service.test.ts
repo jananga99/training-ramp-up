@@ -47,21 +47,13 @@ const sampleUser: User = {
 }
 
 describe('Gets the user to given email', () => {
-  afterEach(() => {
-    jest.restoreAllMocks()
-  })
-
   test('Gets the user', async () => {
-    jest
-      .spyOn(AppDataSource.getRepository(User), 'findOneBy')
-      .mockResolvedValue(sampleUser)
+    jest.spyOn(AppDataSource.getRepository(User), 'findOneBy').mockResolvedValue(sampleUser)
     const result = await getOneUser(sampleUser.email as string)
     expect(result).toEqual(sampleUser)
   })
   test('No user for given email', async () => {
-    jest
-      .spyOn(AppDataSource.getRepository(User), 'findOneBy')
-      .mockResolvedValue(null)
+    jest.spyOn(AppDataSource.getRepository(User), 'findOneBy').mockResolvedValue(null)
     const result = await getOneUser('wrong@gmail.com')
     expect(result).toEqual(null)
   })
@@ -69,25 +61,15 @@ describe('Gets the user to given email', () => {
     jest
       .spyOn(AppDataSource.getRepository(User), 'findOneBy')
       .mockRejectedValue(new Error('findOneBy error'))
-    await expect(getOneUser(sampleUser.email as string)).rejects.toThrowError(
-      'findOneBy error'
-    )
+    await expect(getOneUser(sampleUser.email as string)).rejects.toThrowError('findOneBy error')
   })
 })
 
 describe('Signing Up User', () => {
-  afterEach(() => {
-    jest.restoreAllMocks()
-  })
-
   test('Sign up the new non admin user', async () => {
     const createdUser = { ...newUser, isAdmin: false, timestamp: Date.now() }
-    jest
-      .spyOn(AppDataSource.getRepository(User), 'findOneBy')
-      .mockResolvedValue(null)
-    jest
-      .spyOn(AppDataSource.getRepository(User), 'save')
-      .mockResolvedValue(createdUser)
+    jest.spyOn(AppDataSource.getRepository(User), 'findOneBy').mockResolvedValue(null)
+    jest.spyOn(AppDataSource.getRepository(User), 'save').mockResolvedValue(createdUser)
     const result = await signUpUser(newUser)
     expect(result).toEqual(createdUser)
   })
@@ -97,20 +79,14 @@ describe('Signing Up User', () => {
       isAdmin: true,
       timestamp: Date.now(),
     }
-    jest
-      .spyOn(AppDataSource.getRepository(User), 'findOneBy')
-      .mockResolvedValue(null)
-    jest
-      .spyOn(AppDataSource.getRepository(User), 'save')
-      .mockResolvedValue(createdUser)
+    jest.spyOn(AppDataSource.getRepository(User), 'findOneBy').mockResolvedValue(null)
+    jest.spyOn(AppDataSource.getRepository(User), 'save').mockResolvedValue(createdUser)
     const result = await signUpUser(newAdminUser)
     expect(result).toEqual(createdUser)
   })
   test('Sign up fails due to duplicate email', async () => {
     const existingUser = { ...newUser, isAdmin: false, timestamp: Date.now() }
-    jest
-      .spyOn(AppDataSource.getRepository(User), 'findOneBy')
-      .mockResolvedValue(existingUser)
+    jest.spyOn(AppDataSource.getRepository(User), 'findOneBy').mockResolvedValue(existingUser)
     const result = await signUpUser(newUser)
     expect(result).toEqual(null)
   })
@@ -121,12 +97,8 @@ describe('Signing Up User', () => {
     await expect(signUpUser(newUser)).rejects.toThrowError('findOneBy error')
   })
   test('Sign up fails due to error relating to save', async () => {
-    jest
-      .spyOn(AppDataSource.getRepository(User), 'findOneBy')
-      .mockResolvedValue(null)
-    jest
-      .spyOn(AppDataSource.getRepository(User), 'save')
-      .mockRejectedValue(new Error('save error'))
+    jest.spyOn(AppDataSource.getRepository(User), 'findOneBy').mockResolvedValue(null)
+    jest.spyOn(AppDataSource.getRepository(User), 'save').mockRejectedValue(new Error('save error'))
     await expect(signUpUser(newUser)).rejects.toThrowError('save error')
   })
 })
@@ -136,23 +108,13 @@ describe('Validating the sign in of User', () => {
     const saltRounds = 10
     const hashed = await bcrypt.hash(sampleUser.password as string, saltRounds)
     const existingUser = { ...sampleUser, password: hashed }
-    jest
-      .spyOn(AppDataSource.getRepository(User), 'findOneBy')
-      .mockResolvedValue(existingUser)
-    const result = await validateSignIn(
-      sampleUser.email as string,
-      sampleUser.password as string
-    )
+    jest.spyOn(AppDataSource.getRepository(User), 'findOneBy').mockResolvedValue(existingUser)
+    const result = await validateSignIn(sampleUser.email as string, sampleUser.password as string)
     expect(result).toEqual(existingUser)
   })
   test('Sign in fails due to wrong email', async () => {
-    jest
-      .spyOn(AppDataSource.getRepository(User), 'findOneBy')
-      .mockResolvedValue(null)
-    const result = await validateSignIn(
-      sampleUser.email as string,
-      sampleUser.password as string
-    )
+    jest.spyOn(AppDataSource.getRepository(User), 'findOneBy').mockResolvedValue(null)
+    const result = await validateSignIn(sampleUser.email as string, sampleUser.password as string)
     expect(result).toEqual(null)
   })
   test('Sign in fails due to wrong password', async () => {
@@ -160,9 +122,7 @@ describe('Validating the sign in of User', () => {
     const hashed = await bcrypt.hash(sampleUser.password as string, saltRounds)
     sampleUser.password = hashed
     const existingUser = { ...sampleUser, password: hashed }
-    jest
-      .spyOn(AppDataSource.getRepository(User), 'findOneBy')
-      .mockResolvedValue(existingUser)
+    jest.spyOn(AppDataSource.getRepository(User), 'findOneBy').mockResolvedValue(existingUser)
     const result = await validateSignIn(sampleUser.email as string, 'wrong')
     expect(result).toEqual(null)
   })
@@ -183,6 +143,12 @@ describe('Generates an access token', () => {
     const decode: JwtPayload = jwt.verify(result, secret) as JwtPayload
     expect(decode.email).toEqual(sampleUser.email)
   })
+  test('token generates for wrong email', async () => {
+    const secret = process.env.ACCESS_TOKEN_SECRET as string
+    const result = generateAccessToken('wrong')
+    const decode: JwtPayload = jwt.verify(result, secret) as JwtPayload
+    expect(decode.email).not.toEqual(sampleUser.email)
+  })
 })
 
 describe('Generates a refresh token', () => {
@@ -191,5 +157,11 @@ describe('Generates a refresh token', () => {
     const result = generateRefreshToken(sampleUser.email as string)
     const decode: JwtPayload = jwt.verify(result, secret) as JwtPayload
     expect(decode.email).toEqual(sampleUser.email)
+  })
+  test('token generates for wrong email', async () => {
+    const secret = process.env.REFRESH_TOKEN_SECRET as string
+    const result = generateRefreshToken('wrong')
+    const decode: JwtPayload = jwt.verify(result, secret) as JwtPayload
+    expect(decode.email).not.toEqual(sampleUser.email)
   })
 })

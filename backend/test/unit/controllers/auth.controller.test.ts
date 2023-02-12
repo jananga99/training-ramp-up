@@ -41,9 +41,6 @@ jest.mock('../../../src/services/auth.service', () => ({
 }))
 
 describe('signs up a new user', () => {
-  afterEach(() => {
-    jest.restoreAllMocks()
-  })
   const getRequest = () =>
     ({
       body: newUser,

@@ -66,21 +66,18 @@ jest.mock('../../../src/services/notification.service', () => ({
 }))
 
 describe('get all students', () => {
-  afterEach(() => {
-    jest.restoreAllMocks()
-  })
+  const getRequest = () => ({} as Request)
   const getResponse = () =>
     ({
       status: jest.fn().mockReturnThis(),
       json: jest.fn().mockReturnThis(),
     } as unknown as Response)
+  const getNext = () => jest.fn() as NextFunction
   test('gets all students', async () => {
-    const spy = jest
-      .spyOn(studentService, 'getMultiple')
-      .mockResolvedValue(students)
-    const req = {} as Request
+    const spy = jest.spyOn(studentService, 'getMultiple').mockResolvedValue(students)
+    const req = getRequest()
     const res = getResponse()
-    const next = jest.fn() as NextFunction
+    const next = getNext()
     await getStudents(req, res, next)
     expect(res.status).toHaveBeenCalledTimes(1)
     expect(res.status).toHaveBeenCalledWith(200)
@@ -92,9 +89,9 @@ describe('get all students', () => {
   test('gets all students fails', async () => {
     const err = new Error('error in find')
     jest.spyOn(studentService, 'getMultiple').mockRejectedValue(err)
-    const req = {} as Request
+    const req = getRequest()
     const res = getResponse()
-    const next = jest.fn() as NextFunction
+    const next = getNext()
     await getStudents(req, res, next)
     expect(next).toHaveBeenCalledTimes(1)
     expect(next).toHaveBeenCalledWith(err)
@@ -104,9 +101,6 @@ describe('get all students', () => {
 })
 
 describe('create the student', () => {
-  afterEach(() => {
-    jest.restoreAllMocks()
-  })
   const getRequest = () =>
     ({
       body: {
@@ -118,14 +112,13 @@ describe('create the student', () => {
       status: jest.fn().mockReturnThis(),
       json: jest.fn().mockReturnThis(),
     } as unknown as Response)
+  const getNext = () => jest.fn() as NextFunction
   test('creates student', async () => {
     const createdStudent = { ...newStudent, id: 10 }
-    const spy = jest
-      .spyOn(studentService, 'create')
-      .mockResolvedValue(createdStudent)
+    const spy = jest.spyOn(studentService, 'create').mockResolvedValue(createdStudent)
     const req = getRequest()
     const res = getResponse()
-    const next = jest.fn() as NextFunction
+    const next = getNext()
     await createStudent(req, res, next)
     expect(res.status).toHaveBeenCalledTimes(1)
     expect(res.status).toHaveBeenCalledWith(201)
@@ -137,16 +130,9 @@ describe('create the student', () => {
   test('creates student fails due to create error', async () => {
     const err = new Error('error in create')
     const spy = jest.spyOn(studentService, 'create').mockRejectedValue(err)
-    const req = {
-      body: {
-        student: createStudent,
-      },
-    } as Request
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn().mockReturnThis(),
-    } as unknown as Response
-    const next = jest.fn() as NextFunction
+    const req = getRequest()
+    const res = getResponse()
+    const next = getNext()
     await createStudent(req, res, next)
     expect(next).toHaveBeenCalledTimes(1)
     expect(next).toHaveBeenCalledWith(err)
@@ -157,9 +143,6 @@ describe('create the student', () => {
 })
 
 describe('update the student', () => {
-  afterEach(() => {
-    jest.restoreAllMocks()
-  })
   const getRequest = () =>
     ({
       body: {
@@ -174,14 +157,13 @@ describe('update the student', () => {
       status: jest.fn().mockReturnThis(),
       json: jest.fn().mockReturnThis(),
     } as unknown as Response)
+  const getNext = () => jest.fn() as NextFunction
   test('updates student', async () => {
     const updatedStudent = updateStudentData
-    const spy = jest
-      .spyOn(studentService, 'update')
-      .mockResolvedValue(updatedStudent)
+    const spy = jest.spyOn(studentService, 'update').mockResolvedValue(updatedStudent)
     const req = getRequest()
     const res = getResponse()
-    const next = jest.fn() as NextFunction
+    const next = getNext()
     await updateStudent(req, res, next)
     expect(res.status).toHaveBeenCalledTimes(1)
     expect(res.status).toHaveBeenCalledWith(200)
@@ -195,7 +177,7 @@ describe('update the student', () => {
     const spy = jest.spyOn(studentService, 'update').mockRejectedValue(err)
     const req = getRequest()
     const res = getResponse()
-    const next = jest.fn() as NextFunction
+    const next = getNext()
     await updateStudent(req, res, next)
     expect(next).toHaveBeenCalledTimes(1)
     expect(next).toHaveBeenCalledWith(err)
@@ -207,12 +189,10 @@ describe('update the student', () => {
     const spy = jest.spyOn(studentService, 'update').mockResolvedValue(null)
     const req = getRequest()
     const res = getResponse()
-    const next = jest.fn() as NextFunction
+    const next = getNext()
     await updateStudent(req, res, next)
     expect(next).toHaveBeenCalledTimes(1)
-    expect(next).toHaveBeenCalledWith(
-      new Error('There is no existing student for this id')
-    )
+    expect(next).toHaveBeenCalledWith(new Error('There is no existing student for this id'))
     expect(res.status).not.toHaveBeenCalled()
     expect(res.json).not.toHaveBeenCalled()
     spy.mockRestore()
@@ -220,9 +200,6 @@ describe('update the student', () => {
 })
 
 describe('remove the student', () => {
-  afterEach(() => {
-    jest.restoreAllMocks()
-  })
   const getRequest = () =>
     ({
       body: {
@@ -237,14 +214,12 @@ describe('remove the student', () => {
       status: jest.fn().mockReturnThis(),
       json: jest.fn().mockReturnThis(),
     } as unknown as Response)
-
+  const getNext = () => jest.fn() as NextFunction
   test('removes student', async () => {
-    const spy = jest
-      .spyOn(studentService, 'remove')
-      .mockResolvedValue(removeStudentData)
+    const spy = jest.spyOn(studentService, 'remove').mockResolvedValue(removeStudentData)
     const req = getRequest()
     const res = getResponse()
-    const next = jest.fn() as NextFunction
+    const next = getNext()
     await removeStudent(req, res, next)
     expect(res.status).toHaveBeenCalledTimes(1)
     expect(res.status).toHaveBeenCalledWith(204)
@@ -257,7 +232,7 @@ describe('remove the student', () => {
     const spy = jest.spyOn(studentService, 'remove').mockRejectedValue(err)
     const req = getRequest()
     const res = getResponse()
-    const next = jest.fn() as NextFunction
+    const next = getNext()
     await removeStudent(req, res, next)
     expect(next).toHaveBeenCalledTimes(1)
     expect(next).toHaveBeenCalledWith(err)
@@ -269,12 +244,10 @@ describe('remove the student', () => {
     const spy = jest.spyOn(studentService, 'remove').mockResolvedValue(null)
     const req = getRequest()
     const res = getResponse()
-    const next = jest.fn() as NextFunction
+    const next = getNext()
     await removeStudent(req, res, next)
     expect(next).toHaveBeenCalledTimes(1)
-    expect(next).toHaveBeenCalledWith(
-      new Error('There is no existing student for this id')
-    )
+    expect(next).toHaveBeenCalledWith(new Error('There is no existing student for this id'))
     expect(res.status).not.toHaveBeenCalled()
     expect(res.json).not.toHaveBeenCalled()
     spy.mockRestore()

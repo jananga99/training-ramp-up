@@ -10,7 +10,7 @@ jest.mock('../../../index', () => ({
 
 describe('Notifications', () => {
   afterEach(() => {
-    jest.restoreAllMocks()
+    jest.resetAllMocks()
   })
   test('notification sends', async () => {
     const type = 'update'
@@ -47,7 +47,6 @@ describe('Notifications', () => {
       name: 'Jack',
     }
     const spy = jest.spyOn(io, 'emit')
-    spy.mockReset()
     sendNotification(type, id, student)
     expect(spy).not.toHaveBeenCalled()
   })

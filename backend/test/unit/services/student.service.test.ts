@@ -1,11 +1,6 @@
 import { Gender, Student } from '../../../src/models/student.model'
 import { AppDataSource } from '../../../src/configs/postgre.config'
-import {
-  create,
-  getMultiple,
-  remove,
-  update,
-} from '../../../src/services/student.service'
+import { create, getMultiple, remove, update } from '../../../src/services/student.service'
 
 let students: Student[]
 const student1 = {
@@ -67,13 +62,8 @@ jest.mock('../../../src/configs/postgre.config', () => ({
 }))
 
 describe('Student Getting', () => {
-  afterEach(() => {
-    jest.restoreAllMocks()
-  })
   test('get all the students', async () => {
-    jest
-      .spyOn(AppDataSource.getRepository(Student), 'find')
-      .mockResolvedValue(students)
+    jest.spyOn(AppDataSource.getRepository(Student), 'find').mockResolvedValue(students)
     const result = await getMultiple()
     expect(result).toHaveLength(2)
     expect(result).toContainEqual(student1)
@@ -89,14 +79,9 @@ describe('Student Getting', () => {
 })
 
 describe('Student Creating', () => {
-  afterEach(() => {
-    jest.restoreAllMocks()
-  })
   test('creates the student', async () => {
     const createdStudent = { ...newStudent, id: 3 }
-    jest
-      .spyOn(AppDataSource.getRepository(Student), 'save')
-      .mockResolvedValue(createdStudent)
+    jest.spyOn(AppDataSource.getRepository(Student), 'save').mockResolvedValue(createdStudent)
     const result = await create(newStudent)
     expect(result).toEqual(createdStudent)
   })
@@ -109,64 +94,40 @@ describe('Student Creating', () => {
 })
 
 describe('Student Updating', () => {
-  afterEach(() => {
-    jest.restoreAllMocks()
-  })
   test('updates the student', async () => {
-    jest
-      .spyOn(AppDataSource.getRepository(Student), 'findOneBy')
-      .mockResolvedValue(updateStudent)
-    jest
-      .spyOn(AppDataSource.getRepository(Student), 'save')
-      .mockResolvedValue(updateStudent)
+    jest.spyOn(AppDataSource.getRepository(Student), 'findOneBy').mockResolvedValue(student2)
+    jest.spyOn(AppDataSource.getRepository(Student), 'save').mockResolvedValue(updateStudent)
     const result = await update(updateStudent.id, updateStudent)
     expect(result).toEqual(updateStudent)
   })
   test('no student with given id to update', async () => {
-    jest
-      .spyOn(AppDataSource.getRepository(Student), 'findOneBy')
-      .mockResolvedValue(null)
+    jest.spyOn(AppDataSource.getRepository(Student), 'findOneBy').mockResolvedValue(null)
     const result = await update(updateStudent.id, updateStudent)
     expect(result).toEqual(null)
   })
   test('error in save', async () => {
-    jest
-      .spyOn(AppDataSource.getRepository(Student), 'findOneBy')
-      .mockResolvedValue(updateStudent)
+    jest.spyOn(AppDataSource.getRepository(Student), 'findOneBy').mockResolvedValue(updateStudent)
     jest
       .spyOn(AppDataSource.getRepository(Student), 'save')
       .mockRejectedValue(new Error('save error'))
-    await expect(update(updateStudent.id, updateStudent)).rejects.toThrowError(
-      'save error'
-    )
+    await expect(update(updateStudent.id, updateStudent)).rejects.toThrowError('save error')
   })
 })
 
 describe('Student Removing', () => {
-  afterEach(() => {
-    jest.restoreAllMocks()
-  })
   test('removes the student', async () => {
-    jest
-      .spyOn(AppDataSource.getRepository(Student), 'findOneBy')
-      .mockResolvedValue(removeStudent)
-    jest
-      .spyOn(AppDataSource.getRepository(Student), 'remove')
-      .mockResolvedValue(removeStudent)
+    jest.spyOn(AppDataSource.getRepository(Student), 'findOneBy').mockResolvedValue(removeStudent)
+    jest.spyOn(AppDataSource.getRepository(Student), 'remove').mockResolvedValue(removeStudent)
     const result = await remove(removeStudent.id)
     expect(result).toEqual(removeStudent)
   })
   test('no student with given id to remove', async () => {
-    jest
-      .spyOn(AppDataSource.getRepository(Student), 'findOneBy')
-      .mockResolvedValue(null)
+    jest.spyOn(AppDataSource.getRepository(Student), 'findOneBy').mockResolvedValue(null)
     const result = await remove(removeStudent.id)
     expect(result).toEqual(null)
   })
   test('error in remove', async () => {
-    jest
-      .spyOn(AppDataSource.getRepository(Student), 'findOneBy')
-      .mockResolvedValue(removeStudent)
+    jest.spyOn(AppDataSource.getRepository(Student), 'findOneBy').mockResolvedValue(removeStudent)
     jest
       .spyOn(AppDataSource.getRepository(Student), 'remove')
       .mockRejectedValue(new Error('remove error'))
