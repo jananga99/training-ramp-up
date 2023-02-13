@@ -1,6 +1,6 @@
 import { Strategy, ExtractJwt } from 'passport-jwt'
 import passport from 'passport'
-import { getOneUser } from '../services/auth.service'
+import { getOne } from '../services/user.service'
 import { Request } from 'express'
 
 const cookieExtractorAccess = function (req: Request) {
@@ -28,7 +28,7 @@ const refreshOpts = {
 }
 
 const jwtStrategy = new Strategy(opts, async function (jwt_payload, done) {
-  const user = await getOneUser(jwt_payload.email)
+  const user = await getOne(jwt_payload.email)
   if (user) {
     return done(null, user)
   } else {
@@ -37,7 +37,7 @@ const jwtStrategy = new Strategy(opts, async function (jwt_payload, done) {
 })
 
 const jwtAdminStrategy = new Strategy(opts, async function (jwt_payload, done) {
-  const user = await getOneUser(jwt_payload.email)
+  const user = await getOne(jwt_payload.email)
   if (user && user.isAdmin) {
     return done(null, user)
   } else {
@@ -46,7 +46,7 @@ const jwtAdminStrategy = new Strategy(opts, async function (jwt_payload, done) {
 })
 
 const refreshStrategy = new Strategy(refreshOpts, async function (jwt_payload, done) {
-  const user = await getOneUser(jwt_payload.email)
+  const user = await getOne(jwt_payload.email)
   if (user) {
     return done(null, user)
   } else {

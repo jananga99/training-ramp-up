@@ -1,18 +1,12 @@
 import bcrypt from 'bcrypt'
 import { User } from '../models/user.model'
-import { AppDataSource } from '../configs/postgre.config'
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
+import { create, getOne } from './user.service'
 dotenv.config()
 
-const repository = AppDataSource.getRepository(User)
-
-async function getOneUser(email: string): Promise<User | null> {
-  return await repository.findOneBy({ email: email })
-}
-
 async function signUpUser(user: User): Promise<User | null> {
-  const existingUser = await getOneUser(user.email as string)
+  const existingUser = await getOne(user.email as string)
   if (existingUser) {
     return null
   } else {
@@ -20,12 +14,12 @@ async function signUpUser(user: User): Promise<User | null> {
     const saltRounds = 10
     user.password = await bcrypt.hash(user.password as string, saltRounds)
     user.isAdmin = user.email === 'admin@gmail.com'
-    return await repository.save(user)
+    return create(user)
   }
 }
 
 async function validateSignIn(email: string, password: string): Promise<User | null> {
-  const existingUser = await getOneUser(email)
+  const existingUser = await getOne(email)
   if (existingUser && existingUser.password) {
     const result = await bcrypt.compare(password, existingUser.password)
     if (result) {
@@ -62,4 +56,4 @@ function generateRefreshToken(email: string): string {
   )
 }
 
-export { validateSignIn, generateAccessToken, generateRefreshToken, signUpUser, getOneUser }
+export { validateSignIn, generateAccessToken, generateRefreshToken, signUpUser }
