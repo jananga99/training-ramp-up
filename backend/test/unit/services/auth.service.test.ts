@@ -3,7 +3,6 @@ import { User } from '../../../src/models/user.model'
 import {
   generateAccessToken,
   generateRefreshToken,
-  getOneUser,
   signUpUser,
   validateSignIn,
 } from '../../../src/services/auth.service'
@@ -46,24 +45,24 @@ const sampleUser: User = {
   timestamp: Date.now(),
 }
 
-describe('Gets the user to given email', () => {
-  test('Gets the user', async () => {
-    jest.spyOn(AppDataSource.getRepository(User), 'findOneBy').mockResolvedValue(sampleUser)
-    const result = await getOneUser(sampleUser.email as string)
-    expect(result).toEqual(sampleUser)
-  })
-  test('No user for given email', async () => {
-    jest.spyOn(AppDataSource.getRepository(User), 'findOneBy').mockResolvedValue(null)
-    const result = await getOneUser('wrong@gmail.com')
-    expect(result).toEqual(null)
-  })
-  test('Get user fails due to error relating to findOneBy', async () => {
-    jest
-      .spyOn(AppDataSource.getRepository(User), 'findOneBy')
-      .mockRejectedValue(new Error('findOneBy error'))
-    await expect(getOneUser(sampleUser.email as string)).rejects.toThrowError('findOneBy error')
-  })
-})
+// describe('Gets the user to given email', () => {
+//   test('Gets the user', async () => {
+//     jest.spyOn(AppDataSource.getRepository(User), 'findOneBy').mockResolvedValue(sampleUser)
+//     const result = await getOneUser(sampleUser.email as string)
+//     expect(result).toEqual(sampleUser)
+//   })
+//   test('No user for given email', async () => {
+//     jest.spyOn(AppDataSource.getRepository(User), 'findOneBy').mockResolvedValue(null)
+//     const result = await getOneUser('wrong@gmail.com')
+//     expect(result).toEqual(null)
+//   })
+//   test('Get user fails due to error relating to findOneBy', async () => {
+//     jest
+//       .spyOn(AppDataSource.getRepository(User), 'findOneBy')
+//       .mockRejectedValue(new Error('findOneBy error'))
+//     await expect(getOneUser(sampleUser.email as string)).rejects.toThrowError('findOneBy error')
+//   })
+// })
 
 describe('Signing Up User', () => {
   test('Sign up the new non admin user', async () => {

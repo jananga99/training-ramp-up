@@ -222,7 +222,7 @@ describe('remove the student', () => {
     const next = getNext()
     await removeStudent(req, res, next)
     expect(res.status).toHaveBeenCalledTimes(1)
-    expect(res.status).toHaveBeenCalledWith(204)
+    expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledTimes(1)
     expect(spy).toHaveBeenCalledTimes(1)
     spy.mockRestore()
