@@ -1,4 +1,5 @@
 .idea
+.env
 # compiled output
 /dist
 /node_modules
