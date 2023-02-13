@@ -7,6 +7,8 @@ import { AllExceptionFilter } from './all-exception.filter';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Student } from './students/entities/student.entity';
+import { EventsGateway } from './events/events.gateway';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -22,6 +24,7 @@ import { Student } from './students/entities/student.entity';
       synchronize: true,
     }),
     StudentsModule,
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -30,6 +33,7 @@ import { Student } from './students/entities/student.entity';
       useClass: AllExceptionFilter,
     },
     AppService,
+    EventsGateway,
   ],
 })
 export class AppModule {}

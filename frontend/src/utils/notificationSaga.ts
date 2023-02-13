@@ -17,7 +17,7 @@ type UserNotification = {
 
 function handleNotifications() {
   return eventChannel((emitter) => {
-    const socket = io(process.env.REACT_APP_BACKEND_SERVER_URL as string, {
+    const socket = io(process.env.REACT_APP_SOCKET_SERVER_URL as string, {
       transports: ["websocket"],
     });
     socket.on("notification", (type: string, id: number, message: string, student: Student) => {
@@ -50,7 +50,7 @@ export default function* notificationSaga() {
             yield put(updateReduxStudent(notification.data as Student));
             break;
           case "delete":
-            yield put(removeReduxStudent(notification.data?.id as number));
+            yield put(removeReduxStudent(notification.id as number));
             break;
         }
       }

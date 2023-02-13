@@ -16,15 +16,21 @@ import {
   DeleteStudentValidationPipe,
   UpdateStudentValidationPipe,
 } from './utils/validation.pipe';
+import { EventsGateway } from '../events/events.gateway';
 
 @Controller('students')
 export class StudentsController {
-  constructor(private readonly studentsService: StudentsService) {}
+  constructor(
+    private readonly studentsService: StudentsService,
+    private readonly eventsGateway: EventsGateway,
+  ) {}
 
   @Post()
   @UsePipes(new CreateStudentValidationPipe())
-  create(@Body() createStudentDto: CreateStudentDto) {
-    return this.studentsService.create(createStudentDto);
+  async create(@Body() createStudentDto: CreateStudentDto) {
+    const student = await this.studentsService.create(createStudentDto);
+    this.eventsGateway.sendNotification('create', student.id, student);
+    return student;
   }
 
   @Get()
@@ -34,13 +40,23 @@ export class StudentsController {
 
   @Patch(':id')
   @UsePipes(new UpdateStudentValidationPipe())
-  update(@Param('id') id: string, @Body() updateStudentDto: UpdateStudentDto) {
-    return this.studentsService.update(+id, updateStudentDto);
+  async update(
+    @Param('id') id: number,
+    @Body() updateStudentDto: UpdateStudentDto,
+  ) {
+    const student = await this.studentsService.update(+id, updateStudentDto);
+    this.eventsGateway.sendNotification(
+      'update',
+      student.id as number,
+      student,
+    );
+    return student;
   }
 
   @Delete(':id')
   @UsePipes(new DeleteStudentValidationPipe())
-  remove(@Param('id') id: string) {
-    return this.studentsService.remove(+id);
+  async remove(@Param('id') id: number) {
+    await this.studentsService.remove(id);
+    this.eventsGateway.sendNotification('delete', id, null);
   }
 }
