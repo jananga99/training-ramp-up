@@ -25,6 +25,7 @@ import { BirthdayCell } from "./BirthdayCell/BirthdayCell";
 import { signOutUser } from "../../pages/SignInPage/slice";
 import { Button } from "@progress/kendo-react-buttons";
 import { getAge, getBeforeDate } from "../../utils/helpers";
+import { AddNewButton } from "./AddNewButton/AddNewButton";
 
 const initialStudent: GridStudent = {
   id: 0,
@@ -265,15 +266,7 @@ const DataGrid: FC = () => {
       </div>
       <Grid editField="inEdit" onItemChange={itemChange} data={gridData}>
         <GridToolbar>
-          <div>
-            <button
-              title="Add new"
-              className="k-button k-button-md k-rounded-md k-button-solid"
-              onClick={handleAddNewClick}
-            >
-              Add new
-            </button>
-          </div>
+          <AddNewButton handleAddNewClick={handleAddNewClick} isAdmin={isAdmin} />
         </GridToolbar>
         <GridColumn
           title="Id"
