@@ -1,17 +1,8 @@
 import { Request, Response, NextFunction } from 'express'
-import {
-  getMultiple,
-  create,
-  update,
-  remove,
-} from '../services/student.service'
+import { getMultiple, create, update, remove } from '../services/student.service'
 import { sendNotification } from '../services/notification.service'
 
-async function getStudents(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+async function getStudents(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const students = await getMultiple()
     res.status(200).json(students)
@@ -50,7 +41,7 @@ async function removeStudent(req: Request, res: Response, next: NextFunction) {
     if (student) {
       student.id = parseInt(req.params.id)
       sendNotification('delete', parseInt(req.params.id), student)
-      res.status(204).json()
+      res.status(200).json(req.params.id)
     } else {
       next(new Error('There is no existing student for this id'))
     }

@@ -9,7 +9,8 @@ type RouteGuardProps = {
 
 const RouteGuard = ({ element }: RouteGuardProps): JSX.Element => {
   const signedIn = useSelector((state: RootState) => state.auth.signedIn);
-  return signedIn ? element : <SignInPage />;
+  // return signedIn ? element : <SignInPage />;
+  return element;
 };
 
 export default RouteGuard;

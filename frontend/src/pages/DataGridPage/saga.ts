@@ -89,7 +89,7 @@ function* updateStudentHandler(action: PayloadAction<Student>) {
 function* removeStudentHandler(action: PayloadAction<number>) {
   try {
     const response: AxiosResponse = yield call(removeAsync, action.payload as number);
-    if (response.status === 204) {
+    if (response.status === 200) {
       yield put(removeStudentSuccess(response.data));
     } else {
       yield put(removeStudentFailed());
