@@ -1,9 +1,22 @@
-import { ObjectSchema } from 'yup'
 import { Request, Response, NextFunction } from 'express'
+import {
+  idValidationSchema,
+  requiredStudentValidationSchema,
+  signInUserValidationSchema,
+  studentValidationSchema,
+  userValidationSchema,
+} from '../utils/validation'
+
+type bodyValidationSchemaType =
+  | typeof requiredStudentValidationSchema
+  | typeof studentValidationSchema
+  | typeof userValidationSchema
+  | typeof signInUserValidationSchema
+
+type paramValidationSchemaType = typeof idValidationSchema
 
 export const validateBody =
-  (schema: ObjectSchema<any>) =>
-  (req: Request, res: Response, next: NextFunction) => {
+  (schema: bodyValidationSchemaType) => (req: Request, res: Response, next: NextFunction) => {
     try {
       schema.validateSync(req.body, { abortEarly: false })
       next()
@@ -13,8 +26,7 @@ export const validateBody =
   }
 
 export const validateParams =
-  (schema: ObjectSchema<any>) =>
-  (req: Request, res: Response, next: NextFunction) => {
+  (schema: paramValidationSchemaType) => (req: Request, res: Response, next: NextFunction) => {
     try {
       schema.validateSync(req.params, { abortEarly: false })
       next()
