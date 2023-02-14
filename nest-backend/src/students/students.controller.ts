@@ -64,5 +64,6 @@ export class StudentsController {
   async remove(@Param('id') id: number) {
     await this.studentsService.remove(id);
     this.eventsGateway.sendNotification('delete', id, null);
+    return id;
   }
 }
