@@ -36,7 +36,7 @@ export class StudentsService {
     id = parseInt(String(id));
     const existingStudent = await this.findOne(id);
     if (existingStudent) {
-      return this.studentRepository.delete(id);
+      return this.studentRepository.remove(existingStudent);
     } else {
       throw new Error('There is no existing student for this id');
     }
