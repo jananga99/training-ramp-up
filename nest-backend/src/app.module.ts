@@ -2,13 +2,13 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { StudentsModule } from './students/students.module';
-import { APP_FILTER } from '@nestjs/core';
-import { AllExceptionFilter } from './all-exception.filter';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Student } from './students/entities/student.entity';
-import { EventsGateway } from './events/events.gateway';
 import { EventsModule } from './events/events.module';
+import { AuthModule } from './auth/auth.module';
+import { User } from './users/entities/user.entity';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -20,20 +20,15 @@ import { EventsModule } from './events/events.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [Student],
+      entities: [Student, User],
       synchronize: true,
     }),
     StudentsModule,
     EventsModule,
+    AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
-  providers: [
-    {
-      provide: APP_FILTER,
-      useClass: AllExceptionFilter,
-    },
-    AppService,
-    EventsGateway,
-  ],
+  providers: [AppService],
 })
 export class AppModule {}
