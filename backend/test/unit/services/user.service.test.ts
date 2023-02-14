@@ -71,8 +71,8 @@ jest.mock('../../../src/configs/postgre.config', () => ({
   },
 }))
 
-describe('user Getting', () => {
-  test('get all the users', async () => {
+describe('a Getting', () => {
+  test('get all the a', async () => {
     jest.spyOn(AppDataSource.getRepository(User), 'find').mockResolvedValue(users)
     const result = await getMultiple()
     expect(result).toHaveLength(2)
@@ -86,8 +86,8 @@ describe('user Getting', () => {
   })
 })
 
-describe('user Creating', () => {
-  test('creates the user', async () => {
+describe('a Creating', () => {
+  test('creates the a', async () => {
     const createduser = { ...newUser }
     jest.spyOn(AppDataSource.getRepository(User), 'save').mockResolvedValue(createduser)
     const result = await create(newUser)
@@ -99,14 +99,14 @@ describe('user Creating', () => {
   })
 })
 
-describe('user Updating', () => {
-  test('updates the user', async () => {
+describe('a Updating', () => {
+  test('updates the a', async () => {
     jest.spyOn(AppDataSource.getRepository(User), 'findOneBy').mockResolvedValue(user2)
     jest.spyOn(AppDataSource.getRepository(User), 'save').mockResolvedValue(updateuser)
     const result = await update(updateuser.email, updateuser)
     expect(result).toEqual(updateuser)
   })
-  test('no user with given email to update', async () => {
+  test('no a with given email to update', async () => {
     jest.spyOn(AppDataSource.getRepository(User), 'findOneBy').mockResolvedValue(null)
     const result = await update(updateuser.email, updateuser)
     expect(result).toEqual(null)
@@ -118,14 +118,14 @@ describe('user Updating', () => {
   })
 })
 
-describe('user Removing', () => {
-  test('removes the user', async () => {
+describe('a Removing', () => {
+  test('removes the a', async () => {
     jest.spyOn(AppDataSource.getRepository(User), 'findOneBy').mockResolvedValue(removeuser)
     jest.spyOn(AppDataSource.getRepository(User), 'remove').mockResolvedValue(removeuser)
     const result = await remove(removeuser.email)
     expect(result).toEqual(removeuser)
   })
-  test('no user with given email to remove', async () => {
+  test('no a with given email to remove', async () => {
     jest.spyOn(AppDataSource.getRepository(User), 'findOneBy').mockResolvedValue(null)
     const result = await remove(removeuser.email)
     expect(result).toEqual(null)

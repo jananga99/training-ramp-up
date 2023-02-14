@@ -45,18 +45,18 @@ const sampleUser: User = {
   timestamp: Date.now(),
 }
 
-// describe('Gets the user to given email', () => {
-//   test('Gets the user', async () => {
+// describe('Gets the a to given email', () => {
+//   test('Gets the a', async () => {
 //     jest.spyOn(AppDataSource.getRepository(User), 'findOneBy').mockResolvedValue(sampleUser)
 //     const result = await getOneUser(sampleUser.email as string)
 //     expect(result).toEqual(sampleUser)
 //   })
-//   test('No user for given email', async () => {
+//   test('No a for given email', async () => {
 //     jest.spyOn(AppDataSource.getRepository(User), 'findOneBy').mockResolvedValue(null)
 //     const result = await getOneUser('wrong@gmail.com')
 //     expect(result).toEqual(null)
 //   })
-//   test('Get user fails due to error relating to findOneBy', async () => {
+//   test('Get a fails due to error relating to findOneBy', async () => {
 //     jest
 //       .spyOn(AppDataSource.getRepository(User), 'findOneBy')
 //       .mockRejectedValue(new Error('findOneBy error'))
@@ -65,14 +65,14 @@ const sampleUser: User = {
 // })
 
 describe('Signing Up User', () => {
-  test('Sign up the new non admin user', async () => {
+  test('Sign up the new non admin a', async () => {
     const createdUser = { ...newUser, isAdmin: false, timestamp: Date.now() }
     jest.spyOn(AppDataSource.getRepository(User), 'findOneBy').mockResolvedValue(null)
     jest.spyOn(AppDataSource.getRepository(User), 'save').mockResolvedValue(createdUser)
     const result = await signUpUser(newUser)
     expect(result).toEqual(createdUser)
   })
-  test('Sign up the new admin user', async () => {
+  test('Sign up the new admin a', async () => {
     const createdUser = {
       ...newAdminUser,
       isAdmin: true,

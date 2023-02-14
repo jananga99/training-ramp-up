@@ -9,6 +9,8 @@ import { EventsModule } from './events/events.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './users/entities/user.entity';
 import { UsersModule } from './users/users.module';
+import { APP_FILTER } from '@nestjs/core';
+import { AllExceptionFilter } from '../all-exception.filter';
 
 @Module({
   imports: [
@@ -29,6 +31,12 @@ import { UsersModule } from './users/users.module';
     UsersModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionFilter,
+    },
+    AppService,
+  ],
 })
 export class AppModule {}

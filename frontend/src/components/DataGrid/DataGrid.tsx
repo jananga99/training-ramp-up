@@ -137,7 +137,7 @@ const DataGrid: FC = () => {
     setGridData(newGridData);
   }, [students]);
 
-  // Signs out the current user
+  // Signs out the current a
   const handleSignOut = () => {
     dispatch(signOutUser());
   };

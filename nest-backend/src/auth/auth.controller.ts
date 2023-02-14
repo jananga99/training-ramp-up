@@ -5,8 +5,10 @@ import {
   HttpCode,
   Res,
   UsePipes,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { SignUpAuthDto } from './dto/signup-auth.dto';
 import { SignInAuthDto } from './dto/signin-auth.dto';
@@ -14,6 +16,8 @@ import {
   SignInValidationPipe,
   SignUpValidationPipe,
 } from './utils/validation.pipe';
+import { AuthGuard } from '@nestjs/passport';
+import { User } from '../users/entities/user.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -43,10 +47,8 @@ export class AuthController {
           this.authService.generateAccessToken(signInAuthDto.email),
           {
             httpOnly: true,
-            // sameSite: 'strict',
-            // secure: true,
-            sameSite: 'none',
-            secure: false,
+            sameSite: 'strict',
+            secure: true,
             maxAge: 10 * 60 * 1000,
           },
         )
@@ -55,10 +57,8 @@ export class AuthController {
           this.authService.generateRefreshToken(signInAuthDto.email),
           {
             httpOnly: true,
-            // sameSite: 'strict',
-            // secure: true,
-            sameSite: 'none',
-            secure: false,
+            sameSite: 'strict',
+            secure: true,
             maxAge: 6 * 60 * 60 * 1000,
           },
         );
@@ -75,6 +75,25 @@ export class AuthController {
   async signOut(@Res({ passthrough: true }) response: Response) {
     response.clearCookie('jwt-access');
     response.clearCookie('jwt-refresh');
+    return { success: true };
+  }
+
+  @Post('refresh')
+  @UseGuards(AuthGuard('jwt-refresh'))
+  async refreshToken(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    response.cookie(
+      'jwt-access',
+      this.authService.generateAccessToken((request.user as User).email),
+      {
+        httpOnly: true,
+        sameSite: 'strict',
+        secure: true,
+        maxAge: 10 * 60 * 1000,
+      },
+    );
     return { success: true };
   }
 }

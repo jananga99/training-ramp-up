@@ -40,7 +40,7 @@ jest.mock('../../../src/services/auth.service', () => ({
   getOneUser: jest.fn(),
 }))
 
-describe('signs up a new user', () => {
+describe('signs up a new a', () => {
   const getRequest = () =>
     ({
       body: newUser,
@@ -51,7 +51,7 @@ describe('signs up a new user', () => {
       json: jest.fn().mockReturnThis(),
     } as unknown as Response)
   const getNext = () => jest.fn() as NextFunction
-  test('signs up the non admin user', async () => {
+  test('signs up the non admin a', async () => {
     const createdUser = {
       ...newUser,
       password: 'decoded',
@@ -69,7 +69,7 @@ describe('signs up a new user', () => {
     expect(res.json).toHaveBeenCalledTimes(1)
     spy.mockRestore()
   })
-  test('signs up the admin user', async () => {
+  test('signs up the admin a', async () => {
     const createdUser = {
       ...newAdminUser,
       password: 'decoded',
@@ -115,7 +115,7 @@ describe('signs up a new user', () => {
   })
 })
 
-describe('signs in a user', () => {
+describe('signs in a a', () => {
   afterEach(() => {
     jest.restoreAllMocks()
   })
@@ -133,7 +133,7 @@ describe('signs in a user', () => {
       cookie: jest.fn().mockReturnThis(),
     } as unknown as Response)
   const getNext = () => jest.fn() as NextFunction
-  test('signs in the user', async () => {
+  test('signs in the a', async () => {
     const spy = jest.spyOn(authService, 'validateSignIn').mockResolvedValue(sampleUser)
     const spyAccessToken = jest
       .spyOn(authService, 'generateAccessToken')
@@ -190,7 +190,7 @@ describe('signs in a user', () => {
   })
 })
 
-describe('signs out a user', () => {
+describe('signs out a a', () => {
   afterEach(() => {
     jest.restoreAllMocks()
   })
@@ -202,7 +202,7 @@ describe('signs out a user', () => {
       clearCookie: jest.fn().mockReturnThis(),
     } as unknown as Response)
   const getNext = () => jest.fn() as NextFunction
-  test('signs out the user', async () => {
+  test('signs out the a', async () => {
     const req = getRequest()
     const res = getResponse()
     const next = getNext()
@@ -230,7 +230,7 @@ describe('signs out a user', () => {
   })
 })
 
-describe('refreshes user', () => {
+describe('refreshes a', () => {
   afterEach(() => {
     jest.restoreAllMocks()
   })
@@ -244,7 +244,7 @@ describe('refreshes user', () => {
       json: jest.fn().mockReturnThis(),
     } as unknown as Response)
   const getNext = () => jest.fn() as NextFunction
-  test('refreshes the user', async () => {
+  test('refreshes the a', async () => {
     const spy = jest.spyOn(authService, 'generateAccessToken').mockReturnValue(sampleAccessToken)
     const req = getRequest()
     const res = getResponse()

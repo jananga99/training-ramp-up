@@ -39,7 +39,7 @@ export class AuthService {
       },
       process.env.ACCESS_TOKEN_SECRET as string,
       {
-        expiresIn: '10m',
+        expiresIn: 15,
       },
     );
   }
