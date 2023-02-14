@@ -12,13 +12,13 @@ import {
 import { StudentsService } from './students.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
+import { EventsGateway } from '../events/events.gateway';
+import { AuthGuard } from '@nestjs/passport';
 import {
   CreateStudentValidationPipe,
   DeleteStudentValidationPipe,
   UpdateStudentValidationPipe,
 } from './utils/validation.pipe';
-import { EventsGateway } from '../events/events.gateway';
-import { AuthGuard } from '@nestjs/passport';
 
 @Controller('students')
 export class StudentsController {

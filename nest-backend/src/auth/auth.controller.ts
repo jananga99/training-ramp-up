@@ -4,7 +4,6 @@ import {
   Body,
   HttpCode,
   Res,
-  UsePipes,
   UseGuards,
   Req,
 } from '@nestjs/common';
@@ -12,10 +11,6 @@ import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { SignUpAuthDto } from './dto/signup-auth.dto';
 import { SignInAuthDto } from './dto/signin-auth.dto';
-import {
-  SignInValidationPipe,
-  SignUpValidationPipe,
-} from './utils/validation.pipe';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from '../users/entities/user.entity';
 
@@ -24,14 +19,12 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signUp')
-  @UsePipes(new SignUpValidationPipe())
   signUp(@Body() createAuthDto: SignUpAuthDto) {
     return this.authService.signUp(createAuthDto);
   }
 
   @Post()
   @HttpCode(200)
-  @UsePipes(new SignInValidationPipe())
   async signIn(
     @Body() signInAuthDto: SignInAuthDto,
     @Res({ passthrough: true }) response: Response,

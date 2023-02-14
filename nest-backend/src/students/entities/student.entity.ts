@@ -10,16 +10,16 @@ export enum Gender {
 export class Student {
   @PrimaryGeneratedColumn()
   id: number | undefined;
-  @Column('text')
-  address: string | undefined;
-  @Column('int')
-  age: number | undefined;
-  @Column('text')
-  birthday: Date | undefined;
-  @Column('text')
-  gender: string | undefined;
-  @Column('text')
-  mobileNo: string | undefined;
-  @Column('text')
-  name: string | undefined;
+  @Column('text', { nullable: true })
+  address: string;
+  @Column('int', { nullable: true })
+  age: number;
+  @Column('text', { nullable: true })
+  birthday: Date;
+  @Column('text', { nullable: true })
+  gender: string;
+  @Column('text', { nullable: true })
+  mobileNo: string;
+  @Column('text', { nullable: true })
+  name: string;
 }

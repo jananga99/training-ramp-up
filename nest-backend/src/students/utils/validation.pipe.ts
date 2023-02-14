@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import {
   IdValidationSchema,
-  RequiredStudentValidationSchema,
   StudentValidationSchema,
 } from './validation.schema';
 import { UpdateStudentDto } from '../dto/update-student.dto';
@@ -49,7 +48,6 @@ export class CreateStudentValidationPipe
   implements PipeTransform<UpdateStudentDto>
 {
   transform(value: CreateStudentDto): CreateStudentDto {
-    validator(RequiredStudentValidationSchema, value);
     return validator(StudentValidationSchema, value);
   }
 }
