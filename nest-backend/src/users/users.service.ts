@@ -39,7 +39,7 @@ export class UsersService {
   async remove(email: string) {
     const existingUser = await this.findOne(email);
     if (existingUser) {
-      return this.usersRepository.delete(email);
+      return this.usersRepository.remove(existingUser);
     }
     throw new Error('There is no existing User for this id');
   }

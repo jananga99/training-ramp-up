@@ -93,13 +93,13 @@ describe('StudentsService', () => {
     afterEach(() => {
       jest.restoreAllMocks();
     });
-    test('creates the student', async () => {
+    it('creates the student', async () => {
       const createdStudent = { ...newStudent, id: 3 };
       jest.spyOn(repositoryMock, 'save').mockResolvedValue(createdStudent);
       const result = await service.create(newStudent);
       expect(result).toEqual(createdStudent);
     });
-    test('error in save', async () => {
+    it('error in save', async () => {
       jest
         .spyOn(repositoryMock, 'save')
         .mockRejectedValue(new Error('save error'));
@@ -113,19 +113,19 @@ describe('StudentsService', () => {
     afterEach(() => {
       jest.restoreAllMocks();
     });
-    test('updates the student', async () => {
+    it('updates the student', async () => {
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(updateStudent);
       jest.spyOn(repositoryMock, 'save').mockResolvedValue(updateStudent);
       const result = await service.update(updateStudent.id, updateStudent);
       expect(result).toEqual(updateStudent);
     });
-    test('no student with given id to update', async () => {
+    it('no student with given id to update', async () => {
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(null);
       await expect(
         service.update(updateStudent.id, updateStudent),
       ).rejects.toThrowError('There is no existing student for this id');
     });
-    test('error in save', async () => {
+    it('error in save', async () => {
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(updateStudent);
       jest
         .spyOn(repositoryMock, 'save')
@@ -140,19 +140,19 @@ describe('StudentsService', () => {
     afterEach(() => {
       jest.restoreAllMocks();
     });
-    test('removes the student', async () => {
+    it('removes the student', async () => {
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(removeStudent);
       jest.spyOn(repositoryMock, 'remove').mockResolvedValue(removeStudent);
       const result = await service.remove(removeStudent.id);
       expect(result).toEqual(removeStudent);
     });
-    test('no student with given id to remove', async () => {
+    it('no student with given id to remove', async () => {
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(null);
       await expect(service.remove(removeStudent.id)).rejects.toThrowError(
         'There is no existing student for this id',
       );
     });
-    test('error in remove', async () => {
+    it('error in remove', async () => {
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(removeStudent);
       jest
         .spyOn(repositoryMock, 'remove')
