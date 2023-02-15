@@ -4,6 +4,7 @@ import { UpdateStudentDto } from './dto/update-student.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Student } from './entities/student.entity';
 import { Repository } from 'typeorm';
+import { STUDENT_NOT_FOUND_MESSAGE } from './utils/const';
 
 @Injectable()
 export class StudentsService {
@@ -31,7 +32,7 @@ export class StudentsService {
     if (existingStudent) {
       return this.studentRepository.save({ ...updateStudentDto, id: id });
     } else {
-      throw new NotFoundException('There is no existing student for this id');
+      throw new NotFoundException(STUDENT_NOT_FOUND_MESSAGE);
     }
   }
 
@@ -41,6 +42,6 @@ export class StudentsService {
     if (existingStudent) {
       return this.studentRepository.remove(existingStudent);
     }
-    throw new NotFoundException('There is no existing student for this id');
+    throw new NotFoundException(STUDENT_NOT_FOUND_MESSAGE);
   }
 }

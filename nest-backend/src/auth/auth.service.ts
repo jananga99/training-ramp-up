@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
+import { ADMIN_EMAIL, INVALID_CREDENTIALS_MESSAGE } from './utils/const';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +14,7 @@ export class AuthService {
     const user: User = {
       ...signUpAuthDto,
       timestamp: Date.now(),
-      isAdmin: signUpAuthDto.email === 'admin@gmail.com',
+      isAdmin: signUpAuthDto.email === ADMIN_EMAIL,
     };
     const saltRounds: number = 10;
     user.password = await bcrypt.hash(user.password as string, saltRounds);
@@ -29,7 +30,7 @@ export class AuthService {
         return existingUser;
       }
     }
-    throw new UnauthorizedException('Invalid Email or Password');
+    throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
   }
 
   generateAccessToken(email: string): string {

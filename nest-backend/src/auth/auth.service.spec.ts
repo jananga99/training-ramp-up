@@ -8,6 +8,8 @@ import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { UsersService } from '../users/users.service';
 import { ConfigModule } from '@nestjs/config';
+import { DUPLICATE_EMAIL_MESSAGE } from '../users/utils/const';
+import { INVALID_CREDENTIALS_MESSAGE } from './utils/const';
 
 const newUser: User = {
   email: 'john@gmail.com',
@@ -91,7 +93,7 @@ describe('AuthService', () => {
       };
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(existingUser);
       await expect(service.signUp(newUser)).rejects.toThrowError(
-        'Duplicate email',
+        DUPLICATE_EMAIL_MESSAGE,
       );
     });
     it('Sign up fails due to error relating to findOneBy', async () => {
@@ -133,7 +135,7 @@ describe('AuthService', () => {
           sampleUser.email as string,
           sampleUser.password as string,
         ),
-      ).rejects.toThrowError('Invalid Email or Password');
+      ).rejects.toThrowError(INVALID_CREDENTIALS_MESSAGE);
     });
     it('Sign in fails due to wrong password', async () => {
       const saltRounds: number = 10;
@@ -146,7 +148,7 @@ describe('AuthService', () => {
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(existingUser);
       await expect(
         service.signIn(sampleUser.email as string, 'wrong'),
-      ).rejects.toThrowError('Invalid Email or Password');
+      ).rejects.toThrowError(INVALID_CREDENTIALS_MESSAGE);
     });
     it('Sign in fails due to error relating to findOneBy', async () => {
       jest

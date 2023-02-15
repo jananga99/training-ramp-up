@@ -15,6 +15,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { User } from '../users/entities/user.entity';
 import { SuccessAuthDto } from './dto/success-auth.dto';
 import { IsAdminAuthDto } from './dto/isAdmin-auth.dto';
+import { CookieName, PassportStrategyName } from './utils/jwt.const';
 
 @Controller('auth')
 export class AuthController {
@@ -37,7 +38,7 @@ export class AuthController {
     );
     response
       .cookie(
-        'jwt-access',
+        CookieName.JWT_ACCESS,
         this.authService.generateAccessToken(signInAuthDto.email),
         {
           httpOnly: true,
@@ -47,7 +48,7 @@ export class AuthController {
         },
       )
       .cookie(
-        'jwt-refresh',
+        CookieName.JWT_REFRESH,
         this.authService.generateRefreshToken(signInAuthDto.email),
         {
           httpOnly: true,
@@ -62,19 +63,19 @@ export class AuthController {
   @Post('signOut')
   @HttpCode(200)
   signOut(@Res({ passthrough: true }) response: Response): SuccessAuthDto {
-    response.clearCookie('jwt-access');
-    response.clearCookie('jwt-refresh');
+    response.clearCookie(CookieName.JWT_ACCESS);
+    response.clearCookie(CookieName.JWT_REFRESH);
     return { success: true };
   }
 
   @Post('refresh')
-  @UseGuards(AuthGuard('jwt-refresh'))
+  @UseGuards(AuthGuard(PassportStrategyName.JWT_REFRESH))
   refreshToken(
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ): SuccessAuthDto {
     response.cookie(
-      'jwt-access',
+      CookieName.JWT_ACCESS,
       this.authService.generateAccessToken((request.user as User).email),
       {
         httpOnly: true,

@@ -121,7 +121,10 @@ describe('StudentsController', () => {
     it('updates student', async () => {
       jest.spyOn(mockService, 'update').mockResolvedValue(updatedStudentData);
       expect(
-        await controller.update(updatedStudentData.id, updateStudentData),
+        await controller.update(
+          { id: updatedStudentData.id },
+          updateStudentData,
+        ),
       ).toBe(updatedStudentData);
     });
     it('updates student fails due to save error', async () => {
@@ -129,7 +132,7 @@ describe('StudentsController', () => {
         .spyOn(mockService, 'update')
         .mockRejectedValue(new Error('error in save'));
       await expect(
-        controller.update(updatedStudentData.id, updateStudentData),
+        controller.update({ id: updatedStudentData.id }, updateStudentData),
       ).rejects.toThrowError('error in save');
     });
     it('updates student fails due to no existing student', async () => {
@@ -139,7 +142,7 @@ describe('StudentsController', () => {
           new Error('There is no existing student for this id'),
         );
       await expect(
-        controller.update(updatedStudentData.id, updateStudentData),
+        controller.update({ id: updatedStudentData.id }, updateStudentData),
       ).rejects.toThrowError('There is no existing student for this id');
     });
   });
@@ -147,7 +150,7 @@ describe('StudentsController', () => {
   describe('remove the student', () => {
     it('removes student', async () => {
       jest.spyOn(mockService, 'remove').mockResolvedValue(removeStudentData);
-      expect(await controller.remove(removeStudentData.id)).toBe(
+      expect(await controller.remove({ id: removeStudentData.id })).toBe(
         removeStudentData.id,
       );
     });
@@ -156,7 +159,7 @@ describe('StudentsController', () => {
         .spyOn(mockService, 'remove')
         .mockRejectedValue(new Error('error in save'));
       await expect(
-        controller.remove(removeStudentData.id),
+        controller.remove({ id: removeStudentData.id }),
       ).rejects.toThrowError('error in save');
     });
     it('removes student fails due to save error', async () => {
@@ -166,7 +169,7 @@ describe('StudentsController', () => {
           new Error('There is no existing student for this id'),
         );
       await expect(
-        controller.remove(removeStudentData.id),
+        controller.remove({ id: removeStudentData.id }),
       ).rejects.toThrowError('There is no existing student for this id');
     });
   });

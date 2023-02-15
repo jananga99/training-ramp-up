@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
+import { STUDENT_NOT_FOUND_MESSAGE } from './utils/const';
 
 const student1: Student = {
   id: 1,
@@ -132,7 +133,7 @@ describe('StudentsService', () => {
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(null);
       await expect(
         service.update(updatedStudent.id, updateStudent),
-      ).rejects.toThrowError('There is no existing student for this id');
+      ).rejects.toThrowError(STUDENT_NOT_FOUND_MESSAGE);
     });
     it('error in save', async () => {
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(updatedStudent);
@@ -158,7 +159,7 @@ describe('StudentsService', () => {
     it('no student with given id to remove', async () => {
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(null);
       await expect(service.remove(removeStudent.id)).rejects.toThrowError(
-        'There is no existing student for this id',
+        STUDENT_NOT_FOUND_MESSAGE,
       );
     });
     it('error in remove', async () => {

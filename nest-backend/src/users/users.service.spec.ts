@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { USER_NOT_FOUND_MESSAGE } from './utils/const';
 const newUser: User = {
   email: 'john@gmail.com',
   firstName: 'John',
@@ -113,7 +114,7 @@ describe('UsersService', () => {
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(null);
       await expect(
         service.update(updateuser.email, updateuser),
-      ).rejects.toThrowError('There is no existing user for this email');
+      ).rejects.toThrowError(USER_NOT_FOUND_MESSAGE);
     });
     it('error in save', async () => {
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(updateuser);
@@ -136,7 +137,7 @@ describe('UsersService', () => {
     it('no user with given email to remove', async () => {
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(null);
       await expect(service.remove(removeuser.email)).rejects.toThrowError(
-        'There is no existing user for this email',
+        USER_NOT_FOUND_MESSAGE,
       );
     });
     it('error in remove', async () => {

@@ -16,6 +16,10 @@ import {
 import { Gender } from '../entities/student.entity';
 import { getAge } from '../utils/helpers';
 import { Type } from 'class-transformer';
+import {
+  INCOMPATIBLE_AGE_BIRTHDAY_MESSAGE,
+  INVALID_MOBILE_NO_MESSAGE,
+} from '../utils/const';
 
 @ValidatorConstraint({ name: 'ageCompatibility', async: false })
 export class CustomAgeValidation implements ValidatorConstraintInterface {
@@ -24,7 +28,7 @@ export class CustomAgeValidation implements ValidatorConstraintInterface {
   }
 
   defaultMessage(args: ValidationArguments) {
-    return 'Age is not compatible with the birthday';
+    return INCOMPATIBLE_AGE_BIRTHDAY_MESSAGE;
   }
 }
 
@@ -42,7 +46,7 @@ export class CreateStudentDto {
   @IsPositive()
   @Min(18)
   @Validate(CustomAgeValidation, {
-    message: 'Age is not compatible with the birthday',
+    message: INCOMPATIBLE_AGE_BIRTHDAY_MESSAGE,
   })
   age: number;
   @IsNotEmpty()
@@ -51,8 +55,7 @@ export class CreateStudentDto {
   @IsNotEmpty()
   @IsString()
   @Matches(/^(\+\d{2}|0)\d{9}$/, {
-    message:
-      'MobileNo must be a nine number prefixed by country code or 0 (e.g. 0123456789 or +94123456789',
+    message: INVALID_MOBILE_NO_MESSAGE,
   })
   mobileNo: string;
   @IsNotEmpty()

@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { DUPLICATE_EMAIL_MESSAGE, USER_NOT_FOUND_MESSAGE } from './utils/const';
 
 @Injectable()
 export class UsersService {
@@ -21,7 +22,7 @@ export class UsersService {
       createUserDto.email as string,
     );
     if (existingUser) {
-      throw new ConflictException('Duplicate email');
+      throw new ConflictException(DUPLICATE_EMAIL_MESSAGE);
     }
     return this.usersRepository.save(createUserDto);
   }
@@ -42,7 +43,7 @@ export class UsersService {
     if (existingUser) {
       return this.usersRepository.save({ ...updateUserDto, email });
     }
-    throw new NotFoundException('There is no existing user for this email');
+    throw new NotFoundException(USER_NOT_FOUND_MESSAGE);
   }
 
   async remove(email: string): Promise<User> {
@@ -50,6 +51,6 @@ export class UsersService {
     if (existingUser) {
       return this.usersRepository.remove(existingUser);
     }
-    throw new NotFoundException('There is no existing user for this email');
+    throw new NotFoundException(USER_NOT_FOUND_MESSAGE);
   }
 }

@@ -3,8 +3,9 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { User } from '../users/entities/user.entity';
 import { SignUpAuthDto } from './dto/signup-auth.dto';
-import { SignInAuthDto } from './dto/signin-auth.dto';
 import { Response, Request } from 'express';
+import { DUPLICATE_EMAIL_MESSAGE } from '../users/utils/const';
+import { INVALID_CREDENTIALS_MESSAGE } from './utils/const';
 
 const signUpUser: SignUpAuthDto = {
   email: 'john@gmail.com',
@@ -19,11 +20,6 @@ const sampleUser: User = {
   lastName: 'Morrison',
   password: 'John1@gmail.com',
   timestamp: Date.now(),
-};
-
-const signInUser: SignInAuthDto = {
-  email: 'john@gmail.com',
-  password: 'John1@gmail.com',
 };
 
 const sampleAccessToken = 'sample-token';
@@ -60,9 +56,9 @@ describe('AuthController', () => {
     it('signs up fails due to duplicated email', async () => {
       jest
         .spyOn(service, 'signUp')
-        .mockRejectedValue(new Error('Duplicated email'));
+        .mockRejectedValue(new Error(DUPLICATE_EMAIL_MESSAGE));
       await expect(controller.signUp(signUpUser)).rejects.toThrowError(
-        'Duplicated email',
+        DUPLICATE_EMAIL_MESSAGE,
       );
     });
 
@@ -97,11 +93,11 @@ describe('AuthController', () => {
     it('sign in fails due to invalid email or password', async () => {
       jest
         .spyOn(service, 'signIn')
-        .mockRejectedValue(new Error('Invalid Email or Password'));
+        .mockRejectedValue(new Error(INVALID_CREDENTIALS_MESSAGE));
       const res: Response = getResponse();
       await expect(
         controller.signIn({ ...signUpUser, password: 'wrong' }, res),
-      ).rejects.toThrowError('Invalid Email or Password');
+      ).rejects.toThrowError(INVALID_CREDENTIALS_MESSAGE);
       expect(res.cookie).toHaveBeenCalledTimes(0);
     });
 
