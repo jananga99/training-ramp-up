@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -12,35 +16,40 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async create(createUserDto: CreateUserDto) {
-    const existingUser = await this.findOne(createUserDto.email as string);
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const existingUser: User = await this.findOne(
+      createUserDto.email as string,
+    );
     if (existingUser) {
-      throw new Error('Duplicate email');
+      throw new ConflictException('Duplicate email');
     }
     return this.usersRepository.save(createUserDto);
   }
 
-  findAll() {
+  findAll(): Promise<User[]> {
     return this.usersRepository.find();
   }
 
-  findOne(email: string) {
+  findOne(email: string): Promise<User> {
     return this.usersRepository.findOneBy({ email });
   }
 
-  async update(email: string, updateUserDto: UpdateUserDto) {
-    const existingUser = await this.findOne(email);
+  async update(
+    email: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UpdateUserDto> {
+    const existingUser: User = await this.findOne(email);
     if (existingUser) {
       return this.usersRepository.save({ ...updateUserDto, email });
     }
-    throw new Error('There is no existing User for this id');
+    throw new NotFoundException('There is no existing user for this email');
   }
 
-  async remove(email: string) {
-    const existingUser = await this.findOne(email);
+  async remove(email: string): Promise<User> {
+    const existingUser: User = await this.findOne(email);
     if (existingUser) {
       return this.usersRepository.remove(existingUser);
     }
-    throw new Error('There is no existing User for this id');
+    throw new NotFoundException('There is no existing user for this email');
   }
 }

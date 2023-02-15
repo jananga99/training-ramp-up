@@ -1,6 +1,7 @@
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'typeorm';
 import { Student } from '../students/entities/student.entity';
+import { UpdateStudentDto } from '../students/dto/update-student.dto';
 
 @WebSocketGateway(3002, {
   cors: {
@@ -11,7 +12,11 @@ import { Student } from '../students/entities/student.entity';
 export class EventsGateway {
   @WebSocketServer()
   server: Server;
-  sendNotification(type: string, id: number, student: Student) {
+  sendNotification(
+    type: string,
+    id: number,
+    student: Student | UpdateStudentDto,
+  ): void {
     if (type === 'create' || type === 'update' || type === 'delete') {
       this.server.emit(
         'notification',

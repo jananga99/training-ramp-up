@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { SignUpAuthDto } from './dto/signup-auth.dto';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
@@ -9,19 +9,19 @@ import { UsersService } from '../users/users.service';
 export class AuthService {
   constructor(private readonly userService: UsersService) {}
 
-  async signUp(signUpAuthDto: SignUpAuthDto) {
+  async signUp(signUpAuthDto: SignUpAuthDto): Promise<User> {
     const user: User = {
       ...signUpAuthDto,
       timestamp: Date.now(),
       isAdmin: signUpAuthDto.email === 'admin@gmail.com',
     };
-    const saltRounds = 10;
+    const saltRounds: number = 10;
     user.password = await bcrypt.hash(user.password as string, saltRounds);
-    const createdUser = await this.userService.create(user);
+    const createdUser: User = await this.userService.create(user);
     return { ...createdUser, password: '' };
   }
 
-  async signIn(email: string, password: string): Promise<User | null> {
+  async signIn(email: string, password: string): Promise<User> {
     const existingUser = await this.userService.findOne(email);
     if (existingUser && existingUser.password) {
       const result = await bcrypt.compare(password, existingUser.password);
@@ -29,7 +29,7 @@ export class AuthService {
         return existingUser;
       }
     }
-    throw new HttpException('Invalid Email or Password', 401);
+    throw new UnauthorizedException('Invalid Email or Password');
   }
 
   generateAccessToken(email: string): string {

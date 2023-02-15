@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,34 +11,36 @@ export class StudentsService {
     @InjectRepository(Student)
     private studentRepository: Repository<Student>,
   ) {}
-  create(createStudentDto: CreateStudentDto) {
+  create(createStudentDto: CreateStudentDto): Promise<Student> {
     return this.studentRepository.save(createStudentDto);
   }
 
-  findAll() {
+  findAll(): Promise<Student[]> {
     return this.studentRepository.find();
   }
 
-  findOne(id: number) {
+  findOne(id: number): Promise<Student> {
     return this.studentRepository.findOneBy({ id });
   }
 
-  async update(id: number, updateStudentDto: UpdateStudentDto) {
-    const existingStudent = await this.findOne(id);
+  async update(
+    id: number,
+    updateStudentDto: UpdateStudentDto,
+  ): Promise<Student> {
+    const existingStudent: Student = await this.findOne(id);
     if (existingStudent) {
       return this.studentRepository.save({ ...updateStudentDto, id: id });
     } else {
-      throw new Error('There is no existing student for this id');
+      throw new NotFoundException('There is no existing student for this id');
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<Student> {
     id = parseInt(String(id));
-    const existingStudent = await this.findOne(id);
+    const existingStudent: Student = await this.findOne(id);
     if (existingStudent) {
       return this.studentRepository.remove(existingStudent);
-    } else {
-      throw new Error('There is no existing student for this id');
     }
+    throw new NotFoundException('There is no existing student for this id');
   }
 }

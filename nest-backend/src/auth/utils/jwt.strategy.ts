@@ -3,6 +3,8 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { UsersService } from '../../users/users.service';
+import { User } from '../../users/entities/user.entity';
+import { PayloadAuthDto } from '../dto/payload-auth.dto';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -20,7 +22,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(payload: any) {
+  validate(payload: PayloadAuthDto): Promise<User> {
     return this.usersService.findOne(payload.email);
   }
 }
@@ -30,7 +32,7 @@ export class JwtAdminStrategy extends PassportStrategy(Strategy, 'jwt-admin') {
   constructor(private readonly usersService: UsersService) {
     super({
       jwtFromRequest: (req: Request) => {
-        let token = null;
+        let token: string = null;
         if (req && req.cookies) {
           token = req.cookies['jwt-access'];
         }
@@ -41,8 +43,8 @@ export class JwtAdminStrategy extends PassportStrategy(Strategy, 'jwt-admin') {
     });
   }
 
-  async validate(payload: any) {
-    const user = await this.usersService.findOne(payload.email);
+  async validate(payload: PayloadAuthDto): Promise<User | false> {
+    const user: User = await this.usersService.findOne(payload.email);
     if (user && user.isAdmin) {
       return user;
     } else {
@@ -70,7 +72,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
     });
   }
 
-  async validate(payload: any) {
+  validate(payload: PayloadAuthDto): Promise<User> {
     return this.usersService.findOne(payload.email);
   }
 }

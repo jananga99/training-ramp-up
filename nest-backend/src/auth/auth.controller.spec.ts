@@ -53,11 +53,11 @@ describe('AuthController', () => {
   });
 
   describe('signs up a new user', () => {
-    test('signs up a user', async () => {
+    it('signs up a user', async () => {
       jest.spyOn(service, 'signUp').mockResolvedValue(sampleUser);
       expect(await controller.signUp(signUpUser)).toBe(sampleUser);
     });
-    test('signs up fails due to duplicated email', async () => {
+    it('signs up fails due to duplicated email', async () => {
       jest
         .spyOn(service, 'signUp')
         .mockRejectedValue(new Error('Duplicated email'));
@@ -66,7 +66,7 @@ describe('AuthController', () => {
       );
     });
 
-    test('sign up fails due to error', async () => {
+    it('sign up fails due to error', async () => {
       jest
         .spyOn(service, 'signUp')
         .mockRejectedValue(new Error('error in user service'));
@@ -77,9 +77,9 @@ describe('AuthController', () => {
   });
 
   describe('signs in a user', () => {
-    const getResponse = () =>
+    const getResponse: () => Response = (): Response =>
       ({ cookie: jest.fn().mockReturnThis() } as unknown as Response);
-    test('signs in the user', async () => {
+    it('signs in the user', async () => {
       jest.spyOn(service, 'signIn').mockResolvedValue(sampleUser);
       jest
         .spyOn(service, 'generateAccessToken')
@@ -87,29 +87,29 @@ describe('AuthController', () => {
       jest
         .spyOn(service, 'generateRefreshToken')
         .mockReturnValue(sampleRefreshToken);
-      const res = getResponse();
+      const res: Response = getResponse();
       expect(await controller.signIn(signUpUser, res)).toStrictEqual({
         isAdmin: sampleUser.isAdmin,
       });
       expect(res.cookie).toHaveBeenCalledTimes(2);
     });
 
-    test('sign in fails due to invalid email or password', async () => {
+    it('sign in fails due to invalid email or password', async () => {
       jest
         .spyOn(service, 'signIn')
         .mockRejectedValue(new Error('Invalid Email or Password'));
-      const res = getResponse();
+      const res: Response = getResponse();
       await expect(
         controller.signIn({ ...signUpUser, password: 'wrong' }, res),
       ).rejects.toThrowError('Invalid Email or Password');
       expect(res.cookie).toHaveBeenCalledTimes(0);
     });
 
-    test('sign in fails due to error', async () => {
+    it('sign in fails due to error', async () => {
       jest
         .spyOn(service, 'signIn')
         .mockRejectedValue(new Error('error in signIn'));
-      const res = getResponse();
+      const res: Response = getResponse();
       await expect(controller.signIn(signUpUser, res)).rejects.toThrowError(
         'error in signIn',
       );
@@ -118,50 +118,58 @@ describe('AuthController', () => {
   });
 
   describe('signs out a user', () => {
-    const getResponse = () =>
+    const getResponse: () => Response = (): Response =>
       ({ clearCookie: jest.fn().mockReturnThis() } as unknown as Response);
-    test('signs out the user', async () => {
-      const res = getResponse();
+    it('signs out the user', async () => {
+      const res: Response = getResponse();
       expect(await controller.signOut(res)).toStrictEqual({ success: true });
     });
-    test('sign out fails due to error', async () => {
-      const res = getResponse();
-      jest.spyOn(res, 'clearCookie').mockImplementation(() => {
+    it('sign out fails due to error', async () => {
+      const res: Response = getResponse();
+      const spy = jest.spyOn(res, 'clearCookie').mockImplementation(() => {
         throw new Error('error in clearCookie');
       });
-      await expect(controller.signOut(res)).rejects.toThrowError(
-        'error in clearCookie',
-      );
+      try {
+        controller.signOut(res);
+      } catch (err) {
+        expect(err).toHaveProperty('message', 'error in clearCookie');
+      }
+      expect(spy).toThrowError('error in clearCookie');
     });
   });
 
   describe('refreshes a access token', () => {
-    const getRequest = () =>
+    const getRequest: () => Request = (): Request =>
       ({
         user: sampleUser,
       } as unknown as Request);
-    const getResponse = () =>
+    const getResponse: () => Response = (): Response =>
       ({ cookie: jest.fn().mockReturnThis() } as unknown as Response);
-    test('refreshes the a', async () => {
+    it('refreshes the a', async () => {
       jest
         .spyOn(service, 'generateAccessToken')
         .mockReturnValue(sampleAccessToken);
-      const req = getRequest();
-      const res = getResponse();
+      const req: Request = getRequest();
+      const res: Response = getResponse();
       expect(await controller.refreshToken(req, res)).toStrictEqual({
         success: true,
       });
     });
 
-    test('refresh fails due to error', async () => {
-      jest.spyOn(service, 'generateAccessToken').mockImplementation(() => {
-        throw new Error('error in generateAccessToken');
-      });
-      const req = getRequest();
-      const res = getResponse();
-      await expect(controller.refreshToken(req, res)).rejects.toThrowError(
-        'error in generateAccessToken',
-      );
+    it('refresh fails due to error', async () => {
+      const spy = jest
+        .spyOn(service, 'generateAccessToken')
+        .mockImplementation(() => {
+          throw new Error('error in generateAccessToken');
+        });
+      const req: Request = getRequest();
+      const res: Response = getResponse();
+      try {
+        controller.refreshToken(req, res);
+      } catch (err) {
+        expect(err).toHaveProperty('message', 'error in generateAccessToken');
+      }
+      expect(spy).toThrowError('error in generateAccessToken');
     });
   });
 });

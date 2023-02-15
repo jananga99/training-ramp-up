@@ -41,12 +41,16 @@ function* signUpHandler(action: PayloadAction<DetailedUser>) {
     if (response.status === 201) {
       alert(`User - ${response.data.email} is registered successfully`);
       yield put(createUserSuccess());
-    } else if (response.status === 200) {
-      alert(`This email is already registered`);
+    } else {
+      alert(`User registration failed. Try again.`);
       yield put(createUserFailed());
     }
-  } catch (err) {
-    alert(`User registration failed. Try again.`);
+  } catch (err: any) {
+    if (err.response.status === 409) {
+      alert(`This email is already registered`);
+    } else {
+      alert(`User registration failed. Try again.`);
+    }
     yield put(createUserFailed());
   }
 }

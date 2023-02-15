@@ -3,8 +3,10 @@ import { StudentsService } from './students.service';
 import { Gender, Student } from './entities/student.entity';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { CreateStudentDto } from './dto/create-student.dto';
+import { UpdateStudentDto } from './dto/update-student.dto';
 
-const student1 = {
+const student1: Student = {
   id: 1,
   address: 'London',
   age: 23,
@@ -13,7 +15,7 @@ const student1 = {
   mobileNo: '0123456789',
   name: 'John',
 };
-const student2 = {
+const student2: Student = {
   id: 2,
   address: 'Tokyo',
   age: 23,
@@ -22,9 +24,8 @@ const student2 = {
   mobileNo: '0123456789',
   name: 'Jack',
 };
-const students = [student1, student2];
-const newStudent = {
-  id: undefined,
+const students: Student[] = [student1, student2];
+const newStudent: CreateStudentDto = {
   address: 'New York',
   age: 23,
   birthday: new Date('2022/1/1'),
@@ -32,8 +33,7 @@ const newStudent = {
   mobileNo: '0123456789',
   name: 'Jason',
 };
-const updateStudent = {
-  id: 2,
+const updateStudent: UpdateStudentDto = {
   address: 'Hiroshima',
   age: 23,
   birthday: new Date('2022/1/1'),
@@ -41,7 +41,16 @@ const updateStudent = {
   mobileNo: '0123456789',
   name: 'Jack',
 };
-const removeStudent = {
+const updatedStudent: Student = {
+  id: 3,
+  address: 'Hiroshima',
+  age: 23,
+  birthday: new Date('2022/1/1'),
+  gender: Gender.MALE,
+  mobileNo: '0123456789',
+  name: 'Jack',
+};
+const removeStudent: Student = {
   id: 2,
   address: 'Hiroshima',
   age: 23,
@@ -94,7 +103,7 @@ describe('StudentsService', () => {
       jest.restoreAllMocks();
     });
     it('creates the student', async () => {
-      const createdStudent = { ...newStudent, id: 3 };
+      const createdStudent: Student = { ...newStudent, id: 3 };
       jest.spyOn(repositoryMock, 'save').mockResolvedValue(createdStudent);
       const result = await service.create(newStudent);
       expect(result).toEqual(createdStudent);
@@ -114,24 +123,24 @@ describe('StudentsService', () => {
       jest.restoreAllMocks();
     });
     it('updates the student', async () => {
-      jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(updateStudent);
-      jest.spyOn(repositoryMock, 'save').mockResolvedValue(updateStudent);
-      const result = await service.update(updateStudent.id, updateStudent);
-      expect(result).toEqual(updateStudent);
+      jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(updatedStudent);
+      jest.spyOn(repositoryMock, 'save').mockResolvedValue(updatedStudent);
+      const result = await service.update(updatedStudent.id, updateStudent);
+      expect(result).toEqual(updatedStudent);
     });
     it('no student with given id to update', async () => {
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(null);
       await expect(
-        service.update(updateStudent.id, updateStudent),
+        service.update(updatedStudent.id, updateStudent),
       ).rejects.toThrowError('There is no existing student for this id');
     });
     it('error in save', async () => {
-      jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(updateStudent);
+      jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(updatedStudent);
       jest
         .spyOn(repositoryMock, 'save')
         .mockRejectedValue(new Error('save error'));
       await expect(
-        service.update(updateStudent.id, updateStudent),
+        service.update(updatedStudent.id, updateStudent),
       ).rejects.toThrowError('save error');
     });
   });
@@ -143,7 +152,7 @@ describe('StudentsService', () => {
     it('removes the student', async () => {
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(removeStudent);
       jest.spyOn(repositoryMock, 'remove').mockResolvedValue(removeStudent);
-      const result = await service.remove(removeStudent.id);
+      const result: Student = await service.remove(removeStudent.id);
       expect(result).toEqual(removeStudent);
     });
     it('no student with given id to remove', async () => {

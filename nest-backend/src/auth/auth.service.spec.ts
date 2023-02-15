@@ -60,7 +60,7 @@ describe('AuthService', () => {
 
   describe('Signing Up User', () => {
     it('Sign up the new non admin a', async () => {
-      const createdUser = {
+      const createdUser: User = {
         ...newUser,
         isAdmin: false,
         timestamp: Date.now(),
@@ -68,11 +68,11 @@ describe('AuthService', () => {
       };
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(null);
       jest.spyOn(repositoryMock, 'save').mockResolvedValue(createdUser);
-      const result = await service.signUp(newUser);
+      const result: User = await service.signUp(newUser);
       expect(result).toEqual(createdUser);
     });
     it('Sign up the new admin a', async () => {
-      const createdUser = {
+      const createdUser: User = {
         ...newAdminUser,
         isAdmin: true,
         timestamp: Date.now(),
@@ -80,11 +80,11 @@ describe('AuthService', () => {
       };
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(null);
       jest.spyOn(repositoryMock, 'save').mockResolvedValue(createdUser);
-      const result = await service.signUp(newAdminUser);
+      const result: User = await service.signUp(newAdminUser);
       expect(result).toEqual(createdUser);
     });
     it('Sign up fails due to duplicate email', async () => {
-      const existingUser = {
+      const existingUser: User = {
         ...newUser,
         isAdmin: false,
         timestamp: Date.now(),
@@ -113,12 +113,12 @@ describe('AuthService', () => {
 
   describe('Validating the sign in of User', () => {
     it('Sign in success', async () => {
-      const saltRounds = 10;
-      const hashed = await bcrypt.hash(
+      const saltRounds: number = 10;
+      const hashed: string = await bcrypt.hash(
         sampleUser.password as string,
         saltRounds,
       );
-      const existingUser = { ...sampleUser, password: hashed };
+      const existingUser: User = { ...sampleUser, password: hashed };
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(existingUser);
       const result = await service.signIn(
         sampleUser.email as string,
@@ -136,13 +136,13 @@ describe('AuthService', () => {
       ).rejects.toThrowError('Invalid Email or Password');
     });
     it('Sign in fails due to wrong password', async () => {
-      const saltRounds = 10;
-      const hashed = await bcrypt.hash(
+      const saltRounds: number = 10;
+      const hashed: string = await bcrypt.hash(
         sampleUser.password as string,
         saltRounds,
       );
       sampleUser.password = hashed;
-      const existingUser = { ...sampleUser, password: hashed };
+      const existingUser: User = { ...sampleUser, password: hashed };
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(existingUser);
       await expect(
         service.signIn(sampleUser.email as string, 'wrong'),
@@ -163,14 +163,16 @@ describe('AuthService', () => {
 
   describe('Generates an access token', () => {
     it('token generates', async () => {
-      const secret = process.env.ACCESS_TOKEN_SECRET as string;
-      const result = service.generateAccessToken(sampleUser.email as string);
+      const secret: string = process.env.ACCESS_TOKEN_SECRET as string;
+      const result: string = service.generateAccessToken(
+        sampleUser.email as string,
+      );
       const decode: JwtPayload = jwt.verify(result, secret) as JwtPayload;
       expect(decode.email).toEqual(sampleUser.email);
     });
     it('token generates for wrong email', async () => {
-      const secret = process.env.ACCESS_TOKEN_SECRET as string;
-      const result = service.generateAccessToken('wrong');
+      const secret: string = process.env.ACCESS_TOKEN_SECRET as string;
+      const result: string = service.generateAccessToken('wrong');
       const decode: JwtPayload = jwt.verify(result, secret) as JwtPayload;
       expect(decode.email).not.toEqual(sampleUser.email);
     });
@@ -178,14 +180,16 @@ describe('AuthService', () => {
 
   describe('Generates a refresh token', () => {
     it('token generates', async () => {
-      const secret = process.env.REFRESH_TOKEN_SECRET as string;
-      const result = service.generateRefreshToken(sampleUser.email as string);
+      const secret: string = process.env.REFRESH_TOKEN_SECRET as string;
+      const result: string = service.generateRefreshToken(
+        sampleUser.email as string,
+      );
       const decode: JwtPayload = jwt.verify(result, secret) as JwtPayload;
       expect(decode.email).toEqual(sampleUser.email);
     });
     it('token generates for wrong email', async () => {
-      const secret = process.env.REFRESH_TOKEN_SECRET as string;
-      const result = service.generateRefreshToken('wrong');
+      const secret: string = process.env.REFRESH_TOKEN_SECRET as string;
+      const result: string = service.generateRefreshToken('wrong');
       const decode: JwtPayload = jwt.verify(result, secret) as JwtPayload;
       expect(decode.email).not.toEqual(sampleUser.email);
     });

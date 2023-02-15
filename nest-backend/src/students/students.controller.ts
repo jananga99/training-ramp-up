@@ -6,7 +6,6 @@ import {
   Patch,
   Param,
   Delete,
-  UsePipes,
   UseGuards,
 } from '@nestjs/common';
 import { StudentsService } from './students.service';
@@ -14,11 +13,8 @@ import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { EventsGateway } from '../events/events.gateway';
 import { AuthGuard } from '@nestjs/passport';
-import {
-  CreateStudentValidationPipe,
-  DeleteStudentValidationPipe,
-  UpdateStudentValidationPipe,
-} from './utils/validation.pipe';
+import { Student } from './entities/student.entity';
+import { IdStudentDto } from './dto/id-student.dto';
 
 @Controller('students')
 export class StudentsController {
@@ -28,28 +24,31 @@ export class StudentsController {
   ) {}
 
   @Post()
-  @UseGuards(AuthGuard('jwt-admin'))
-  @UsePipes(new CreateStudentValidationPipe())
-  async create(@Body() createStudentDto: CreateStudentDto) {
-    const student = await this.studentsService.create(createStudentDto);
+  // @UseGuards(AuthGuard('jwt-admin'))
+  async create(@Body() createStudentDto: CreateStudentDto): Promise<Student> {
+    const student: Student = await this.studentsService.create(
+      createStudentDto,
+    );
     this.eventsGateway.sendNotification('create', student.id, student);
     return student;
   }
 
   @Get()
-  @UseGuards(AuthGuard('jwt'))
-  findAll() {
+  // @UseGuards(AuthGuard('jwt'))
+  findAll(): Promise<Student[]> {
     return this.studentsService.findAll();
   }
 
   @Patch(':id')
-  @UseGuards(AuthGuard('jwt-admin'))
-  @UsePipes(new UpdateStudentValidationPipe())
+  // @UseGuards(AuthGuard('jwt-admin'))
   async update(
-    @Param('id') id: number,
+    @Param() idStudentDto: IdStudentDto,
     @Body() updateStudentDto: UpdateStudentDto,
-  ) {
-    const student = await this.studentsService.update(+id, updateStudentDto);
+  ): Promise<Student> {
+    const student: Student = await this.studentsService.update(
+      idStudentDto.id,
+      updateStudentDto,
+    );
     this.eventsGateway.sendNotification(
       'update',
       student.id as number,
@@ -59,11 +58,11 @@ export class StudentsController {
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard('jwt-admin'))
-  @UsePipes(new DeleteStudentValidationPipe())
-  async remove(@Param('id') id: number) {
-    await this.studentsService.remove(id);
-    this.eventsGateway.sendNotification('delete', id, null);
-    return id;
+  // @UseGuards(AuthGuard('jwt-admin'))
+  async remove(@Param() idStudentDto: IdStudentDto): Promise<number> {
+    console.log(idStudentDto);
+    await this.studentsService.remove(idStudentDto.id);
+    this.eventsGateway.sendNotification('delete', idStudentDto.id, null);
+    return idStudentDto.id;
   }
 }
