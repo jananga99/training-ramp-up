@@ -17,7 +17,7 @@ export class StudentsService {
   }
 
   findAll(): Promise<Student[]> {
-    return this.studentRepository.find();
+    return this.studentRepository.find({ order: { id: 'ASC' } });
   }
 
   findOne(id: number): Promise<Student> {

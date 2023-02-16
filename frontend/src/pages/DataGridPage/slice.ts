@@ -61,6 +61,9 @@ export const slice = createSlice({
             val.birthday = action.payload.birthday;
             val.age = action.payload.age;
           }
+          if (action.payload.address) {
+            val.address = action.payload.address;
+          }
         }
         return val;
       });
