@@ -75,6 +75,7 @@ describe('StudentsService', () => {
             save: jest.fn(),
             remove: jest.fn(),
             findOneBy: jest.fn(),
+            update: jest.fn(),
           })),
         },
       ],
@@ -125,9 +126,11 @@ describe('StudentsService', () => {
     });
     it('updates the student', async () => {
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(updatedStudent);
-      jest.spyOn(repositoryMock, 'save').mockResolvedValue(updatedStudent);
+      jest
+        .spyOn(repositoryMock, 'update')
+        .mockResolvedValue({ affected: 1, raw: null, generatedMaps: null });
       const result = await service.update(updatedStudent.id, updateStudent);
-      expect(result).toEqual(updatedStudent);
+      expect(result.affected).toEqual(1);
     });
     it('no student with given id to update', async () => {
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(null);
@@ -135,14 +138,14 @@ describe('StudentsService', () => {
         service.update(updatedStudent.id, updateStudent),
       ).rejects.toThrowError(STUDENT_NOT_FOUND_MESSAGE);
     });
-    it('error in save', async () => {
+    it('error in update', async () => {
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(updatedStudent);
       jest
-        .spyOn(repositoryMock, 'save')
-        .mockRejectedValue(new Error('save error'));
+        .spyOn(repositoryMock, 'update')
+        .mockRejectedValue(new Error('update error'));
       await expect(
         service.update(updatedStudent.id, updateStudent),
-      ).rejects.toThrowError('save error');
+      ).rejects.toThrowError('update error');
     });
   });
 

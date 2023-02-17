@@ -20,6 +20,7 @@ import { Roles } from './utils/students.roles.decorator';
 import { Role } from './utils/const';
 import { PassportStrategyName } from '../auth/utils/jwt.const';
 import { EventTypeName } from '../events/events.const';
+import { UpdateResult } from 'typeorm';
 
 @Controller('students')
 @UseGuards(AuthGuard(PassportStrategyName.JWT_ACCESS), RolesGuard)
@@ -45,7 +46,7 @@ export class StudentsController {
 
   @Get()
   @Roles(Role.NON_ADMIN, Role.ADMIN)
-  findAll(): Promise<Student[]> {
+  async findAll(): Promise<Student[]> {
     return this.studentsService.findAll();
   }
 
@@ -54,17 +55,14 @@ export class StudentsController {
   async update(
     @Param() idStudentDto: IdStudentDto,
     @Body() updateStudentDto: UpdateStudentDto,
-  ): Promise<Student> {
-    const student: Student = await this.studentsService.update(
+  ): Promise<UpdateStudentDto> {
+    await this.studentsService.update(idStudentDto.id, updateStudentDto);
+    this.eventsGateway.sendNotification(
+      EventTypeName.UPDATE,
       idStudentDto.id,
       updateStudentDto,
     );
-    this.eventsGateway.sendNotification(
-      EventTypeName.UPDATE,
-      student.id as number,
-      student,
-    );
-    return student;
+    return updateStudentDto;
   }
 
   @Delete(':id')

@@ -1,9 +1,9 @@
 import {
-  IsBooleanString,
   IsEmail,
   IsNotEmpty,
   IsNumber,
   IsString,
+  IsBoolean,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -22,6 +22,6 @@ export class CreateUserDto {
   lastName: string;
   @IsNumber()
   timestamp: number;
-  @IsBooleanString()
+  @IsBoolean()
   isAdmin: boolean;
 }

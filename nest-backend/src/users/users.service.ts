@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -27,21 +27,21 @@ export class UsersService {
     return this.usersRepository.save(createUserDto);
   }
 
-  findAll(): Promise<User[]> {
+  async findAll(): Promise<User[]> {
     return this.usersRepository.find();
   }
 
-  findOne(email: string): Promise<User> {
+  async findOne(email: string): Promise<User> {
     return this.usersRepository.findOneBy({ email });
   }
 
   async update(
     email: string,
     updateUserDto: UpdateUserDto,
-  ): Promise<UpdateUserDto> {
+  ): Promise<UpdateResult> {
     const existingUser: User = await this.findOne(email);
     if (existingUser) {
-      return this.usersRepository.save({ ...updateUserDto, email });
+      return this.usersRepository.update(email, { ...updateUserDto, email });
     }
     throw new NotFoundException(USER_NOT_FOUND_MESSAGE);
   }

@@ -8,7 +8,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { CookieName, PassportStrategyName } from './jwt.const';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(
+export class JwtAccessStrategy extends PassportStrategy(
   Strategy,
   PassportStrategyName.JWT_ACCESS,
 ) {
@@ -23,30 +23,6 @@ export class JwtStrategy extends PassportStrategy(
       },
       ignoreExpiration: false,
       secretOrKey: process.env.ACCESS_TOKEN_SECRET,
-    });
-  }
-
-  validate(payload: PayloadAuthDto): Promise<User> {
-    return this.usersService.findOne(payload.email);
-  }
-}
-
-@Injectable()
-export class JwtRefreshStrategy extends PassportStrategy(
-  Strategy,
-  PassportStrategyName.JWT_REFRESH,
-) {
-  constructor(private readonly usersService: UsersService) {
-    super({
-      jwtFromRequest: (req: Request) => {
-        let token = null;
-        if (req && req.cookies) {
-          token = req.cookies[CookieName.JWT_REFRESH];
-        }
-        return token;
-      },
-      ignoreExpiration: false,
-      secretOrKey: process.env.REFRESH_TOKEN_SECRET,
     });
   }
 

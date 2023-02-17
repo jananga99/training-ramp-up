@@ -4,14 +4,14 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 export class User {
   @PrimaryColumn('text')
   email: string;
-  @Column('boolean', { nullable: true })
+  @Column('boolean')
   isAdmin: boolean;
-  @Column('text', { nullable: true })
+  @Column('text')
   password: string;
-  @Column('text', { nullable: true })
+  @Column('text')
   firstName: string;
-  @Column('text', { nullable: true })
+  @Column('text')
   lastName: string;
-  @Column('text', { nullable: true })
+  @Column('text')
   timestamp: number;
 }

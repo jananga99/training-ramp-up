@@ -3,7 +3,7 @@ import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Student } from './entities/student.entity';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { STUDENT_NOT_FOUND_MESSAGE } from './utils/const';
 
 @Injectable()
@@ -12,25 +12,25 @@ export class StudentsService {
     @InjectRepository(Student)
     private studentRepository: Repository<Student>,
   ) {}
-  create(createStudentDto: CreateStudentDto): Promise<Student> {
+  async create(createStudentDto: CreateStudentDto): Promise<Student> {
     return this.studentRepository.save(createStudentDto);
   }
 
-  findAll(): Promise<Student[]> {
+  async findAll(): Promise<Student[]> {
     return this.studentRepository.find({ order: { id: 'ASC' } });
   }
 
-  findOne(id: number): Promise<Student> {
+  async findOne(id: number): Promise<Student> {
     return this.studentRepository.findOneBy({ id });
   }
 
   async update(
     id: number,
     updateStudentDto: UpdateStudentDto,
-  ): Promise<Student> {
+  ): Promise<UpdateResult> {
     const existingStudent: Student = await this.findOne(id);
     if (existingStudent) {
-      return this.studentRepository.save({ ...updateStudentDto, id: id });
+      return this.studentRepository.update(id, { ...updateStudentDto, id: id });
     } else {
       throw new NotFoundException(STUDENT_NOT_FOUND_MESSAGE);
     }

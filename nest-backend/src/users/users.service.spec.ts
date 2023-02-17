@@ -1,9 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { USER_NOT_FOUND_MESSAGE } from './utils/const';
 const newUser: User = {
   email: 'john@gmail.com',
@@ -61,6 +60,7 @@ describe('UsersService', () => {
             save: jest.fn(),
             remove: jest.fn(),
             findOneBy: jest.fn(),
+            update: jest.fn(),
           })),
         },
       ],
@@ -103,12 +103,14 @@ describe('UsersService', () => {
   describe('User Updating', () => {
     it('updates the user', async () => {
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(user2);
-      jest.spyOn(repositoryMock, 'save').mockResolvedValue(updateuser);
-      const result: UpdateUserDto = await service.update(
+      jest
+        .spyOn(repositoryMock, 'update')
+        .mockResolvedValue({ affected: 1, raw: null, generatedMaps: null });
+      const result: UpdateResult = await service.update(
         updateuser.email,
         updateuser,
       );
-      expect(result).toEqual(updateuser);
+      expect(result.affected).toEqual(1);
     });
     it('no user with given email to update', async () => {
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(null);
@@ -116,14 +118,14 @@ describe('UsersService', () => {
         service.update(updateuser.email, updateuser),
       ).rejects.toThrowError(USER_NOT_FOUND_MESSAGE);
     });
-    it('error in save', async () => {
+    it('error in update', async () => {
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValue(updateuser);
       jest
-        .spyOn(repositoryMock, 'save')
-        .mockRejectedValue(new Error('save error'));
+        .spyOn(repositoryMock, 'update')
+        .mockRejectedValue(new Error('update error'));
       await expect(
         service.update(updateuser.email, updateuser),
-      ).rejects.toThrowError('save error');
+      ).rejects.toThrowError('update error');
     });
   });
 

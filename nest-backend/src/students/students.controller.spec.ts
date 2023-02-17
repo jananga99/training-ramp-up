@@ -119,13 +119,15 @@ describe('StudentsController', () => {
 
   describe('update the student', () => {
     it('updates student', async () => {
-      jest.spyOn(mockService, 'update').mockResolvedValue(updatedStudentData);
+      jest
+        .spyOn(mockService, 'update')
+        .mockResolvedValue({ affected: 1, raw: null, generatedMaps: null });
       expect(
         await controller.update(
           { id: updatedStudentData.id },
           updateStudentData,
         ),
-      ).toBe(updatedStudentData);
+      ).toBe(updateStudentData);
     });
     it('updates student fails due to save error', async () => {
       jest
