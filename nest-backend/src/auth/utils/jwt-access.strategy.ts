@@ -1,11 +1,12 @@
 import { Strategy } from 'passport-jwt';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Request } from 'express';
 import { UsersService } from '../../users/users.service';
 import { User } from '../../users/entities/user.entity';
 import { PayloadAuthDto } from '../dto/payload-auth.dto';
 import { PassportStrategy } from '@nestjs/passport';
 import { CookieName, PassportStrategyName } from './jwt.const';
+import { USER_NOT_FOUND_MESSAGE } from '../../users/utils/const';
 
 @Injectable()
 export class JwtAccessStrategy extends PassportStrategy(
@@ -26,7 +27,11 @@ export class JwtAccessStrategy extends PassportStrategy(
     });
   }
 
-  validate(payload: PayloadAuthDto): Promise<User> {
-    return this.usersService.findOne(payload.email);
+  async validate(payload: PayloadAuthDto): Promise<User> {
+    const existingUser = await this.usersService.findOne(payload.email);
+    if (existingUser) {
+      return existingUser;
+    }
+    throw new NotFoundException(USER_NOT_FOUND_MESSAGE);
   }
 }

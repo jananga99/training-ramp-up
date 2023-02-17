@@ -20,7 +20,6 @@ import { Roles } from './utils/students.roles.decorator';
 import { Role } from './utils/const';
 import { PassportStrategyName } from '../auth/utils/jwt.const';
 import { EventTypeName } from '../events/events.const';
-import { UpdateResult } from 'typeorm';
 
 @Controller('students')
 @UseGuards(AuthGuard(PassportStrategyName.JWT_ACCESS), RolesGuard)
