@@ -42,7 +42,7 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
     "socket.io": "^4.6.0",
-    "typeorm": "^0.3.12",
+    "typeorm": "^0.3.27",
     "yup": "^1.0.0",
     "yup-password": "^0.2.2"
   },
